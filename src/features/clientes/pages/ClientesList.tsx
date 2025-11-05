@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Plus, ChevronLeft, ChevronRight, FileUp, PackageSearch } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { KPI } from '@/components/shared/KPI';
 import { FiltrosClientes } from '../components/FiltrosClientes';
 import { ClienteRow } from '../components/ClienteRow';
