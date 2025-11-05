@@ -46,25 +46,24 @@ export function DataTableContent({ children, className }: DataTableContentProps)
   );
 }
 
-interface DataTableRowProps {
+interface DataTableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
   children: ReactNode;
   className?: string;
-  onClick?: () => void;
   selected?: boolean;
 }
 
-export function DataTableRow({ children, className, onClick, selected }: DataTableRowProps) {
+export function DataTableRow({ children, className, selected, ...props }: DataTableRowProps) {
   return (
     <tr
       className={cn(
         'h-20 border-b border-border transition-colors',
         'odd:bg-background even:bg-muted/[0.35]',
         'hover:bg-primary/5',
-        onClick && 'cursor-pointer',
-        selected && 'bg-primary/10',
+        selected && 'bg-primary/10 hover:bg-primary/15',
+        'group',
         className
       )}
-      onClick={onClick}
+      {...props}
     >
       {children}
     </tr>

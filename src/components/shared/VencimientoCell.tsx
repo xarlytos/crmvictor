@@ -21,7 +21,6 @@ export function VencimientoCell({ cliente, config, className }: VencimientoCellP
 
   const dias = diffDays(fechaVencimiento);
   const severity = severityByDays(dias);
-  const mes = new Date(fechaVencimiento).getMonth() + 1;
   const isVencido = dias < 0;
 
   // Colores según severidad

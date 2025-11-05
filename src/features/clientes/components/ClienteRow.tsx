@@ -3,9 +3,7 @@ import { VencimientoCell } from '@/components/shared/VencimientoCell';
 import { formatPhone, formatEmail, enumToLabel } from '@/lib/formatters';
 import { formatDate } from '@/lib/date';
 import { Phone, Mail } from 'lucide-react';
-import {
-  TooltipProvider,
-} from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableRow, DataTableCell } from '@/components/shared/DataTable';
 import type { Cliente, ConfigUsuario } from '@/types';
