@@ -1,77 +1,27 @@
-import faker from 'faker';
 import type {
   Cliente,
   DataProvider,
   FiltrosClientes,
-  ConfigUsuario,
   EstadoCliente,
   TipoCarga,
   Transporte,
+  ConfigUsuario,
 } from '@/types';
-import { getMonthFromDate, getDaysUntil } from '@/lib/date';
 
-const STORAGE_KEY = 'crm_seguros_data';
-const STORAGE_VERSION = '1.0.0';
-const CONFIG_KEY = 'crm_seguros_config';
+const STORAGE_KEY = 'crm-clientes';
+const STORAGE_VERSION = '1.0';
+const CONFIG_KEY = 'crm-config';
 
-const tiposCarga: TipoCarga[] = [
-  'general_fraccionada',
-  'frigorifica',
-  'adr_peligrosas',
-  'completa_ftl',
-  'fraccionada_ltl',
-  'a_granel',
-  'vehiculos',
-];
+// Utility functions
+function getMonthFromDate(dateString: string): number {
+  return new Date(dateString).getMonth() + 1; // Adding 1 because getMonth() returns 0-11
+}
 
-const transportes: Transporte[] = ['nacional', 'internacional', 'peninsula'];
-
-const estados: EstadoCliente[] = [
-  'contratado',
-  'contactado_buena_pinta',
-  'en_negociacion',
-  'descartado',
-];
-
-function generateMockClientes(count: number): Cliente[] {
-  const clientes: Cliente[] = [];
+function getDaysUntil(dateString: string): number {
   const now = new Date();
-
-  for (let i = 0; i < count; i++) {
-    const fechaInicio = faker.date.past(1);
-    const diasVencimiento = faker.random.number({ min: 30, max: 150 });
-    const fechaFin = new Date(now);
-    fechaFin.setDate(fechaFin.getDate() + diasVencimiento);
-
-    const cliente: Cliente = {
-      id: faker.random.uuid(),
-      empresa: faker.company.companyName(),
-      contacto: faker.name.findName(),
-      telefono: faker.phone.phoneNumber('+34 6## ### ###'),
-      correo: faker.internet.email(),
-      direccion: faker.address.streetAddress(),
-      notas: faker.random.boolean() ? faker.lorem.sentence() : undefined,
-      estado: faker.random.arrayElement(estados),
-      tipoCarga: faker.random.arrayElement(tiposCarga),
-      transporte: faker.random.arrayElement(transportes),
-      poliza: {
-        aseguradora: faker.company.companyName(),
-        numPoliza: faker.random.alphaNumeric(10).toUpperCase(),
-        fechaInicio: fechaInicio.toISOString(),
-        fechaFin: fechaFin.toISOString(),
-        prima: faker.random.number({ min: 500, max: 5000 }),
-      },
-      numVehiculos: faker.random.boolean() ? faker.random.number({ min: 1, max: 50 }) : undefined,
-      facturacion: faker.random.boolean() ? `${faker.random.number({ min: 1, max: 10 })},${faker.random.number({ min: 1, max: 9 })}M` : undefined,
-      fechaLlamada: faker.random.boolean() ? faker.date.recent(30).toISOString() : undefined,
-      createdAt: faker.date.past(2).toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    clientes.push(cliente);
-  }
-
-  return clientes;
+  const targetDate = new Date(dateString);
+  const diffTime = targetDate.getTime() - now.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
 function getDefaultConfig(): ConfigUsuario {
@@ -182,27 +132,27 @@ export class MockDataProvider implements DataProvider {
     };
 
     // Helper para convertir tipo de carga
-    const parseTipoCarga = (mercancia: string): string | undefined => {
+    const parseTipoCarga = (mercancia: string): TipoCarga | undefined => {
       if (!mercancia || mercancia === '-' || mercancia.trim() === '') return undefined;
-      const map: Record<string, string> = {
+      const map: Record<string, TipoCarga> = {
         'NARANJA': 'general_fraccionada',
         'FRIO': 'frigorifica',
         'FRIGO': 'frigorifica',
         'CARGA FRACCIONADA': 'fraccionada_ltl',
         'NO ADR': 'general_fraccionada',
       };
-      return map[mercancia.toUpperCase()] || undefined;
+      return map[mercancia.toUpperCase()] as TipoCarga | undefined;
     };
 
     // Helper para convertir transporte
-    const parseTransporte = (transporte: string): string | undefined => {
+    const parseTransporte = (transporte: string): Transporte | undefined => {
       if (!transporte || transporte === '-' || transporte.trim() === '') return undefined;
-      const map: Record<string, string> = {
+      const map: Record<string, Transporte> = {
         'INT': 'internacional',
         'NAC': 'nacional',
         'PEN': 'peninsula',
       };
-      return map[transporte.toUpperCase()] || undefined;
+      return map[transporte.toUpperCase()] as Transporte | undefined;
     };
 
     // Si no hay datos guardados, crear los clientes nuevos
@@ -470,36 +420,15 @@ export class MockDataProvider implements DataProvider {
       }
 
       if (filters.estados && filters.estados.length > 0) {
-        const hasSinDefinir = filters.estados.includes('sin_definir' as any);
-        const estadosReales = filters.estados.filter((e) => e !== 'sin_definir');
-        
-        clientes = clientes.filter((c) => {
-          if (hasSinDefinir && !c.estado) return true;
-          if (estadosReales.length > 0 && c.estado && estadosReales.includes(c.estado)) return true;
-          return false;
-        });
+        clientes = clientes.filter((c) => c.estado && filters.estados?.includes(c.estado));
       }
 
       if (filters.tiposCarga && filters.tiposCarga.length > 0) {
-        const hasSinDefinir = filters.tiposCarga.includes('sin_definir' as any);
-        const tiposReales = filters.tiposCarga.filter((t) => t !== 'sin_definir');
-        
-        clientes = clientes.filter((c) => {
-          if (hasSinDefinir && !c.tipoCarga) return true;
-          if (tiposReales.length > 0 && c.tipoCarga && tiposReales.includes(c.tipoCarga)) return true;
-          return false;
-        });
+        clientes = clientes.filter((c) => c.tipoCarga && filters.tiposCarga?.includes(c.tipoCarga));
       }
 
       if (filters.transportes && filters.transportes.length > 0) {
-        const hasSinDefinir = filters.transportes.includes('sin_definir' as any);
-        const transportesReales = filters.transportes.filter((t) => t !== 'sin_definir');
-        
-        clientes = clientes.filter((c) => {
-          if (hasSinDefinir && !c.transporte) return true;
-          if (transportesReales.length > 0 && c.transporte && transportesReales.includes(c.transporte)) return true;
-          return false;
-        });
+        clientes = clientes.filter((c) => c.transporte && filters.transportes?.includes(c.transporte));
       }
 
       if (filters.mesVencimiento) {

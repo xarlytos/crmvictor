@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { FiltrosClientes, EstadoCliente, TipoCarga, Transporte } from '@/types';
+import type { FiltrosClientes } from '@/types';
 
 interface ClientesStore {
   filtros: FiltrosClientes;

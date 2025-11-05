@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Plus, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, FileUp, PackageSearch } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, FileUp, PackageSearch } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { KPI } from '@/components/shared/KPI';
 import { FiltrosClientes } from '../components/FiltrosClientes';
@@ -192,13 +192,6 @@ export function ClientesList() {
       await createMutation.mutateAsync(data);
     }
     setDrawerOpen(false);
-  };
-
-  const handleEstadoChange = async (cliente: Cliente, nuevoEstado: string) => {
-    await updateMutation.mutateAsync({
-      id: cliente.id,
-      data: { estado: nuevoEstado as EstadoCliente },
-    });
   };
 
   const handleBulkEstadoChange = async (estado: EstadoCliente) => {
