@@ -8,110 +8,139 @@ import { Link } from 'react-router-dom';
 import { formatDate, getDaysUntil, getUrgenciaColor } from '@/lib/date';
 import { ChipMes } from '@/components/shared/ChipMes';
 import { Progress } from '@/components/ui/progress';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import type { Cliente } from '@/types';
 
 export function DashboardPage() {
   const { data: config = { alertWindowDays: 60, monthColors: {} } } = useQuery({
     queryKey: ['config'],
     queryFn: () => dataProvider.getConfig(),
   });
-  
+
   const { data: clientesData } = useQuery({
     queryKey: ['clientes', 'all'],
     queryFn: () => dataProvider.listClientes(),
   });
 
-  const { data: vencimientosData } = useQuery({
-    queryKey: ['vencimientos', 'dashboard', config.alertWindowDays],
-    queryFn: () => dataProvider.listVencimientos({ days: config.alertWindowDays }),
-    enabled: !!config.alertWindowDays,
-  });
-
   const clientes = clientesData?.items || [];
-  const vencimientos = vencimientosData || [];
-  
+
+  const [selectedMonth, setSelectedMonth] = useState<{
+    mes: string;
+    vencimientos: Array<{ client: Cliente; tipo: string; fecha: string }>;
+  } | null>(null);
+
+  // Helper to get nearest expiration days
+  const getNearestExpirationDays = (c: Cliente) => {
+    const dates = [
+      c.poliza.fechaFin,
+      c.vencimientos?.rc,
+      c.vencimientos?.mercancias,
+      c.vencimientos?.acc,
+      c.vencimientos?.flotas,
+      c.vencimientos?.pyme,
+    ].filter(Boolean) as string[];
+
+    if (dates.length === 0) return 9999;
+
+    const days = dates.map(d => getDaysUntil(d));
+    const futureDays = days.filter(d => d >= 0);
+    if (futureDays.length > 0) return Math.min(...futureDays);
+    return Math.max(...days); // All expired
+  };
+
   // Calcular vencimientos por mes - TODOS los vencimientos de todos los clientes
-  // El cálculo se hace dentro del useMemo para que siempre use la fecha actual
   const vencimientosPorMes = useMemo(() => {
-    const now = new Date(); // Fecha actual dentro del useMemo para que siempre sea actual
+    const now = new Date();
     const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     const mesActual = now.getMonth() + 1;
     const añoActual = now.getFullYear();
-    
+
     // Recopilar TODOS los vencimientos de todos los clientes
-    const todosVencimientos: Array<{ fecha: string; mes: number; año: number }> = [];
-    
+    const todosVencimientos: Array<{ fecha: string; mes: number; año: number; client: Cliente; tipo: string }> = [];
+
     clientes.forEach((c) => {
-      // Recopilar todos los tipos de vencimientos
-      if (c.vencimientos?.rc) {
-        const fecha = new Date(c.vencimientos.rc);
-        todosVencimientos.push({ fecha: c.vencimientos.rc, mes: fecha.getMonth() + 1, año: fecha.getFullYear() });
-      }
-      if (c.vencimientos?.mercancias) {
-        const fecha = new Date(c.vencimientos.mercancias);
-        todosVencimientos.push({ fecha: c.vencimientos.mercancias, mes: fecha.getMonth() + 1, año: fecha.getFullYear() });
-      }
-      if (c.vencimientos?.acc) {
-        const fecha = new Date(c.vencimientos.acc);
-        todosVencimientos.push({ fecha: c.vencimientos.acc, mes: fecha.getMonth() + 1, año: fecha.getFullYear() });
-      }
-      if (c.vencimientos?.flotas) {
-        const fecha = new Date(c.vencimientos.flotas);
-        todosVencimientos.push({ fecha: c.vencimientos.flotas, mes: fecha.getMonth() + 1, año: fecha.getFullYear() });
-      }
-      if (c.vencimientos?.pyme) {
-        const fecha = new Date(c.vencimientos.pyme);
-        todosVencimientos.push({ fecha: c.vencimientos.pyme, mes: fecha.getMonth() + 1, año: fecha.getFullYear() });
-      }
+      const addExp = (dateStr: string | undefined, tipo: string) => {
+        if (!dateStr) return;
+        const fecha = new Date(dateStr);
+        todosVencimientos.push({
+          fecha: dateStr,
+          mes: fecha.getMonth() + 1,
+          año: fecha.getFullYear(),
+          client: c,
+          tipo
+        });
+      };
+
+      addExp(c.poliza.fechaFin, 'Póliza');
+      addExp(c.vencimientos?.rc, 'Responsabilidad Civil');
+      addExp(c.vencimientos?.mercancias, 'Mercancías');
+      addExp(c.vencimientos?.acc, 'Accidentes');
+      addExp(c.vencimientos?.flotas, 'Flotas');
+      addExp(c.vencimientos?.pyme, 'Pyme');
     });
-    
+
     // Crear un mapa de meses con vencimientos (12 meses desde el mes actual)
-    const datosMeses: Array<{ mes: string; numero: number; vencimientos: number; esActual: boolean }> = [];
-    
+    const datosMeses: Array<{
+      mes: string;
+      numero: number;
+      vencimientos: number;
+      esActual: boolean;
+      detalles: Array<{ client: Cliente; tipo: string; fecha: string }>
+    }> = [];
+
     for (let i = 0; i < 12; i++) {
       const mesNumero = ((mesActual - 1 + i) % 12) + 1;
       const año = añoActual + Math.floor((mesActual - 1 + i) / 12);
       const nombreMes = meses[mesNumero - 1];
       const mesConAño = `${nombreMes} ${año}`;
       const esMesActual = i === 0;
-      
-      // Contar vencimientos en este mes
-      const vencimientosEnMes = todosVencimientos.filter((v) => {
+
+      const expirationsInMonth = todosVencimientos.filter((v) => {
         return v.mes === mesNumero && v.año === año;
-      }).length;
-      
+      });
+
       datosMeses.push({
         mes: mesConAño,
         numero: mesNumero,
-        vencimientos: vencimientosEnMes,
+        vencimientos: expirationsInMonth.length,
         esActual: esMesActual,
+        detalles: expirationsInMonth.map(x => ({ client: x.client, tipo: x.tipo, fecha: x.fecha })),
       });
     }
-    
-    return datosMeses;
-  }, [clientes]); // No necesitamos 'now' como dependencia porque lo calculamos dentro
 
-  // Calcular métricas usando la fecha actual
+    return datosMeses;
+  }, [clientes]);
+
+  // Calcular métricas
   const now = new Date();
   const mesActual = now.getMonth() + 1;
   const vencenEsteMes = clientes.filter(
     (c) => new Date(c.poliza.fechaFin).getMonth() + 1 === mesActual
   ).length;
 
-  const vencenEnVentana = vencimientos.filter(
-    (v) => getDaysUntil(v.poliza.fechaFin) <= config.alertWindowDays
-  ).length;
+  const vencenEnVentana = clientes.filter(c => {
+    const days = getNearestExpirationDays(c);
+    return days >= 0 && days <= config.alertWindowDays;
+  }).length;
 
   const contratados = clientes.filter((c) => c.estado === 'contratado').length;
   const tasaCierre = clientes.length > 0 ? ((contratados / clientes.length) * 100).toFixed(1) : '0';
 
-  const proximosVencimientos = vencimientos
-    .sort((a, b) => {
-      const diasA = getDaysUntil(a.poliza.fechaFin);
-      const diasB = getDaysUntil(b.poliza.fechaFin);
-      return diasA - diasB;
-    })
+  const proximosVencimientos = clientes
+    .map(c => ({
+      ...c,
+      daysToExpiration: getNearestExpirationDays(c)
+    }))
+    .filter(c => c.daysToExpiration >= 0 && c.daysToExpiration <= 999)
+    .sort((a, b) => a.daysToExpiration - b.daysToExpiration)
     .slice(0, 10);
 
   return (
@@ -151,22 +180,30 @@ export function DashboardPage() {
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={450}>
-            <BarChart data={vencimientosPorMes}>
+            <BarChart
+              data={vencimientosPorMes}
+              onClick={(data: any) => {
+                if (data && data.activePayload && data.activePayload.length > 0) {
+                  setSelectedMonth(data.activePayload[0].payload);
+                }
+              }}
+              className="cursor-pointer"
+            >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="mes" 
+              <XAxis
+                dataKey="mes"
                 tick={{ fontSize: 12 }}
                 angle={-45}
                 textAnchor="end"
                 height={100}
               />
-              <YAxis 
+              <YAxis
                 label={{ value: 'Número de Vencimientos', angle: -90, position: 'insideLeft' }}
                 tick={{ fontSize: 12 }}
                 allowDecimals={false}
                 domain={[0, 'dataMax']}
               />
-              <Tooltip 
+              <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
                     const data = payload[0].payload;
@@ -187,11 +224,11 @@ export function DashboardPage() {
               />
               <Bar dataKey="vencimientos" radius={[4, 4, 0, 0]}>
                 {vencimientosPorMes.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.esActual 
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.esActual
                       ? config.monthColors[entry.numero] || 'hsl(var(--primary))'
-                      : entry.vencimientos > 0 
+                      : entry.vencimientos > 0
                         ? config.monthColors[entry.numero] || 'hsl(var(--muted-foreground))'
                         : 'hsl(var(--muted))'
                     }
@@ -219,9 +256,9 @@ export function DashboardPage() {
               </p>
             ) : (
               proximosVencimientos.map((cliente) => {
-                const dias = getDaysUntil(cliente.poliza.fechaFin);
+                const dias = cliente.daysToExpiration;
                 const porcentaje = Math.max(0, Math.min(100, (dias / 60) * 100));
-                
+
                 return (
                   <div
                     key={cliente.id}
@@ -252,7 +289,34 @@ export function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={!!selectedMonth} onOpenChange={(open) => !open && setSelectedMonth(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Vencimientos {selectedMonth?.mes}</DialogTitle>
+          </DialogHeader>
+          <div className="h-[300px] mt-4 overflow-y-auto">
+            <div className="space-y-4">
+              {selectedMonth?.vencimientos.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center">No hay vencimientos este mes</p>
+              ) : (
+                selectedMonth?.vencimientos.map((item, i) => (
+                  <div key={i} className="flex flex-col p-3 border rounded-lg bg-card">
+                    <div className="flex justify-between items-start">
+                      <span className="font-semibold">{item.client.empresa}</span>
+                      <Badge variant="outline">{item.tipo}</Badge>
+                    </div>
+                    <div className="flex justify-between mt-2 text-sm text-muted-foreground">
+                      <span>{formatDate(item.fecha)}</span>
+                      <span>{item.client.contacto}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-

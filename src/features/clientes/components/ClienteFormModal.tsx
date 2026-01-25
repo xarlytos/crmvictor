@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { Cliente, EstadoCliente, TipoCarga, Transporte } from '@/types';
+import type { Cliente, EstadoCliente, Transporte } from '@/types';
 import dayjs from 'dayjs';
 
 const clienteSchema = z.object({
@@ -28,19 +28,19 @@ const clienteSchema = z.object({
   contacto: z.string().min(1, 'Contacto es requerido'),
   telefono: z.string().min(1, 'Teléfono es requerido'),
   correo: z.string().email('Correo inválido'),
+  cif: z.string().optional(),
   direccion: z.string().optional(),
   notas: z.string().optional(),
   estado: z.enum(['contratado', 'contactado_buena_pinta', 'en_negociacion', 'descartado']),
-  tipoCarga: z.enum([
-    'general_fraccionada',
-    'frigorifica',
-    'adr_peligrosas',
-    'completa_ftl',
-    'fraccionada_ltl',
-    'a_granel',
-    'vehiculos',
+  tipoCarga: z.string().min(1, 'Tipo de carga es requerido'),
+  transporte: z.enum([
+    'nacional',
+    'internacional',
+    'peninsular',
+    'espana_francia',
+    'espana_portugal',
+    'espana_francia_portugal',
   ]),
-  transporte: z.enum(['nacional', 'internacional', 'peninsula']),
   numVehiculos: z.number().optional(),
   facturacion: z.string().optional(),
   fechaLlamada: z.string().optional(),
@@ -85,20 +85,13 @@ const estadoLabels: Record<EstadoCliente, string> = {
   descartado: 'Descartado',
 };
 
-const tipoCargaLabels: Record<TipoCarga, string> = {
-  general_fraccionada: 'General Fraccionada',
-  frigorifica: 'Frigorífica',
-  adr_peligrosas: 'ADR Peligrosas',
-  completa_ftl: 'Completa FTL',
-  fraccionada_ltl: 'Fraccionada LTL',
-  a_granel: 'A Granel',
-  vehiculos: 'Vehículos',
-};
-
 const transporteLabels: Record<Transporte, string> = {
   nacional: 'Nacional',
   internacional: 'Internacional',
-  peninsula: 'Península',
+  peninsular: 'Peninsular',
+  espana_francia: 'España y Francia',
+  espana_portugal: 'España y Portugal',
+  espana_francia_portugal: 'España, Francia y Portugal',
 };
 
 export function ClienteFormModal({
@@ -118,43 +111,44 @@ export function ClienteFormModal({
     resolver: zodResolver(clienteSchema),
     defaultValues: cliente
       ? {
-          empresa: cliente.empresa,
-          contacto: cliente.contacto,
-          telefono: cliente.telefono,
-          correo: cliente.correo,
-          direccion: cliente.direccion || '',
-          notas: cliente.notas || '',
-          estado: cliente.estado,
-          tipoCarga: cliente.tipoCarga,
-          transporte: cliente.transporte,
-          numVehiculos: cliente.numVehiculos,
-          facturacion: cliente.facturacion || '',
-          fechaLlamada: cliente.fechaLlamada ? cliente.fechaLlamada.split('T')[0] : '',
-          estadoConversacion: cliente.estadoConversacion || '',
-          poliza: {
-            fechaInicio: cliente.poliza.fechaInicio.split('T')[0],
-            fechaFin: cliente.poliza.fechaFin.split('T')[0],
-            aseguradora: cliente.poliza.aseguradora || '',
-            numPoliza: cliente.poliza.numPoliza || '',
-            prima: cliente.poliza.prima,
-          },
-          vencimientos: {
-            rc: cliente.vencimientos?.rc ? cliente.vencimientos.rc.split('T')[0] : '',
-            mercancias: cliente.vencimientos?.mercancias ? cliente.vencimientos.mercancias.split('T')[0] : '',
-            acc: cliente.vencimientos?.acc ? cliente.vencimientos.acc.split('T')[0] : '',
-            flotas: cliente.vencimientos?.flotas ? cliente.vencimientos.flotas.split('T')[0] : '',
-            pyme: cliente.vencimientos?.pyme ? cliente.vencimientos.pyme.split('T')[0] : '',
-          },
-        }
-      : {
-          estado: 'contactado_buena_pinta',
-          tipoCarga: 'general_fraccionada',
-          transporte: 'nacional',
-          poliza: {
-            fechaInicio: dayjs().format('YYYY-MM-DD'),
-            fechaFin: dayjs().add(90, 'days').format('YYYY-MM-DD'),
-          },
+        empresa: cliente.empresa,
+        contacto: cliente.contacto,
+        cif: cliente.cif || '',
+        telefono: cliente.telefono,
+        correo: cliente.correo,
+        direccion: cliente.direccion || '',
+        notas: cliente.notas || '',
+        estado: cliente.estado,
+        tipoCarga: cliente.tipoCarga || '',
+        transporte: cliente.transporte,
+        numVehiculos: cliente.numVehiculos,
+        facturacion: cliente.facturacion || '',
+        fechaLlamada: cliente.fechaLlamada ? cliente.fechaLlamada.split('T')[0] : '',
+        estadoConversacion: cliente.estadoConversacion || '',
+        poliza: {
+          fechaInicio: cliente.poliza.fechaInicio.split('T')[0],
+          fechaFin: cliente.poliza.fechaFin.split('T')[0],
+          aseguradora: cliente.poliza.aseguradora || '',
+          numPoliza: cliente.poliza.numPoliza || '',
+          prima: cliente.poliza.prima,
         },
+        vencimientos: {
+          rc: cliente.vencimientos?.rc ? cliente.vencimientos.rc.split('T')[0] : '',
+          mercancias: cliente.vencimientos?.mercancias ? cliente.vencimientos.mercancias.split('T')[0] : '',
+          acc: cliente.vencimientos?.acc ? cliente.vencimientos.acc.split('T')[0] : '',
+          flotas: cliente.vencimientos?.flotas ? cliente.vencimientos.flotas.split('T')[0] : '',
+          pyme: cliente.vencimientos?.pyme ? cliente.vencimientos.pyme.split('T')[0] : '',
+        },
+      }
+      : {
+        estado: 'contactado_buena_pinta',
+        tipoCarga: '',
+        transporte: 'nacional',
+        poliza: {
+          fechaInicio: dayjs().format('YYYY-MM-DD'),
+          fechaFin: dayjs().add(90, 'days').format('YYYY-MM-DD'),
+        },
+      },
   });
 
   useEffect(() => {
@@ -162,12 +156,13 @@ export function ClienteFormModal({
       reset({
         empresa: cliente.empresa,
         contacto: cliente.contacto,
+        cif: cliente.cif || '',
         telefono: cliente.telefono,
         correo: cliente.correo,
         direccion: cliente.direccion || '',
         notas: cliente.notas || '',
         estado: cliente.estado,
-        tipoCarga: cliente.tipoCarga,
+        tipoCarga: cliente.tipoCarga || '',
         transporte: cliente.transporte,
         numVehiculos: cliente.numVehiculos,
         facturacion: cliente.facturacion || '',
@@ -191,7 +186,7 @@ export function ClienteFormModal({
     } else if (open && !cliente) {
       reset({
         estado: 'contactado_buena_pinta',
-        tipoCarga: 'general_fraccionada',
+        tipoCarga: '',
         transporte: 'nacional',
         poliza: {
           fechaInicio: dayjs().format('YYYY-MM-DD'),
@@ -205,6 +200,7 @@ export function ClienteFormModal({
     const submitData: Partial<Cliente> = {
       empresa: data.empresa,
       contacto: data.contacto,
+      cif: data.cif || undefined,
       telefono: data.telefono,
       correo: data.correo,
       direccion: data.direccion || undefined,
@@ -237,7 +233,6 @@ export function ClienteFormModal({
   };
 
   const estadoValue = watch('estado');
-  const tipoCargaValue = watch('tipoCarga');
   const transporteValue = watch('transporte');
 
   return (
@@ -262,6 +257,11 @@ export function ClienteFormModal({
               {errors.contacto && (
                 <p className="text-sm text-destructive">{errors.contacto.message}</p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cif">CIF</Label>
+              <Input id="cif" {...register('cif')} placeholder="CIF / DNI" />
             </div>
 
             <div className="space-y-2">
@@ -306,21 +306,14 @@ export function ClienteFormModal({
 
             <div className="space-y-2">
               <Label htmlFor="tipoCarga">Tipo de Carga *</Label>
-              <Select
-                value={tipoCargaValue}
-                onValueChange={(value) => setValue('tipoCarga', value as TipoCarga)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(tipoCargaLabels).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id="tipoCarga"
+                {...register('tipoCarga')}
+                placeholder="Ej: General, Frigorífica..."
+              />
+              {errors.tipoCarga && (
+                <p className="text-sm text-destructive">{errors.tipoCarga.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">

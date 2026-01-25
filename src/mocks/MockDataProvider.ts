@@ -62,7 +62,7 @@ export class MockDataProvider implements DataProvider {
     // Helper para convertir meses a fechas
     const parseMonthToDate = (monthStr: string): string | undefined => {
       if (!monthStr || monthStr === '-' || monthStr.trim() === '') return undefined;
-      
+
       const monthMap: Record<string, number> = {
         'ENERO': 1, 'ENE': 1,
         'FEBRERO': 2, 'FEB': 2,
@@ -94,9 +94,9 @@ export class MockDataProvider implements DataProvider {
     // Helper para parsear fechas como "31 dic" o "3/10"
     const parseDate = (dateStr: string): string | undefined => {
       if (!dateStr || dateStr === '-' || dateStr.trim() === '') return undefined;
-      
+
       const trimmed = dateStr.trim();
-      
+
       // Formato "3/10" o "7/10" (día/mes)
       if (trimmed.includes('/')) {
         const [day, month] = trimmed.split('/').map(Number);
@@ -108,7 +108,7 @@ export class MockDataProvider implements DataProvider {
           return new Date(year, month - 1, day).toISOString();
         }
       }
-      
+
       // Formato "31 dic" (día + mes abreviado)
       const parts = trimmed.split(/\s+/);
       if (parts.length === 2) {
@@ -126,7 +126,7 @@ export class MockDataProvider implements DataProvider {
           return new Date(year, month - 1, day).toISOString();
         }
       }
-      
+
       // Si es solo un mes, usar parseMonthToDate
       return parseMonthToDate(trimmed);
     };
@@ -150,7 +150,7 @@ export class MockDataProvider implements DataProvider {
       const map: Record<string, Transporte> = {
         'INT': 'internacional',
         'NAC': 'nacional',
-        'PEN': 'peninsula',
+        'PEN': 'peninsular',
       };
       return map[transporte.toUpperCase()] as Transporte | undefined;
     };
@@ -158,7 +158,7 @@ export class MockDataProvider implements DataProvider {
     // Si no hay datos guardados, crear los clientes nuevos
     const now = new Date();
     const currentYear = now.getFullYear();
-    
+
     const clientes: Cliente[] = [
       {
         id: '1',
@@ -432,9 +432,36 @@ export class MockDataProvider implements DataProvider {
       }
 
       if (filters.mesVencimiento) {
-        clientes = clientes.filter(
-          (c) => getMonthFromDate(c.poliza.fechaFin) === filters.mesVencimiento
-        );
+        clientes = clientes.filter((c) => {
+          const dates = [
+            c.poliza.fechaFin,
+            c.vencimientos?.rc,
+            c.vencimientos?.mercancias,
+            c.vencimientos?.acc,
+            c.vencimientos?.flotas,
+            c.vencimientos?.pyme,
+          ].filter(Boolean) as string[];
+
+          return dates.some(d => getMonthFromDate(d) === filters.mesVencimiento);
+        });
+      }
+
+      if (filters.proximosDias !== undefined) {
+        clientes = clientes.filter((c) => {
+          const dates = [
+            c.poliza.fechaFin,
+            c.vencimientos?.rc,
+            c.vencimientos?.mercancias,
+            c.vencimientos?.acc,
+            c.vencimientos?.flotas,
+            c.vencimientos?.pyme,
+          ].filter(Boolean) as string[];
+
+          return dates.some(d => {
+            const dias = getDaysUntil(d);
+            return dias >= 0 && dias <= filters.proximosDias!;
+          });
+        });
       }
     }
 
@@ -456,12 +483,13 @@ export class MockDataProvider implements DataProvider {
       id: `cliente-${Date.now()}`,
       empresa: dto.empresa || '',
       contacto: dto.contacto || '',
+      cif: dto.cif,
       telefono: dto.telefono || undefined,
       correo: dto.correo || undefined,
       direccion: dto.direccion,
       notas: dto.notas,
       estado: dto.estado || undefined,
-      tipoCarga: dto.tipoCarga || undefined,
+      tipoCarga: dto.tipoCarga || undefined, // Changed this to string compatible
       transporte: dto.transporte || undefined,
       poliza: dto.poliza || {
         fechaInicio: new Date().toISOString(),
@@ -516,32 +544,71 @@ export class MockDataProvider implements DataProvider {
   }): Promise<Cliente[]> {
     const clientes = this.getClientes();
     let filtered = clientes.filter((c) => {
-      const dias = getDaysUntil(c.poliza.fechaFin);
-      return dias >= 0; // Solo futuros
+      const dates = [
+        c.poliza.fechaFin,
+        c.vencimientos?.rc,
+        c.vencimientos?.mercancias,
+        c.vencimientos?.acc,
+        c.vencimientos?.flotas,
+        c.vencimientos?.pyme,
+      ].filter(Boolean) as string[];
+
+      // Keep if ANY expiration is in the future
+      return dates.some(d => getDaysUntil(d) >= 0);
     });
 
     if (params.days !== undefined) {
       filtered = filtered.filter((c) => {
-        const dias = getDaysUntil(c.poliza.fechaFin);
-        return dias <= params.days!;
+        const dates = [
+          c.poliza.fechaFin,
+          c.vencimientos?.rc,
+          c.vencimientos?.mercancias,
+          c.vencimientos?.acc,
+          c.vencimientos?.flotas,
+          c.vencimientos?.pyme,
+        ].filter(Boolean) as string[];
+
+        return dates.some(d => {
+          const dias = getDaysUntil(d);
+          return dias >= 0 && dias <= params.days!;
+        });
       });
     }
 
     if (params.mes) {
-      filtered = filtered.filter(
-        (c) => getMonthFromDate(c.poliza.fechaFin) === params.mes
-      );
+      filtered = filtered.filter((c) => {
+        const dates = [
+          c.poliza.fechaFin,
+          c.vencimientos?.rc,
+          c.vencimientos?.mercancias,
+          c.vencimientos?.acc,
+          c.vencimientos?.flotas,
+          c.vencimientos?.pyme,
+        ].filter(Boolean) as string[];
+
+        return dates.some(d => getMonthFromDate(d) === params.mes);
+      });
     }
 
     if (params.estado) {
       filtered = filtered.filter((c) => c.estado === params.estado);
     }
 
-    // Ordenar por fechaFin ascendente
+    // Ordenar por fechaFin mas próxima (using min proximity)
     filtered.sort((a, b) => {
-      const fechaA = new Date(a.poliza.fechaFin).getTime();
-      const fechaB = new Date(b.poliza.fechaFin).getTime();
-      return fechaA - fechaB;
+      const getMinDays = (c: Cliente) => {
+        const dates = [
+          c.poliza.fechaFin,
+          c.vencimientos?.rc,
+          c.vencimientos?.mercancias,
+          c.vencimientos?.acc,
+          c.vencimientos?.flotas,
+          c.vencimientos?.pyme,
+        ].filter(Boolean) as string[];
+        if (dates.length === 0) return 9999;
+        return Math.min(...dates.map(d => getDaysUntil(d)));
+      };
+      return getMinDays(a) - getMinDays(b);
     });
 
     return filtered;

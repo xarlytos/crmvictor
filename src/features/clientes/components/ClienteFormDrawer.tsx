@@ -23,25 +23,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { DateInput } from '@/components/shared/DateInput';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { Trash2 } from 'lucide-react';
-import type { Cliente, EstadoCliente, TipoCarga, Transporte } from '@/types';
+import type { Cliente, EstadoCliente, Transporte } from '@/types';
 
 const clienteSchema = z.object({
   empresa: z.string().optional(),
   contacto: z.string().optional(),
   telefono: z.string().optional(),
   correo: z.string().optional(),
+  cif: z.string().optional(),
   notas: z.string().optional(),
   estado: z.enum(['contratado', 'contactado_buena_pinta', 'en_negociacion', 'descartado']).optional(),
-  tipoCarga: z.enum([
-    'general_fraccionada',
-    'frigorifica',
-    'adr_peligrosas',
-    'completa_ftl',
-    'fraccionada_ltl',
-    'a_granel',
-    'vehiculos',
+  tipoCarga: z.string().optional(),
+  transporte: z.enum([
+    'nacional',
+    'internacional',
+    'peninsular',
+    'espana_francia',
+    'espana_portugal',
+    'espana_francia_portugal',
   ]).optional(),
-  transporte: z.enum(['nacional', 'internacional', 'peninsula']).optional(),
   fechaLlamada: z.string().optional(),
   facturacion: z.string().optional(),
   numVehiculos: z.preprocess(
@@ -55,7 +55,13 @@ const clienteSchema = z.object({
     },
     z.number().optional()
   ),
-  fechaVencimiento: z.string().optional(),
+  vencimientos: z.object({
+    rc: z.string().optional(),
+    mercancias: z.string().optional(),
+    acc: z.string().optional(),
+    flotas: z.string().optional(),
+    pyme: z.string().optional(),
+  }).optional(),
 }).refine(
   (data) => {
     // Al menos uno de empresa o contacto debe estar presente
@@ -96,20 +102,15 @@ const estadoLabels: Record<EstadoCliente, string> = {
   descartado: 'Descartado',
 };
 
-const tipoCargaLabels: Record<TipoCarga, string> = {
-  general_fraccionada: 'General Fraccionada',
-  frigorifica: 'Frigorífica',
-  adr_peligrosas: 'ADR Peligrosas',
-  completa_ftl: 'Completa FTL',
-  fraccionada_ltl: 'Fraccionada LTL',
-  a_granel: 'A Granel',
-  vehiculos: 'Vehículos',
-};
+/* removed tipoCargaLabels */
 
 const transporteLabels: Record<Transporte, string> = {
   nacional: 'Nacional',
   internacional: 'Internacional',
-  peninsula: 'Península',
+  peninsular: 'Peninsular',
+  espana_francia: 'España y Francia',
+  espana_portugal: 'España y Portugal',
+  espana_francia_portugal: 'España, Francia y Portugal',
 };
 
 export function ClienteFormDrawer({
@@ -131,37 +132,41 @@ export function ClienteFormDrawer({
     resolver: zodResolver(clienteSchema),
     defaultValues: cliente
       ? {
-          empresa: cliente.empresa,
-          contacto: cliente.contacto,
-          telefono: cliente.telefono,
-          correo: cliente.correo,
-          notas: cliente.notas || '',
-          estado: cliente.estado,
-          tipoCarga: cliente.tipoCarga,
-          transporte: cliente.transporte,
-          fechaLlamada: cliente.fechaLlamada ? cliente.fechaLlamada.split('T')[0] : '',
-          facturacion: cliente.facturacion || '',
-          numVehiculos: cliente.numVehiculos,
-          fechaVencimiento: cliente.vencimientos?.flotas 
-            ? cliente.vencimientos.flotas.split('T')[0]
-            : cliente.vencimientos?.mercancias
-            ? cliente.vencimientos.mercancias.split('T')[0]
-            : cliente.poliza.fechaFin.split('T')[0],
-        }
-      : {
-          empresa: '',
-          contacto: '',
-          telefono: '',
-          correo: '',
-          notas: '',
-          estado: undefined,
-          tipoCarga: undefined,
-          transporte: undefined,
-          fechaLlamada: '',
-          facturacion: '',
-          numVehiculos: undefined,
-          fechaVencimiento: '',
+        empresa: cliente.empresa,
+        contacto: cliente.contacto,
+        cif: cliente.cif || '',
+        telefono: cliente.telefono,
+        correo: cliente.correo,
+        notas: cliente.notas || '',
+        estado: cliente.estado,
+        tipoCarga: cliente.tipoCarga || '',
+        transporte: cliente.transporte,
+        fechaLlamada: cliente.fechaLlamada ? cliente.fechaLlamada.split('T')[0] : '',
+        facturacion: cliente.facturacion || '',
+        numVehiculos: cliente.numVehiculos,
+        vencimientos: {
+          rc: cliente.vencimientos?.rc ? cliente.vencimientos.rc.split('T')[0] : '',
+          mercancias: cliente.vencimientos?.mercancias ? cliente.vencimientos.mercancias.split('T')[0] : '',
+          acc: cliente.vencimientos?.acc ? cliente.vencimientos.acc.split('T')[0] : '',
+          flotas: cliente.vencimientos?.flotas ? cliente.vencimientos.flotas.split('T')[0] : '',
+          pyme: cliente.vencimientos?.pyme ? cliente.vencimientos.pyme.split('T')[0] : '',
         },
+      }
+      : {
+        empresa: '',
+        contacto: '',
+        cif: '',
+        telefono: '',
+        correo: '',
+        notas: '',
+        estado: undefined,
+        tipoCarga: '',
+        transporte: undefined,
+        fechaLlamada: '',
+        facturacion: '',
+        numVehiculos: undefined,
+        vencimientos: { rc: '', mercancias: '', acc: '', flotas: '', pyme: '' },
+      },
   });
 
   useEffect(() => {
@@ -169,73 +174,74 @@ export function ClienteFormDrawer({
       reset({
         empresa: cliente.empresa,
         contacto: cliente.contacto,
+        cif: cliente.cif || '',
         telefono: cliente.telefono,
         correo: cliente.correo,
         notas: cliente.notas || '',
         estado: cliente.estado,
-        tipoCarga: cliente.tipoCarga,
+        tipoCarga: cliente.tipoCarga || '',
         transporte: cliente.transporte,
         fechaLlamada: cliente.fechaLlamada ? cliente.fechaLlamada.split('T')[0] : '',
         facturacion: cliente.facturacion || '',
         numVehiculos: cliente.numVehiculos,
-        fechaVencimiento: cliente.vencimientos?.flotas 
-          ? cliente.vencimientos.flotas.split('T')[0]
-          : cliente.vencimientos?.mercancias
-          ? cliente.vencimientos.mercancias.split('T')[0]
-          : cliente.poliza.fechaFin.split('T')[0],
+        vencimientos: {
+          rc: cliente.vencimientos?.rc ? cliente.vencimientos.rc.split('T')[0] : '',
+          mercancias: cliente.vencimientos?.mercancias ? cliente.vencimientos.mercancias.split('T')[0] : '',
+          acc: cliente.vencimientos?.acc ? cliente.vencimientos.acc.split('T')[0] : '',
+          flotas: cliente.vencimientos?.flotas ? cliente.vencimientos.flotas.split('T')[0] : '',
+          pyme: cliente.vencimientos?.pyme ? cliente.vencimientos.pyme.split('T')[0] : '',
+        },
       });
     } else if (open && !cliente) {
       reset({
         empresa: '',
         contacto: '',
+        cif: '',
         telefono: '',
         correo: '',
         notas: '',
         estado: undefined,
-        tipoCarga: undefined,
+        tipoCarga: '',
         transporte: undefined,
         fechaLlamada: '',
         facturacion: '',
         numVehiculos: undefined,
-        fechaVencimiento: '',
+        vencimientos: { rc: '', mercancias: '', acc: '', flotas: '', pyme: '' },
       });
     }
   }, [open, cliente, reset]);
 
   const onFormSubmit = async (data: ClienteFormData) => {
-    // Si no hay fechaVencimiento, no establecer fecha de vencimiento
-    const fechaVencimientoISO = data.fechaVencimiento && data.fechaVencimiento.trim() !== ''
-      ? new Date(data.fechaVencimiento).toISOString()
-      : undefined;
-    
+
     // Limpiar strings vacíos y convertirlos a undefined
     const cleanString = (value: string | undefined): string | undefined => {
       return value && value.trim() !== '' ? value : undefined;
     };
 
     const submitData: Partial<Cliente> = {
-      empresa: data.empresa || data.contacto || '', // Si no hay empresa, usar contacto
+      empresa: data.empresa || data.contacto || '',
       contacto: cleanString(data.contacto),
+      cif: cleanString(data.cif),
       telefono: cleanString(data.telefono),
       correo: cleanString(data.correo),
       notas: cleanString(data.notas),
       estado: data.estado || undefined,
-      tipoCarga: data.tipoCarga || undefined,
+      tipoCarga: cleanString(data.tipoCarga),
       transporte: data.transporte || undefined,
       fechaLlamada: data.fechaLlamada && data.fechaLlamada.trim() !== '' ? new Date(data.fechaLlamada).toISOString() : undefined,
       facturacion: cleanString(data.facturacion),
       numVehiculos: data.numVehiculos,
       poliza: {
         fechaInicio: cliente?.poliza?.fechaInicio || new Date().toISOString(),
-        // Solo establecer fechaFin si hay fechaVencimiento o si es un cliente existente con fechaFin
-        // Si no hay fechaVencimiento y es un cliente nuevo, usar una fecha por defecto para poliza (requerida)
-        fechaFin: fechaVencimientoISO || cliente?.poliza?.fechaFin || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        fechaFin: cliente?.poliza?.fechaFin || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
       },
-      // Solo establecer vencimientos si hay fechaVencimiento explícitamente
-      // Si no hay fechaVencimiento y es un cliente nuevo, dejar undefined
-      vencimientos: fechaVencimientoISO ? {
-        flotas: fechaVencimientoISO,
-      } : (cliente ? cliente.vencimientos : undefined),
+      vencimientos: data.vencimientos ? {
+        rc: data.vencimientos.rc ? new Date(data.vencimientos.rc).toISOString() : undefined,
+        mercancias: data.vencimientos.mercancias ? new Date(data.vencimientos.mercancias).toISOString() : undefined,
+        acc: data.vencimientos.acc ? new Date(data.vencimientos.acc).toISOString() : undefined,
+        flotas: data.vencimientos.flotas ? new Date(data.vencimientos.flotas).toISOString() : undefined,
+        pyme: data.vencimientos.pyme ? new Date(data.vencimientos.pyme).toISOString() : undefined,
+      } : undefined,
     };
 
     await onSubmit(submitData);
@@ -243,7 +249,6 @@ export function ClienteFormDrawer({
   };
 
   const estadoValue = watch('estado');
-  const tipoCargaValue = watch('tipoCarga');
   const transporteValue = watch('transporte');
 
   const handleEstadoChange = (value: string) => {
@@ -254,13 +259,7 @@ export function ClienteFormDrawer({
     }
   };
 
-  const handleTipoCargaChange = (value: string) => {
-    if (value === 'none') {
-      setValue('tipoCarga', undefined);
-    } else {
-      setValue('tipoCarga', value as TipoCarga, { shouldValidate: true });
-    }
-  };
+  /* Removed handleTipoCargaChange as it's now an input */
 
   const handleTransporteChange = (value: string) => {
     if (value === 'none') {
@@ -279,80 +278,92 @@ export function ClienteFormDrawer({
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6 mt-4">
-                    {/* Información Básica */}
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="empresa" className="text-sm font-medium">
-                          Empresa o Nombre
-                        </Label>
-                        <Input
-                          id="empresa"
-                          {...register('empresa')}
-                          placeholder="Nombre de la empresa o contacto"
-                          className="h-10"
-                        />
-                        {errors.empresa && (
-                          <p className="text-sm text-destructive">{errors.empresa.message}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          Debe proporcionar al menos un nombre de empresa o contacto
-                        </p>
-                      </div>
+          {/* Información Básica */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="empresa" className="text-sm font-medium">
+                Empresa o Nombre
+              </Label>
+              <Input
+                id="empresa"
+                {...register('empresa')}
+                placeholder="Nombre de la empresa o contacto"
+                className="h-10"
+              />
+              {errors.empresa && (
+                <p className="text-sm text-destructive">{errors.empresa.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Debe proporcionar al menos un nombre de empresa o contacto
+              </p>
+            </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="contacto" className="text-sm font-medium">
-                          Contacto
-                        </Label>
-                        <Input
-                          id="contacto"
-                          {...register('contacto')}
-                          placeholder="Nombre del contacto"
-                          className="h-10"
-                        />
-                        {errors.contacto && (
-                          <p className="text-sm text-destructive">{errors.contacto.message}</p>
-                        )}
-                      </div>
+            <div className="space-y-2">
+              <Label htmlFor="contacto" className="text-sm font-medium">
+                Contacto
+              </Label>
+              <Input
+                id="contacto"
+                {...register('contacto')}
+                placeholder="Nombre del contacto"
+                className="h-10"
+              />
+              {errors.contacto && (
+                <p className="text-sm text-destructive">{errors.contacto.message}</p>
+              )}
+            </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="telefono" className="text-sm font-medium">
-                          Teléfono
-                        </Label>
-                        <Input
-                          id="telefono"
-                          type="tel"
-                          {...register('telefono')}
-                          placeholder="+34 600 000 000"
-                          className="h-10"
-                        />
-                        {errors.telefono && (
-                          <p className="text-sm text-destructive">{errors.telefono.message}</p>
-                        )}
-                      </div>
+            <div className="space-y-2">
+              <Label htmlFor="cif" className="text-sm font-medium">
+                CIF
+              </Label>
+              <Input
+                id="cif"
+                {...register('cif')}
+                placeholder="CIF / DNI"
+                className="h-10"
+              />
+            </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="correo" className="text-sm font-medium">
-                          Correo
-                        </Label>
-                        <Input
-                          id="correo"
-                          type="email"
-                          {...register('correo')}
-                          placeholder="contacto@empresa.com"
-                          className="h-10"
-                        />
-                        {errors.correo && (
-                          <p className="text-sm text-destructive">{errors.correo.message}</p>
-                        )}
-                      </div>
-                    </div>
+            <div className="space-y-2">
+              <Label htmlFor="telefono" className="text-sm font-medium">
+                Teléfono
+              </Label>
+              <Input
+                id="telefono"
+                type="tel"
+                {...register('telefono')}
+                placeholder="+34 600 000 000"
+                className="h-10"
+              />
+              {errors.telefono && (
+                <p className="text-sm text-destructive">{errors.telefono.message}</p>
+              )}
+            </div>
 
-                    {/* Estado y Clasificación */}
-                    <div className="grid gap-4 sm:grid-cols-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="estado" className="text-sm font-medium">
-                          Estado
-                        </Label>
+            <div className="space-y-2">
+              <Label htmlFor="correo" className="text-sm font-medium">
+                Correo
+              </Label>
+              <Input
+                id="correo"
+                type="email"
+                {...register('correo')}
+                placeholder="contacto@empresa.com"
+                className="h-10"
+              />
+              {errors.correo && (
+                <p className="text-sm text-destructive">{errors.correo.message}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Estado y Clasificación */}
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="estado" className="text-sm font-medium">
+                Estado
+              </Label>
               <Select
                 value={estadoValue ? String(estadoValue) : 'none'}
                 onValueChange={handleEstadoChange}
@@ -374,35 +385,25 @@ export function ClienteFormDrawer({
               )}
             </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="tipoCarga" className="text-sm font-medium">
-                          Mercancía
-                        </Label>
-              <Select
-                value={tipoCargaValue ? String(tipoCargaValue) : 'none'}
-                onValueChange={handleTipoCargaChange}
-              >
-                <SelectTrigger className="h-10" id="tipoCarga">
-                  <SelectValue placeholder="Seleccionar mercancía" />
-                </SelectTrigger>
-                <SelectContent className="z-[200]" position="popper" sideOffset={5}>
-                  <SelectItem value="none">Sin definir</SelectItem>
-                  {Object.entries(tipoCargaLabels).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-2">
+              <Label htmlFor="tipoCarga" className="text-sm font-medium">
+                Mercancía
+              </Label>
+              <Input
+                id="tipoCarga"
+                {...register('tipoCarga')}
+                placeholder="Ej: General, Frigorífica..."
+                className="h-10"
+              />
               {errors.tipoCarga && (
                 <p className="text-sm text-destructive">{errors.tipoCarga.message}</p>
               )}
             </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="transporte" className="text-sm font-medium">
-                          Transporte
-                        </Label>
+            <div className="space-y-2">
+              <Label htmlFor="transporte" className="text-sm font-medium">
+                Transporte
+              </Label>
               <Select
                 value={transporteValue ? String(transporteValue) : 'none'}
                 onValueChange={handleTransporteChange}
@@ -425,22 +426,60 @@ export function ClienteFormDrawer({
             </div>
           </div>
 
-          {/* Fechas y Facturación */}
-          <div className="grid gap-4 sm:grid-cols-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="fechaVencimiento" className="text-sm font-medium">
-                          Fecha Vencimiento
-                        </Label>
-              <DateInput
-                id="fechaVencimiento"
-                value={watch('fechaVencimiento')}
-                onChange={(value) => setValue('fechaVencimiento', value)}
-                className="h-10"
-              />
-              {errors.fechaVencimiento && (
-                <p className="text-sm text-destructive">{errors.fechaVencimiento.message}</p>
-              )}
+          {/* Vencimientos */}
+          <div className="space-y-4 border-t pt-4">
+            <h3 className="font-semibold">Vencimientos</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="vencRC" className="text-sm font-medium">Responsabilidad Civil</Label>
+                <DateInput
+                  id="vencRC"
+                  value={watch('vencimientos.rc')}
+                  onChange={(v) => setValue('vencimientos.rc', v)}
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="vencACC" className="text-sm font-medium">Accidentes Convenio</Label>
+                <DateInput
+                  id="vencACC"
+                  value={watch('vencimientos.acc')}
+                  onChange={(v) => setValue('vencimientos.acc', v)}
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="vencFlota" className="text-sm font-medium">Flota</Label>
+                <DateInput
+                  id="vencFlota"
+                  value={watch('vencimientos.flotas')}
+                  onChange={(v) => setValue('vencimientos.flotas', v)}
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="vencMercancias" className="text-sm font-medium">Mercancías</Label>
+                <DateInput
+                  id="vencMercancias"
+                  value={watch('vencimientos.mercancias')}
+                  onChange={(v) => setValue('vencimientos.mercancias', v)}
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="vencPyme" className="text-sm font-medium">Pyme</Label>
+                <DateInput
+                  id="vencPyme"
+                  value={watch('vencimientos.pyme')}
+                  onChange={(v) => setValue('vencimientos.pyme', v)}
+                  className="h-10"
+                />
+              </div>
             </div>
+          </div>
+
+          {/* Fechas y Facturación */}
+          <div className="grid gap-4 sm:grid-cols-2 pt-4 border-t">
 
             <div className="space-y-2">
               <Label htmlFor="fechaLlamada" className="text-sm font-medium">
@@ -487,10 +526,10 @@ export function ClienteFormDrawer({
             <Label htmlFor="notas" className="text-sm font-medium">
               Notas
             </Label>
-            <Textarea 
-              id="notas" 
-              {...register('notas')} 
-              rows={4} 
+            <Textarea
+              id="notas"
+              {...register('notas')}
+              rows={4}
               placeholder="Información adicional, recordatorios, observaciones..."
               className="resize-none"
             />
@@ -521,8 +560,8 @@ export function ClienteFormDrawer({
               >
                 Cancelar
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isSubmitting}
                 className="h-10 px-6"
               >

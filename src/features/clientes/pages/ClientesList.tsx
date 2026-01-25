@@ -15,6 +15,7 @@ import { useClientesStore } from '../store/clientes.store';
 import type { Cliente, EstadoCliente } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { Users, TrendingUp, Calendar, FileText } from 'lucide-react';
+import { getDaysUntil } from '@/lib/date';
 import {
   Select,
   SelectContent,
@@ -29,7 +30,7 @@ type SortField = 'empresa' | 'vencimientos' | 'estado' | 'createdAt';
 type SortDirection = 'asc' | 'desc' | null;
 
 export function ClientesList() {
-  const { filtros } = useClientesStore();
+  const { filtros, setFiltros, resetFiltros } = useClientesStore();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Cliente | null>(null);
@@ -224,12 +225,12 @@ export function ClientesList() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    
+
     const count = selectedIds.size;
     const confirmDelete = window.confirm(
       `¿Estás seguro de que deseas eliminar ${count} ${count === 1 ? 'cliente' : 'clientes'}? Esta acción no se puede deshacer.`
     );
-    
+
     if (!confirmDelete) return;
 
     const promises = Array.from(selectedIds).map((id) => deleteMutation.mutateAsync(id));
@@ -275,10 +276,19 @@ export function ClientesList() {
   const contratados = clientesData?.items.filter((c) => c.estado === 'contratado').length || 0;
   const tasaCierre = total > 0 ? ((contratados / total) * 100).toFixed(1) : '0';
   const proximosVencimientos = clientesData?.items.filter((c) => {
-    const fechaFin = c.vencimientos?.flotas || c.vencimientos?.mercancias || c.poliza.fechaFin;
-    if (!fechaFin) return false;
-    const dias = Math.ceil((new Date(fechaFin).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-    return dias >= 0 && dias <= 90;
+    const dates = [
+      c.poliza.fechaFin,
+      c.vencimientos?.rc,
+      c.vencimientos?.mercancias,
+      c.vencimientos?.acc,
+      c.vencimientos?.flotas,
+      c.vencimientos?.pyme,
+    ].filter(Boolean) as string[];
+
+    return dates.some(d => {
+      const dias = getDaysUntil(d);
+      return dias >= 0 && dias <= 60;
+    });
   }).length || 0;
   const enNegociacion = clientesData?.items.filter((c) => c.estado === 'en_negociacion').length || 0;
 
@@ -304,33 +314,42 @@ export function ClientesList() {
         </div>
 
         {/* KPIs */}
+        {/* KPIs */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <KPI
             title="Total Clientes"
             value={total}
             icon={<Users className="h-4 w-4 text-muted-foreground/60" />}
+            className="cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => resetFiltros()}
           />
           <KPI
             title="Contratados"
             value={contratados}
             subtitle={`${tasaCierre}% tasa de cierre`}
             icon={<TrendingUp className="h-4 w-4 text-muted-foreground/60" />}
+            className="cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => setFiltros({ estados: ['contratado'] })}
           />
           <KPI
             title="Próximos Vencimientos"
             value={proximosVencimientos}
-            subtitle="En los próximos 90 días"
+            subtitle="En los próximos 60 días"
             icon={<Calendar className="h-4 w-4 text-muted-foreground/60" />}
+            className="cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => setFiltros({ proximosDias: 60 })}
           />
           <KPI
             title="En Negociación"
             value={enNegociacion}
             icon={<FileText className="h-4 w-4 text-muted-foreground/60" />}
+            className="cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => setFiltros({ estados: ['en_negociacion'] })}
           />
         </div>
 
         {/* Toolbar de Filtros */}
-        <FiltrosClientes 
+        <FiltrosClientes
           columnVisibility={columnVisibility}
           onColumnsChange={setColumnVisibility}
         />
@@ -340,89 +359,89 @@ export function ClientesList() {
           <DataTableContent>
             <table className="w-full table-auto">
               <thead className="sticky top-0 z-10 bg-muted/30 border-b border-border backdrop-blur-sm">
-                  <tr>
-                    <th className="w-12 px-5 py-4">
-                      <input
-                        type="checkbox"
-                        checked={isAllSelected}
-                        ref={(el) => {
-                          if (el) el.indeterminate = isSomeSelected;
-                        }}
-                        onChange={(e) => toggleSelectAll(e.target.checked)}
-                        className="h-4 w-4 rounded border-gray-300"
-                        aria-label="Seleccionar todos"
-                      />
-                    </th>
-                    {columnVisibility.empresa && (
-                      <DataTableHeaderCell
-                        sortable
-                        sortDirection={sortField === 'empresa' ? sortDirection : null}
-                        onSort={() => handleSort('empresa')}
-                        aria-sort={sortField === 'empresa' ? (sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none') : 'none'}
-                        className="min-w-[300px]"
-                      >
-                        Empresa / Contacto
-                      </DataTableHeaderCell>
-                    )}
-                    {columnVisibility.telefono && (
-                      <DataTableHeaderCell className="w-[150px]">
-                        Teléfono
-                      </DataTableHeaderCell>
-                    )}
-                    {columnVisibility.correo && (
-                      <DataTableHeaderCell className="w-[280px] max-w-[280px]">
-                        Correo
-                      </DataTableHeaderCell>
-                    )}
-                    {columnVisibility.estado && (
-                      <DataTableHeaderCell
-                        sortable
-                        sortDirection={sortField === 'estado' ? sortDirection : null}
-                        onSort={() => handleSort('estado')}
-                        aria-sort={sortField === 'estado' ? (sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none') : 'none'}
-                        className="w-[200px]"
-                      >
-                        Estado
-                      </DataTableHeaderCell>
-                    )}
-                    {columnVisibility.mercancia && (
-                      <DataTableHeaderCell className="w-[200px]">
-                        Mercancía
-                      </DataTableHeaderCell>
-                    )}
-                    {columnVisibility.transporte && (
-                      <DataTableHeaderCell className="w-[140px]">
-                        Transporte
-                      </DataTableHeaderCell>
-                    )}
-                    {columnVisibility.vencimientos && (
-                      <DataTableHeaderCell
-                        sortable
-                        sortDirection={sortField === 'vencimientos' ? sortDirection : null}
-                        onSort={() => handleSort('vencimientos')}
-                        aria-sort={sortField === 'vencimientos' ? (sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none') : 'none'}
-                        className="w-[220px]"
-                      >
-                        Vencimientos
-                      </DataTableHeaderCell>
-                    )}
-                    {columnVisibility.facturacion && (
-                      <DataTableHeaderCell className="w-[120px] text-right">
-                        Facturación
-                      </DataTableHeaderCell>
-                    )}
-                    {columnVisibility.fechaLlamada && (
-                      <DataTableHeaderCell className="w-[160px]">
-                        Fecha de Llamada
-                      </DataTableHeaderCell>
-                    )}
-                    {columnVisibility.numVehiculos && (
-                      <DataTableHeaderCell className="w-[150px]">
-                        Número de Vehículos
-                      </DataTableHeaderCell>
-                    )}
-                  </tr>
-                </thead>
+                <tr>
+                  <th className="w-12 px-5 py-4">
+                    <input
+                      type="checkbox"
+                      checked={isAllSelected}
+                      ref={(el) => {
+                        if (el) el.indeterminate = isSomeSelected;
+                      }}
+                      onChange={(e) => toggleSelectAll(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300"
+                      aria-label="Seleccionar todos"
+                    />
+                  </th>
+                  {columnVisibility.empresa && (
+                    <DataTableHeaderCell
+                      sortable
+                      sortDirection={sortField === 'empresa' ? sortDirection : null}
+                      onSort={() => handleSort('empresa')}
+                      aria-sort={sortField === 'empresa' ? (sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none') : 'none'}
+                      className="min-w-[300px]"
+                    >
+                      Empresa / Contacto
+                    </DataTableHeaderCell>
+                  )}
+                  {columnVisibility.telefono && (
+                    <DataTableHeaderCell className="w-[150px]">
+                      Teléfono
+                    </DataTableHeaderCell>
+                  )}
+                  {columnVisibility.correo && (
+                    <DataTableHeaderCell className="w-[280px] max-w-[280px]">
+                      Correo
+                    </DataTableHeaderCell>
+                  )}
+                  {columnVisibility.estado && (
+                    <DataTableHeaderCell
+                      sortable
+                      sortDirection={sortField === 'estado' ? sortDirection : null}
+                      onSort={() => handleSort('estado')}
+                      aria-sort={sortField === 'estado' ? (sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none') : 'none'}
+                      className="w-[200px]"
+                    >
+                      Estado
+                    </DataTableHeaderCell>
+                  )}
+                  {columnVisibility.mercancia && (
+                    <DataTableHeaderCell className="w-[200px]">
+                      Mercancía
+                    </DataTableHeaderCell>
+                  )}
+                  {columnVisibility.transporte && (
+                    <DataTableHeaderCell className="w-[140px]">
+                      Transporte
+                    </DataTableHeaderCell>
+                  )}
+                  {columnVisibility.vencimientos && (
+                    <DataTableHeaderCell
+                      sortable
+                      sortDirection={sortField === 'vencimientos' ? sortDirection : null}
+                      onSort={() => handleSort('vencimientos')}
+                      aria-sort={sortField === 'vencimientos' ? (sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none') : 'none'}
+                      className="w-[220px]"
+                    >
+                      Vencimientos
+                    </DataTableHeaderCell>
+                  )}
+                  {columnVisibility.facturacion && (
+                    <DataTableHeaderCell className="w-[120px] text-right">
+                      Facturación
+                    </DataTableHeaderCell>
+                  )}
+                  {columnVisibility.fechaLlamada && (
+                    <DataTableHeaderCell className="w-[160px]">
+                      Fecha de Llamada
+                    </DataTableHeaderCell>
+                  )}
+                  {columnVisibility.numVehiculos && (
+                    <DataTableHeaderCell className="w-[150px]">
+                      Número de Vehículos
+                    </DataTableHeaderCell>
+                  )}
+                </tr>
+              </thead>
               <tbody>
                 {isLoading ? (
                   Array.from({ length: 10 }).map((_, i) => (

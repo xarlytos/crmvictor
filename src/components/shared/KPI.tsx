@@ -7,11 +7,12 @@ interface KPIProps {
   subtitle?: string;
   icon?: React.ReactNode;
   className?: string;
+  onClick?: () => void;
 }
 
-export function KPI({ title, value, subtitle, icon, className }: KPIProps) {
+export function KPI({ title, value, subtitle, icon, className, onClick }: KPIProps) {
   return (
-    <Card className={cn('rounded-xl shadow-sm', className)}>
+    <Card className={cn('rounded-xl shadow-sm', className)} onClick={onClick}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}

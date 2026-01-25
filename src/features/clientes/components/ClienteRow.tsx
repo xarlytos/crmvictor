@@ -40,7 +40,7 @@ export function ClienteRow({
   const handleRowClick = (e: React.MouseEvent) => {
     // No hacer nada si no hay manejador de edición
     if (!onEdit) return;
-    
+
     // No abrir drawer si click es en checkbox o botones
     const target = e.target as HTMLElement;
     if (
@@ -160,8 +160,8 @@ export function ClienteRow({
         {/* Mercancía */}
         {visibility.mercancia && (
           <DataTableCell className="w-[200px]">
-            <span className="text-sm line-clamp-1" title={cliente.tipoCarga ? enumToLabel.tipoCarga[cliente.tipoCarga] : 'Sin definir'}>
-              {cliente.tipoCarga ? enumToLabel.tipoCarga[cliente.tipoCarga] : 'Sin definir'}
+            <span className="text-sm line-clamp-1" title={cliente.tipoCarga || 'Sin definir'}>
+              {cliente.tipoCarga || 'Sin definir'}
             </span>
           </DataTableCell>
         )}

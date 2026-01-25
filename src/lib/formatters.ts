@@ -41,7 +41,10 @@ export const enumToLabel = {
   transporte: {
     nacional: 'Nacional',
     internacional: 'Internacional',
-    peninsula: 'Península',
+    peninsular: 'Peninsular',
+    espana_francia: 'España y Francia',
+    espana_portugal: 'España y Portugal',
+    espana_francia_portugal: 'España, Francia y Portugal',
   },
 } as const;
 

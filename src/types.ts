@@ -1,15 +1,14 @@
 export type EstadoCliente = 'contratado' | 'contactado_buena_pinta' | 'en_negociacion' | 'descartado';
 
-export type TipoCarga =
-  | 'general_fraccionada'
-  | 'frigorifica'
-  | 'adr_peligrosas'
-  | 'completa_ftl'
-  | 'fraccionada_ltl'
-  | 'a_granel'
-  | 'vehiculos';
+export type TipoCarga = string;
 
-export type Transporte = 'nacional' | 'internacional' | 'peninsula';
+export type Transporte =
+  | 'nacional'
+  | 'internacional'
+  | 'peninsular'
+  | 'espana_francia'
+  | 'espana_portugal'
+  | 'espana_francia_portugal';
 
 export interface Poliza {
   aseguradora?: string;
@@ -31,6 +30,7 @@ export interface Cliente {
   id: string;
   empresa: string;
   contacto: string;
+  cif?: string;
   telefono?: string;
   correo?: string;
   direccion?: string;
@@ -59,16 +59,17 @@ export interface FiltrosClientes {
   tiposCarga?: TipoCarga[];
   transportes?: Transporte[];
   mesVencimiento?: number;
+  proximosDias?: number; // New
 }
 
 export interface DataProvider {
-  listClientes(filters?: FiltrosClientes): Promise<{items: Cliente[]; total: number}>;
+  listClientes(filters?: FiltrosClientes): Promise<{ items: Cliente[]; total: number }>;
   getCliente(id: string): Promise<Cliente>;
   createCliente(dto: Partial<Cliente>): Promise<Cliente>;
   updateCliente(id: string, dto: Partial<Cliente>): Promise<Cliente>;
   deleteCliente(id: string): Promise<void>;
 
-  listVencimientos(params: {days?: number; mes?: number; estado?: EstadoCliente}): Promise<Cliente[]>;
+  listVencimientos(params: { days?: number; mes?: number; estado?: EstadoCliente }): Promise<Cliente[]>;
 
   getConfig(): Promise<ConfigUsuario>;
   updateConfig(patch: Partial<ConfigUsuario>): Promise<ConfigUsuario>;
