@@ -32,7 +32,7 @@ const tiposCarga: TipoCarga[] = [
   'a_granel',
   'vehiculos',
 ];
-const transportes: Transporte[] = ['nacional', 'internacional', 'peninsula'];
+const transportes: Transporte[] = ['nacional', 'internacional', 'peninsular'];
 const meses = Array.from({ length: 12 }, (_, i) => i + 1);
 
 interface FiltrosContentProps {
@@ -217,7 +217,7 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
               checked={filtros.tiposCarga?.includes(tipo) || false}
               onCheckedChange={() => toggleTipoCarga(tipo)}
             >
-              {enumToLabel.tipoCarga[tipo]}
+              {enumToLabel.tipoCarga[tipo as keyof typeof enumToLabel.tipoCarga]}
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>
@@ -384,7 +384,7 @@ interface FiltrosClientesProps {
 export function FiltrosClientes({ columnVisibility, onColumnsChange }: FiltrosClientesProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const { filtros } = useClientesStore();
-  
+
   const activeFiltersCount = [
     filtros.search,
     filtros.estados?.length,
@@ -421,9 +421,9 @@ export function FiltrosClientes({ columnVisibility, onColumnsChange }: FiltrosCl
               <SheetTitle>Filtros</SheetTitle>
             </SheetHeader>
             <div className="mt-6">
-              <FiltrosContent 
-                onClose={() => setSheetOpen(false)} 
-                columnVisibility={columnVisibility} 
+              <FiltrosContent
+                onClose={() => setSheetOpen(false)}
+                columnVisibility={columnVisibility}
                 onColumnsChange={onColumnsChange}
               />
             </div>
