@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { X, Download, Trash2 } from 'lucide-react';
+import { X, FileDown, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import {
   Select,
@@ -73,8 +73,8 @@ export function BulkBar({
 
           {onBulkExport && (
             <Button variant="outline" size="sm" onClick={onBulkExport} className="gap-2">
-              <Download className="h-4 w-4" />
-              <span className="sr-only md:not-sr-only">Exportar Excel</span>
+              <FileDown className="h-4 w-4" />
+              <span className="sr-only md:not-sr-only">Exportar PDF</span>
             </Button>
           )}
 

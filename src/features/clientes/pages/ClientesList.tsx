@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Plus, ChevronLeft, ChevronRight, FileUp, PackageSearch } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, PackageSearch, FileDown } from 'lucide-react';
 import { KPI } from '@/components/shared/KPI';
 import { FiltrosClientes } from '../components/FiltrosClientes';
 import { ClienteRow } from '../components/ClienteRow';
@@ -14,6 +14,7 @@ import { dataProvider } from '@/config/dataProvider';
 import { useClientesStore } from '../store/clientes.store';
 import type { Cliente, EstadoCliente } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
 import { Users, TrendingUp, Calendar, FileText } from 'lucide-react';
 import { getDaysUntil } from '@/lib/date';
 import {
@@ -242,6 +243,89 @@ export function ClientesList() {
     });
   };
 
+  const handleBulkExportPDF = () => {
+    if (selectedIds.size === 0) return;
+
+    const selectedClientes = clientesData?.items.filter((c) => selectedIds.has(c.id)) || [];
+    
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Título
+    doc.setFontSize(18);
+    doc.text('Listado de Clientes', pageWidth / 2, 20, { align: 'center' });
+    
+    // Fecha
+    doc.setFontSize(10);
+    doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, pageWidth / 2, 28, { align: 'center' });
+    
+    let y = 40;
+    
+    selectedClientes.forEach((cliente, index) => {
+      // Verificar si necesitamos nueva página
+      if (y > 250) {
+        doc.addPage();
+        y = 20;
+      }
+      
+      // Nombre de empresa
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${index + 1}. ${cliente.empresa}`, 14, y);
+      y += 8;
+      
+      // Datos de contacto
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      
+      if (cliente.correo) {
+        doc.text(`Email: ${cliente.correo}`, 20, y);
+        y += 6;
+      }
+      
+      if (cliente.telefono) {
+        doc.text(`Tel: ${cliente.telefono}`, 20, y);
+        y += 6;
+      }
+      
+      // Estado
+      const estadoLabel = {
+        contratado: 'Contratado',
+        en_negociacion: 'En negociación',
+        pendiente: 'Pendiente',
+        baja: 'Baja',
+      }[cliente.estado] || cliente.estado;
+      doc.text(`Estado: ${estadoLabel}`, 20, y);
+      y += 6;
+      
+      // Vencimientos
+      const vencimientos: string[] = [];
+      if (cliente.vencimientos?.rc) vencimientos.push(`RC: ${new Date(cliente.vencimientos.rc).toLocaleDateString('es-ES')}`);
+      if (cliente.vencimientos?.mercancias) vencimientos.push(`Mercancías: ${new Date(cliente.vencimientos.mercancias).toLocaleDateString('es-ES')}`);
+      if (cliente.vencimientos?.acc) vencimientos.push(`ACC: ${new Date(cliente.vencimientos.acc).toLocaleDateString('es-ES')}`);
+      if (cliente.vencimientos?.flotas) vencimientos.push(`Flotas: ${new Date(cliente.vencimientos.flotas).toLocaleDateString('es-ES')}`);
+      if (cliente.vencimientos?.pyme) vencimientos.push(`PYME: ${new Date(cliente.vencimientos.pyme).toLocaleDateString('es-ES')}`);
+      
+      if (vencimientos.length > 0) {
+        doc.text(`Vencimientos: ${vencimientos.join(', ')}`, 20, y);
+        y += 6;
+      }
+      
+      // Separador
+      y += 4;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(14, y, pageWidth - 14, y);
+      y += 8;
+    });
+    
+    doc.save(`clientes-${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    toast({
+      title: 'PDF generado',
+      description: `Se exportaron ${selectedClientes.length} clientes al PDF.`,
+    });
+  };
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : sortDirection === 'desc' ? null : 'asc');
@@ -466,13 +550,6 @@ export function ClientesList() {
                             <Plus className="h-4 w-4 mr-2" />
                             Nuevo Cliente
                           </Button>
-                          <Button
-                            onClick={() => toast({ title: 'Próximamente', description: 'Función en desarrollo' })}
-                            variant="outline"
-                          >
-                            <FileUp className="h-4 w-4 mr-2" />
-                            Importar CSV
-                          </Button>
                         </div>
                       </div>
                     </td>
@@ -547,7 +624,7 @@ export function ClientesList() {
           selectedCount={selectedIds.size}
           onClearSelection={() => setSelectedIds(new Set())}
           onBulkEstadoChange={handleBulkEstadoChange}
-          onBulkExport={() => toast({ title: 'Próximamente', description: 'Función en desarrollo' })}
+          onBulkExport={handleBulkExportPDF}
           onBulkDelete={handleBulkDelete}
         />
 
