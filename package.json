@@ -12,6 +12,7 @@
     "server": "tsx watch backend/index.ts",
     "server:prod": "tsx backend/index.ts",
     "seed": "tsx backend/seed.ts",
+    "clean-db": "tsx backend/clean-db.ts",
     "setup": "npm install && npm run seed"
   },
   "dependencies": {
