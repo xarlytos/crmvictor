@@ -8,8 +8,7 @@ export interface IConfig extends ConfigUsuario, Document {
 const ConfigSchema = new Schema<IConfig>({
   alertWindowDays: { type: Number, required: true, default: 60 },
   monthColors: {
-    type: Map,
-    of: String,
+    type: Object,  // Cambiado de Map a Object para mejor compatibilidad
     required: true,
     default: {
       1: '#ef4444',
@@ -31,4 +30,3 @@ const ConfigSchema = new Schema<IConfig>({
 });
 
 export const ConfigModel = mongoose.model<IConfig>('Config', ConfigSchema);
-

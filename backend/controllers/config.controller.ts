@@ -31,11 +31,15 @@ export const getConfig = async (req: Request, res: Response): Promise<void> => {
       config = defaultConfig.toObject();
     }
 
+    // Asegurar que monthColors sea un objeto plano
+    let colors = config.monthColors;
+    if (colors instanceof Map) {
+      colors = Object.fromEntries(colors);
+    }
+
     const formatted: ConfigUsuario = {
       alertWindowDays: config.alertWindowDays,
-      monthColors: config.monthColors instanceof Map
-        ? Object.fromEntries(config.monthColors)
-        : config.monthColors || defaultColors,
+      monthColors: colors || defaultColors,
     };
 
     res.json(formatted);
@@ -98,11 +102,15 @@ export const updateConfig = async (req: Request, res: Response): Promise<void> =
 
     await config.save();
 
+    // Devolver el objeto actualizado
+    let colors = config.monthColors;
+    if (colors instanceof Map) {
+      colors = Object.fromEntries(colors);
+    }
+
     const formatted: ConfigUsuario = {
       alertWindowDays: config.alertWindowDays,
-      monthColors: config.monthColors instanceof Map
-        ? Object.fromEntries(config.monthColors)
-        : config.monthColors || defaultColors,
+      monthColors: colors || defaultColors,
     };
 
     res.json(formatted);
