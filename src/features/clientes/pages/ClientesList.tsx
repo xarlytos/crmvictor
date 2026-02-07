@@ -297,7 +297,7 @@ export function ClientesList() {
         contactado_buena_pinta: 'Contactado (buena pinta)',
         descartado: 'Descartado',
       };
-      const estadoLabel = estadoLabels[cliente.estado] || cliente.estado;
+      const estadoLabel = cliente.estado ? estadoLabels[cliente.estado] || cliente.estado : 'Sin estado';
       doc.text(`Estado: ${estadoLabel}`, 20, y);
       y += 6;
       
