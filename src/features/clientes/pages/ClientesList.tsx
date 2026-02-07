@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Plus, ChevronLeft, ChevronRight, PackageSearch, FileDown } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, PackageSearch } from 'lucide-react';
 import { KPI } from '@/components/shared/KPI';
 import { FiltrosClientes } from '../components/FiltrosClientes';
 import { ClienteRow } from '../components/ClienteRow';
@@ -289,12 +289,15 @@ export function ClientesList() {
       }
       
       // Estado
-      const estadoLabel = {
+      const estadoLabels: Record<string, string> = {
         contratado: 'Contratado',
         en_negociacion: 'En negociación',
         pendiente: 'Pendiente',
         baja: 'Baja',
-      }[cliente.estado] || cliente.estado;
+        contactado_buena_pinta: 'Contactado (buena pinta)',
+        descartado: 'Descartado',
+      };
+      const estadoLabel = estadoLabels[cliente.estado] || cliente.estado;
       doc.text(`Estado: ${estadoLabel}`, 20, y);
       y += 6;
       
