@@ -2,15 +2,23 @@
 
 Mini-CRM para gestionar clientes de seguros y controlar vencimientos de pólizas.
 
-## Características
+## 🚀 Demo en Vivo
+
+- **Frontend**: [https://crm-seguros.vercel.app](https://tu-url-vercel.vercel.app)
+- **Backend**: [https://crm-seguros-api.railway.app](https://tu-url-railway.app)
+
+## ✨ Características
 
 - **Dashboard** con KPIs y próximos vencimientos
 - **Gestión de Clientes** con CRUD completo y filtros avanzados
+- **Múltiples Vencimientos** por cliente (RC, Mercancías, ACC, Flotas, PYME)
 - **Vencimientos** ordenados por urgencia con semáforo visual
 - **Ajustes** para personalizar colores por mes y ventana de alerta
-- **DataProvider Pattern** con soporte para Mock (localStorage) y API HTTP
+- **Autenticación** con JWT (email/password)
+- **API REST** completa con Node.js + Express + MongoDB
+- **Sidebar minimizable** para mejor visualización
 
-## Stack Tecnológico
+## 🛠 Stack Tecnológico
 
 ### Frontend
 - React + TypeScript + Vite
@@ -19,82 +27,162 @@ Mini-CRM para gestionar clientes de seguros y controlar vencimientos de pólizas
 - React Hook Form + Zod
 - React Query
 - Zustand
-- dayjs
 
-### Backend (Scaffold)
+### Backend
 - Node.js + Express
-- Mongoose (MongoDB)
-- TypeScript
+- MongoDB + Mongoose
+- JWT para autenticación
+- bcryptjs para hash de contraseñas
 
-## Instalación
+## 📦 Instalación Local
 
 ```bash
+# Clonar repositorio
+git clone <repo-url>
+cd crm-seguros
+
 # Instalar dependencias
 npm install
 
-# Iniciar servidor de desarrollo (frontend)
+# Configurar variables de entorno
+cp .env.example .env
+# Edita .env con tus credenciales de MongoDB Atlas
+
+# Crear datos iniciales (usuario admin + clientes de ejemplo)
+npm run seed
+
+# Iniciar desarrollo (frontend + backend)
 npm run dev
-
-# Iniciar servidor backend (opcional, solo scaffold)
-npm run server
 ```
 
-## Configuración
+La aplicación estará disponible en:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3001
 
-El proyecto usa por defecto el `MockDataProvider` que guarda los datos en `localStorage`. Para cambiar a la API HTTP:
+### Credenciales por defecto
+- **Email**: `admin@crm.com`
+- **Password**: `admin123`
 
-1. Crear archivo `.env` en la raíz:
+## 🚀 Despliegue en Producción
+
+### 1. MongoDB Atlas (Base de Datos)
+
+1. Ve a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Crea un nuevo proyecto llamado "crm-seguros"
+3. Crea un cluster gratuito (M0)
+4. Configura un usuario de base de datos
+5. Añade acceso desde cualquier IP (`0.0.0.0/0`)
+6. Copia la URI de conexión
+
+### 2. Railway (Backend)
+
+1. Ve a [Railway](https://railway.app)
+2. Crea un nuevo proyecto
+3. Selecciona "Deploy from GitHub repo"
+4. Selecciona tu repositorio
+5. Configura las variables de entorno en Railway:
+   ```
+   MONGODB_URI=tu_uri_de_mongodb_atlas
+   JWT_SECRET=tu_secreto_jwt_seguro_generado
+   NODE_ENV=production
+   ALLOWED_ORIGINS=https://tu-app.vercel.app
+   ```
+6. Establece el comando de inicio:
+   - **Start Command**: `npm run server:prod`
+7. Genera un dominio (Settings → Domains → Generate Domain)
+8. Copia la URL del backend (la necesitarás para Vercel)
+
+### 3. Vercel (Frontend)
+
+1. Ve a [Vercel](https://vercel.com)
+2. Importa tu repositorio de GitHub
+3. Configura las variables de entorno:
+   ```
+   VITE_API_URL=https://tu-backend-railway.app/api
+   ```
+4. Configura el build:
+   - **Framework Preset**: Vite
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+5. Deploy
+
+### 4. Configuración Final
+
+1. Ve a la URL de Railway y ejecuta el setup:
+   ```
+   POST https://tu-backend-railway.app/api/setup/admin
+   ```
+   O visita `https://tu-frontend-vercel.app/setup.html`
+
+2. Inicia sesión con las credenciales admin
+
+3. ¡Listo! El CRM está en producción.
+
+## 📁 Estructura del Proyecto
+
 ```
-VITE_USE_MOCK=false
+crm-seguros/
+├── backend/                 # Backend Node.js
+│   ├── controllers/         # Lógica de negocio
+│   ├── middleware/          # Auth middleware
+│   ├── models/              # Mongoose models
+│   ├── routes/              # API routes
+│   ├── db.ts                # Conexión MongoDB
+│   ├── index.ts             # Entry point
+│   └── seed.ts              # Datos iniciales
+├── src/                     # Frontend React
+│   ├── api/                 # HttpDataProvider
+│   ├── app/                 # Routing y layout
+│   ├── components/          # Componentes UI
+│   ├── features/            # Features por dominio
+│   │   ├── clientes/
+│   │   ├── vencimientos/
+│   │   ├── ajustes/
+│   │   └── dashboard/
+│   └── types.ts             # Tipos TypeScript
+├── .env.example             # Variables de entorno ejemplo
+├── package.json
+└── README.md
 ```
 
-2. Asegurarse de que el backend esté corriendo en `http://localhost:3001`
+## 🔐 Seguridad
 
-## Estructura del Proyecto
+- ✅ Contraseñas hasheadas con bcrypt
+- ✅ Tokens JWT con expiración (7 días)
+- ✅ CORS configurado
+- ✅ Validación de datos en todos los endpoints
+- ✅ Rutas protegidas con middleware
 
+## 📝 Scripts Disponibles
+
+```bash
+# Desarrollo
+npm run dev              # Inicia frontend y backend
+npm run dev:frontend     # Solo frontend
+npm run dev:backend      # Solo backend
+
+# Producción
+npm run server:prod      # Backend en producción
+npm run build            # Compilar frontend
+
+# Utilidades
+npm run seed             # Crear datos iniciales
+npm run setup            # Instalar + seed
 ```
-src/
-  app/              # Routing y layout
-  components/        # Componentes UI y compartidos
-  features/          # Features por dominio
-    clientes/
-    vencimientos/
-    ajustes/
-    dashboard/
-  lib/              # Utilidades
-  mocks/            # MockDataProvider
-  api/              # HttpDataProvider
-  config/           # Configuración
-  types.ts          # Tipos TypeScript
 
-server/             # Backend scaffold (no conectado por defecto)
-  models/
-  controllers/
-  routes/
-```
+## 🐛 Solución de Problemas
 
-## Uso
+### Error de CORS
+Asegúrate de que `ALLOWED_ORIGINS` en Railway incluya tu URL de Vercel exacta.
 
-### Mock Data Provider (Por defecto)
-Los datos se guardan en `localStorage` y se generan automáticamente 40 clientes de ejemplo al iniciar.
+### Error de conexión a MongoDB
+1. Verifica que la URI sea correcta
+2. Asegúrate de que el usuario tenga permisos
+3. Verifica que la IP tenga acceso (0.0.0.0/0 en Atlas)
 
-### Backend API
-El backend está preparado pero no se usa por defecto. Para activarlo:
-1. Configurar MongoDB
-2. Cambiar `VITE_USE_MOCK=false` en `.env`
-3. Ejecutar `npm run server`
+### Error JWT
+El `JWT_SECRET` debe tener al menos 32 caracteres en producción.
 
-## Rutas
+## 📄 Licencia
 
-- `/dashboard` - Dashboard principal
-- `/clientes` - Listado y gestión de clientes
-- `/vencimientos` - Vencimientos próximos
-- `/ajustes/colores-mes` - Configuración de colores y alertas
-
-## Scripts
-
-- `npm run dev` - Inicia el servidor de desarrollo
-- `npm run build` - Construye para producción
-- `npm run preview` - Preview de la build de producción
-- `npm run server` - Inicia el servidor backend (scaffold)
-
+Proyecto privado - Uso exclusivo.

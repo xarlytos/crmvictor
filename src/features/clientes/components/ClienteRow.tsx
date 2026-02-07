@@ -175,7 +175,7 @@ export function ClienteRow({
 
         {/* Vencimientos */}
         {visibility.vencimientos && (
-          <DataTableCell className="w-[220px]">
+          <DataTableCell className="w-[320px]">
             <VencimientoCell cliente={cliente} config={config} />
           </DataTableCell>
         )}

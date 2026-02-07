@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import type { Cliente } from '@/types';
 
 export function DashboardPage() {
@@ -134,14 +135,35 @@ export function DashboardPage() {
   const contratados = clientes.filter((c) => c.estado === 'contratado').length;
   const tasaCierre = clientes.length > 0 ? ((contratados / clientes.length) * 100).toFixed(1) : '0';
 
-  const proximosVencimientos = clientes
-    .map(c => ({
-      ...c,
-      daysToExpiration: getNearestExpirationDays(c)
-    }))
-    .filter(c => c.daysToExpiration >= 0 && c.daysToExpiration <= 999)
-    .sort((a, b) => a.daysToExpiration - b.daysToExpiration)
-    .slice(0, 10);
+  // Obtener TODOS los vencimientos individuales ordenados por fecha
+  const proximosVencimientos = useMemo(() => {
+    const vencimientos: Array<{
+      cliente: Cliente;
+      tipo: string;
+      fecha: string;
+      dias: number;
+    }> = [];
+
+    clientes.forEach((c) => {
+      const addVencimiento = (fecha: string | undefined, tipo: string) => {
+        if (!fecha) return;
+        const dias = getDaysUntil(fecha);
+        vencimientos.push({ cliente: c, tipo, fecha, dias });
+      };
+
+      addVencimiento(c.poliza?.fechaFin, 'Póliza');
+      addVencimiento(c.vencimientos?.rc, 'RC');
+      addVencimiento(c.vencimientos?.mercancias, 'Mercancías');
+      addVencimiento(c.vencimientos?.acc, 'ACC');
+      addVencimiento(c.vencimientos?.flotas, 'Flotas');
+      addVencimiento(c.vencimientos?.pyme, 'PYME');
+    });
+
+    // Ordenar por días (el que vence antes primero)
+    return vencimientos
+      .sort((a, b) => a.dias - b.dias)
+      .slice(0, 10);
+  }, [clientes]);
 
   return (
     <div className="space-y-6">
@@ -255,28 +277,51 @@ export function DashboardPage() {
                 No hay vencimientos próximos
               </p>
             ) : (
-              proximosVencimientos.map((cliente) => {
-                const dias = cliente.daysToExpiration;
+              proximosVencimientos.map((item, index) => {
+                const dias = item.dias;
                 const porcentaje = Math.max(0, Math.min(100, (dias / 60) * 100));
+                const isVencido = dias < 0;
 
                 return (
                   <div
-                    key={cliente.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors"
+                    key={`${item.cliente.id}-${item.tipo}-${index}`}
+                    className={cn(
+                      "flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors",
+                      isVencido && "border-red-300 bg-red-50/50",
+                      dias >= 0 && dias <= 15 && "border-amber-300 bg-amber-50/50"
+                    )}
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium">{cliente.empresa}</span>
-                        <ChipMes fecha={cliente.poliza.fechaFin} config={config} />
+                        <span className="font-medium">{item.cliente.empresa}</span>
+                        <ChipMes fecha={item.fecha} config={config} />
+                        <span className={cn(
+                          "text-xs px-2 py-0.5 rounded-full font-medium",
+                          isVencido && "bg-red-100 text-red-700",
+                          dias >= 0 && dias <= 15 && "bg-amber-100 text-amber-700",
+                          dias > 15 && "bg-green-100 text-green-700"
+                        )}>
+                          {item.tipo}
+                        </span>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {cliente.contacto} • {formatDate(cliente.poliza.fechaFin)}
+                        {item.cliente.contacto} • {formatDate(item.fecha)}
                       </p>
                       <div className="mt-2">
                         <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="text-muted-foreground">Días restantes: {dias}</span>
+                          <span className={cn(
+                            "font-medium",
+                            isVencido && "text-red-600",
+                            dias >= 0 && dias <= 15 && "text-amber-600"
+                          )}>
+                            {isVencido 
+                              ? `Vencido hace ${Math.abs(dias)} días` 
+                              : dias === 0 
+                                ? 'Vence hoy'
+                                : `Faltan ${dias} días`}
+                          </span>
                           <span className={getUrgenciaColor(dias).replace('bg-', 'text-')}>
-                            {dias > 30 ? 'Baja' : dias >= 15 ? 'Media' : 'Alta'}
+                            {dias > 30 ? 'Baja' : dias >= 15 ? 'Media' : 'Alta'} urgencia
                           </span>
                         </div>
                         <Progress value={100 - porcentaje} className="h-1" />

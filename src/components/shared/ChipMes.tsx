@@ -7,11 +7,12 @@ interface ChipMesProps {
   fecha: string | Date;
   config?: ConfigUsuario;
   className?: string;
+  size?: 'sm' | 'default';
 }
 
 const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-export function ChipMes({ fecha, config, className }: ChipMesProps) {
+export function ChipMes({ fecha, config, className, size = 'default' }: ChipMesProps) {
   const mes = getMonthFromDate(fecha);
   const mesNombre = meses[mes - 1];
   const color = config?.monthColors?.[mes] || '#6b7280';
@@ -29,11 +30,15 @@ export function ChipMes({ fecha, config, className }: ChipMesProps) {
 
   return (
     <Badge
-      className={cn('font-medium', getTextColor(color), className)}
+      className={cn(
+        'font-medium',
+        size === 'sm' && 'text-[10px] px-1 py-0 h-5',
+        getTextColor(color), 
+        className
+      )}
       style={{ backgroundColor: color }}
     >
       {mesNombre}
     </Badge>
   );
 }
-

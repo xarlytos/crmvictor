@@ -30,7 +30,7 @@ type SortField = 'empresa' | 'vencimientos' | 'estado' | 'createdAt';
 type SortDirection = 'asc' | 'desc' | null;
 
 export function ClientesList() {
-  const { filtros, setFiltros, resetFiltros } = useClientesStore();
+  const { filtros } = useClientesStore();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Cliente | null>(null);
@@ -314,37 +314,28 @@ export function ClientesList() {
         </div>
 
         {/* KPIs */}
-        {/* KPIs */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <KPI
             title="Total Clientes"
             value={total}
             icon={<Users className="h-4 w-4 text-muted-foreground/60" />}
-            className="cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => resetFiltros()}
           />
           <KPI
             title="Contratados"
             value={contratados}
             subtitle={`${tasaCierre}% tasa de cierre`}
             icon={<TrendingUp className="h-4 w-4 text-muted-foreground/60" />}
-            className="cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => setFiltros({ estados: ['contratado'] })}
           />
           <KPI
             title="Próximos Vencimientos"
             value={proximosVencimientos}
             subtitle="En los próximos 60 días"
             icon={<Calendar className="h-4 w-4 text-muted-foreground/60" />}
-            className="cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => setFiltros({ proximosDias: 60 })}
           />
           <KPI
             title="En Negociación"
             value={enNegociacion}
             icon={<FileText className="h-4 w-4 text-muted-foreground/60" />}
-            className="cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => setFiltros({ estados: ['en_negociacion'] })}
           />
         </div>
 
@@ -420,7 +411,7 @@ export function ClientesList() {
                       sortDirection={sortField === 'vencimientos' ? sortDirection : null}
                       onSort={() => handleSort('vencimientos')}
                       aria-sort={sortField === 'vencimientos' ? (sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none') : 'none'}
-                      className="w-[220px]"
+                      className="w-[320px]"
                     >
                       Vencimientos
                     </DataTableHeaderCell>

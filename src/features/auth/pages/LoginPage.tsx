@@ -9,12 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Shield, Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-const VALID_EMAIL = 'victorclemente@gmail.com';
-const VALID_PASSWORD = 'Victor123';
-
 export function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@crm.com');
+  const [password, setPassword] = useState('admin123');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -28,29 +25,31 @@ export function LoginPage() {
     }
   }, [isAuthenticated, isLoading, navigate]);
 
-  const handleAutoFill = () => {
-    setEmail(VALID_EMAIL);
-    setPassword(VALID_PASSWORD);
-    setError('');
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('📝 Submit del formulario capturado');
     setError('');
     setIsSubmitting(true);
 
-    // Simular un pequeño delay para mejor UX
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    const success = login(email, password, rememberMe);
-    
-    if (success) {
-      navigate('/dashboard');
-    } else {
-      setError('Email o contraseña incorrectos');
+    try {
+      console.log('⏳ Llamando a login con:', { email, password: '***' });
+      const success = await login(email, password, rememberMe);
+      console.log('✅ Login retornó:', success);
+      
+      if (success) {
+        console.log('🚀 Navegando a dashboard...');
+        navigate('/dashboard', { replace: true });
+      } else {
+        setError('Email o contraseña incorrectos');
+      }
+    } catch (err: any) {
+      console.error('❌ Error en login:', err);
+      setError(err.message || 'Error al iniciar sesión. Verifica que el servidor esté corriendo en http://localhost:3001');
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
   };
 
   if (isLoading) {
@@ -78,7 +77,7 @@ export function LoginPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -101,6 +100,7 @@ export function LoginPage() {
                   className="pl-9 h-11"
                   required
                   disabled={isSubmitting}
+                  autoComplete="email"
                 />
               </div>
             </div>
@@ -120,13 +120,15 @@ export function LoginPage() {
                   className="pl-9 pr-10 h-11"
                   required
                   disabled={isSubmitting}
+                  minLength={6}
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   disabled={isSubmitting}
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  tabIndex={-1}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -153,19 +155,9 @@ export function LoginPage() {
             </div>
 
             <Button
-              type="button"
-              variant="outline"
-              onClick={handleAutoFill}
-              className="w-full h-10 text-sm"
-              disabled={isSubmitting}
-            >
-              Autorellenar datos
-            </Button>
-
-            <Button
               type="submit"
               className="w-full h-11 text-base font-semibold"
-              disabled={isSubmitting || !email || !password}
+              disabled={isSubmitting}
             >
               {isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </Button>
@@ -176,4 +168,3 @@ export function LoginPage() {
     </div>
   );
 }
-

@@ -1,59 +1,90 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { HttpDataProvider } from '@/api/HttpDataProvider';
+
+interface User {
+  id: string;
+  email: string;
+  nombre: string;
+  rol: string;
+}
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (email: string, password: string, rememberMe: boolean) => boolean;
+  user: User | null;
+  login: (email: string, password: string, rememberMe: boolean) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = 'crm_auth';
-const REMEMBER_ME_KEY = 'crm_remember_me';
+const TOKEN_KEY = 'crm_token';
+const USER_KEY = 'crm_user';
 
-const VALID_EMAIL = 'victorclemente@gmail.com';
-const VALID_PASSWORD = 'Victor123';
+const api = new HttpDataProvider();
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Verificar si hay sesión guardada
-    const savedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
-    const sessionAuth = sessionStorage.getItem(AUTH_STORAGE_KEY);
-    const rememberMe = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
-    
-    if (savedAuth === 'true' || sessionAuth === 'true' || rememberMe) {
-      setIsAuthenticated(true);
-    }
-    setIsLoading(false);
+    // Verificar si hay token guardado al iniciar
+    const checkAuth = async () => {
+      const token = localStorage.getItem(TOKEN_KEY);
+      
+      if (token) {
+        try {
+          // Verificar que el token sigue siendo válido
+          const response = await api.getMe();
+          setUser(response.user);
+          setIsAuthenticated(true);
+        } catch (err) {
+          // Token inválido, limpiar
+          localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem(USER_KEY);
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      }
+      
+      setIsLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
-  const login = (email: string, password: string, rememberMe: boolean): boolean => {
-    if (email === VALID_EMAIL && password === VALID_PASSWORD) {
+  const login = async (email: string, password: string, _rememberMe: boolean): Promise<boolean> => {
+    setError(null);
+    console.log('🔐 Intentando login con:', email);
+    
+    try {
+      console.log('📡 Llamando a api.login...');
+      const response = await api.login(email, password);
+      console.log('✅ Login exitoso:', response);
+      
+      setUser(response.user);
       setIsAuthenticated(true);
-      if (rememberMe) {
-        localStorage.setItem(AUTH_STORAGE_KEY, 'true');
-        localStorage.setItem(REMEMBER_ME_KEY, 'true');
-      } else {
-        sessionStorage.setItem(AUTH_STORAGE_KEY, 'true');
-      }
+      
       return true;
+    } catch (err: any) {
+      console.error('❌ Error en login:', err);
+      setError(err.message || 'Error al iniciar sesión');
+      throw err; // Re-lanzar para que el componente lo maneje
     }
-    return false;
   };
 
   const logout = () => {
+    api.logout();
     setIsAuthenticated(false);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    localStorage.removeItem(REMEMBER_ME_KEY);
-    sessionStorage.removeItem(AUTH_STORAGE_KEY);
+    setUser(null);
+    setError(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading, error }}>
       {children}
     </AuthContext.Provider>
   );
@@ -66,4 +97,3 @@ export function useAuth() {
   }
   return context;
 }
-
