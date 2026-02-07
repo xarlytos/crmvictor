@@ -10,6 +10,7 @@ import { clientesRouter } from './routes/clientes';
 import { vencimientosRouter } from './routes/vencimientos';
 import { configRouter } from './routes/config';
 import { UsuarioModel } from './models/Usuario';
+import { ClienteModel } from './models/Cliente';
 import { generateToken } from './middleware/auth';
 
 const app = express();
@@ -94,6 +95,20 @@ app.post('/api/setup/admin', async (req, res) => {
   } catch (error) {
     console.error('Setup error:', error);
     res.status(500).json({ error: 'Error al crear usuario' });
+  }
+});
+
+// Endpoint temporal para limpiar todos los clientes
+app.post('/api/setup/clear-clients', async (req, res) => {
+  try {
+    const result = await ClienteModel.deleteMany({});
+    res.json({ 
+      message: 'Todos los clientes han sido eliminados', 
+      deletedCount: result.deletedCount 
+    });
+  } catch (error) {
+    console.error('Clear clients error:', error);
+    res.status(500).json({ error: 'Error al eliminar clientes' });
   }
 });
 
