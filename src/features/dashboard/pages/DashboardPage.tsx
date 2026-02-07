@@ -41,7 +41,7 @@ export function DashboardPage() {
   // Helper to get nearest expiration days
   const getNearestExpirationDays = (c: Cliente) => {
     const dates = [
-      c.poliza.fechaFin,
+      c.poliza?.fechaFin,
       c.vencimientos?.rc,
       c.vencimientos?.mercancias,
       c.vencimientos?.acc,
@@ -80,7 +80,7 @@ export function DashboardPage() {
         });
       };
 
-      addExp(c.poliza.fechaFin, 'Póliza');
+      addExp(c.poliza?.fechaFin, 'Póliza');
       addExp(c.vencimientos?.rc, 'Responsabilidad Civil');
       addExp(c.vencimientos?.mercancias, 'Mercancías');
       addExp(c.vencimientos?.acc, 'Accidentes');
@@ -124,7 +124,7 @@ export function DashboardPage() {
   const now = new Date();
   const mesActual = now.getMonth() + 1;
   const vencenEsteMes = clientes.filter(
-    (c) => new Date(c.poliza.fechaFin).getMonth() + 1 === mesActual
+    (c) => c.poliza?.fechaFin && new Date(c.poliza.fechaFin).getMonth() + 1 === mesActual
   ).length;
 
   const vencenEnVentana = clientes.filter(c => {

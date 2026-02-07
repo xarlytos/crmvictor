@@ -125,13 +125,13 @@ export function ClienteFormModal({
         facturacion: cliente.facturacion || '',
         fechaLlamada: cliente.fechaLlamada ? cliente.fechaLlamada.split('T')[0] : '',
         estadoConversacion: cliente.estadoConversacion || '',
-        poliza: {
+        poliza: cliente.poliza ? {
           fechaInicio: cliente.poliza.fechaInicio.split('T')[0],
           fechaFin: cliente.poliza.fechaFin.split('T')[0],
           aseguradora: cliente.poliza.aseguradora || '',
           numPoliza: cliente.poliza.numPoliza || '',
           prima: cliente.poliza.prima,
-        },
+        } : undefined,
         vencimientos: {
           rc: cliente.vencimientos?.rc ? cliente.vencimientos.rc.split('T')[0] : '',
           mercancias: cliente.vencimientos?.mercancias ? cliente.vencimientos.mercancias.split('T')[0] : '',
@@ -168,13 +168,13 @@ export function ClienteFormModal({
         facturacion: cliente.facturacion || '',
         fechaLlamada: cliente.fechaLlamada ? cliente.fechaLlamada.split('T')[0] : '',
         estadoConversacion: cliente.estadoConversacion || '',
-        poliza: {
+        poliza: cliente.poliza ? {
           fechaInicio: cliente.poliza.fechaInicio.split('T')[0],
           fechaFin: cliente.poliza.fechaFin.split('T')[0],
           aseguradora: cliente.poliza.aseguradora || '',
           numPoliza: cliente.poliza.numPoliza || '',
           prima: cliente.poliza.prima,
-        },
+        } : undefined,
         vencimientos: {
           rc: cliente.vencimientos?.rc ? cliente.vencimientos.rc.split('T')[0] : '',
           mercancias: cliente.vencimientos?.mercancias ? cliente.vencimientos.mercancias.split('T')[0] : '',

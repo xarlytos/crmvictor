@@ -434,7 +434,7 @@ export class MockDataProvider implements DataProvider {
       if (filters.mesVencimiento) {
         clientes = clientes.filter((c) => {
           const dates = [
-            c.poliza.fechaFin,
+            c.poliza?.fechaFin,
             c.vencimientos?.rc,
             c.vencimientos?.mercancias,
             c.vencimientos?.acc,
@@ -449,7 +449,7 @@ export class MockDataProvider implements DataProvider {
       if (filters.proximosDias !== undefined) {
         clientes = clientes.filter((c) => {
           const dates = [
-            c.poliza.fechaFin,
+            c.poliza?.fechaFin,
             c.vencimientos?.rc,
             c.vencimientos?.mercancias,
             c.vencimientos?.acc,
@@ -545,7 +545,7 @@ export class MockDataProvider implements DataProvider {
     const clientes = this.getClientes();
     let filtered = clientes.filter((c) => {
       const dates = [
-        c.poliza.fechaFin,
+        c.poliza?.fechaFin,
         c.vencimientos?.rc,
         c.vencimientos?.mercancias,
         c.vencimientos?.acc,
@@ -560,7 +560,7 @@ export class MockDataProvider implements DataProvider {
     if (params.days !== undefined) {
       filtered = filtered.filter((c) => {
         const dates = [
-          c.poliza.fechaFin,
+          c.poliza?.fechaFin,
           c.vencimientos?.rc,
           c.vencimientos?.mercancias,
           c.vencimientos?.acc,
@@ -578,7 +578,7 @@ export class MockDataProvider implements DataProvider {
     if (params.mes) {
       filtered = filtered.filter((c) => {
         const dates = [
-          c.poliza.fechaFin,
+          c.poliza?.fechaFin,
           c.vencimientos?.rc,
           c.vencimientos?.mercancias,
           c.vencimientos?.acc,
@@ -598,7 +598,7 @@ export class MockDataProvider implements DataProvider {
     filtered.sort((a, b) => {
       const getMinDays = (c: Cliente) => {
         const dates = [
-          c.poliza.fechaFin,
+          c.poliza?.fechaFin,
           c.vencimientos?.rc,
           c.vencimientos?.mercancias,
           c.vencimientos?.acc,

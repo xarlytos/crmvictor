@@ -84,8 +84,8 @@ export function ClientesList() {
             bVal = b.empresa.toLowerCase();
             break;
           case 'vencimientos':
-            aVal = a.vencimientos?.flotas || a.vencimientos?.mercancias || a.poliza.fechaFin;
-            bVal = b.vencimientos?.flotas || b.vencimientos?.mercancias || b.poliza.fechaFin;
+            aVal = a.vencimientos?.flotas || a.vencimientos?.mercancias || a.poliza?.fechaFin;
+            bVal = b.vencimientos?.flotas || b.vencimientos?.mercancias || b.poliza?.fechaFin;
             aVal = aVal ? new Date(aVal).getTime() : 0;
             bVal = bVal ? new Date(bVal).getTime() : 0;
             break;
@@ -364,7 +364,7 @@ export function ClientesList() {
   const tasaCierre = total > 0 ? ((contratados / total) * 100).toFixed(1) : '0';
   const proximosVencimientos = clientesData?.items.filter((c) => {
     const dates = [
-      c.poliza.fechaFin,
+      c.poliza?.fechaFin,
       c.vencimientos?.rc,
       c.vencimientos?.mercancias,
       c.vencimientos?.acc,
