@@ -9,9 +9,6 @@ import { authRouter } from './routes/auth';
 import { clientesRouter } from './routes/clientes';
 import { vencimientosRouter } from './routes/vencimientos';
 import { configRouter } from './routes/config';
-import { UsuarioModel } from './models/Usuario';
-import { ClienteModel } from './models/Cliente';
-import { generateToken } from './middleware/auth';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -45,71 +42,6 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     env: process.env.NODE_ENV || 'development'
   });
-});
-
-// Endpoint de emergencia para crear usuario admin (solo desarrollo)
-app.post('/api/setup/admin', async (req, res) => {
-  try {
-    const { email = 'admin@crm.com', password = 'admin123', nombre = 'Administrador' } = req.body;
-    
-    // Verificar si ya existe
-    let user = await UsuarioModel.findOne({ email: email.toLowerCase() });
-    
-    if (user) {
-      user.password = password;
-      await user.save();
-      return res.json({ 
-        message: 'Usuario actualizado',
-        user: {
-          id: user._id.toString(),
-          email: user.email,
-          nombre: user.nombre
-        }
-      });
-    }
-    
-    // Crear nuevo usuario
-    user = new UsuarioModel({
-      email: email.toLowerCase(),
-      password,
-      nombre,
-      rol: 'admin'
-    });
-    await user.save();
-    
-    const token = generateToken({
-      userId: user._id.toString(),
-      email: user.email
-    });
-    
-    res.json({
-      message: 'Usuario admin creado',
-      token,
-      user: {
-        id: user._id.toString(),
-        email: user.email,
-        nombre: user.nombre,
-        rol: user.rol
-      }
-    });
-  } catch (error) {
-    console.error('Setup error:', error);
-    res.status(500).json({ error: 'Error al crear usuario' });
-  }
-});
-
-// Endpoint temporal para limpiar todos los clientes
-app.post('/api/setup/clear-clients', async (req, res) => {
-  try {
-    const result = await ClienteModel.deleteMany({});
-    res.json({ 
-      message: 'Todos los clientes han sido eliminados', 
-      deletedCount: result.deletedCount 
-    });
-  } catch (error) {
-    console.error('Clear clients error:', error);
-    res.status(500).json({ error: 'Error al eliminar clientes' });
-  }
 });
 
 // Routes
