@@ -231,10 +231,7 @@ export function ClienteFormDrawer({
       fechaLlamada: data.fechaLlamada && data.fechaLlamada.trim() !== '' ? new Date(data.fechaLlamada).toISOString() : undefined,
       facturacion: cleanString(data.facturacion),
       numVehiculos: data.numVehiculos,
-      poliza: {
-        fechaInicio: cliente?.poliza?.fechaInicio || new Date().toISOString(),
-        fechaFin: cliente?.poliza?.fechaFin || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-      },
+
       vencimientos: data.vencimientos ? {
         rc: data.vencimientos.rc ? new Date(data.vencimientos.rc).toISOString() : undefined,
         mercancias: data.vencimientos.mercancias ? new Date(data.vencimientos.mercancias).toISOString() : undefined,

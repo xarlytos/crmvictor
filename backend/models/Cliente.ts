@@ -49,7 +49,7 @@ const ClienteSchema = new Schema<ICliente>({
     type: String,
     enum: ['nacional', 'internacional', 'peninsular', 'espana_francia', 'espana_portugal', 'espana_francia_portugal'],
   },
-  poliza: { type: PolizaSchema, required: true },
+  poliza: { type: PolizaSchema },
   vencimientos: { type: VencimientosSchema },
   numVehiculos: { type: Number },
   facturacion: { type: String },

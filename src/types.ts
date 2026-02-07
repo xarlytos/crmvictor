@@ -38,7 +38,7 @@ export interface Cliente {
   estado?: EstadoCliente;
   tipoCarga?: TipoCarga;
   transporte?: Transporte;
-  poliza: Poliza;
+  poliza?: Poliza;
   vencimientos?: Vencimientos;
   numVehiculos?: number;
   facturacion?: string; // Ej: "7,3M", "3M", "700mil"

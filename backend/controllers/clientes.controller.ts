@@ -189,13 +189,7 @@ export const createCliente = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Validar que la póliza tenga fechas
-    if (!clienteData.poliza?.fechaInicio || !clienteData.poliza?.fechaFin) {
-      res.status(400).json({ 
-        error: 'Las fechas de inicio y fin de la póliza son requeridas' 
-      });
-      return;
-    }
+
 
     const cliente = new ClienteModel(clienteData);
     await cliente.save();
