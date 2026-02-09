@@ -33,18 +33,7 @@ const ClienteSchema = new Schema<ICliente>({
     type: String,
     enum: ['contratado', 'contactado_buena_pinta', 'en_negociacion', 'descartado'],
   },
-  tipoCarga: {
-    type: String,
-    enum: [
-      'general_fraccionada',
-      'frigorifica',
-      'adr_peligrosas',
-      'completa_ftl',
-      'fraccionada_ltl',
-      'a_granel',
-      'vehiculos',
-    ],
-  },
+  tipoCarga: { type: String },
   transporte: {
     type: String,
     enum: ['nacional', 'internacional', 'peninsular', 'espana_francia', 'espana_portugal', 'espana_francia_portugal'],

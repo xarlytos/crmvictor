@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,24 +15,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Search, X, SlidersHorizontal, ChevronDown, Columns2 } from 'lucide-react';
 import { useClientesStore } from '../store/clientes.store';
+import { dataProvider } from '@/config/dataProvider';
+import { useQuery } from '@tanstack/react-query';
 import type { EstadoCliente, TipoCarga, Transporte } from '@/types';
 import { enumToLabel } from '@/lib/formatters';
 import { ChipMes } from '@/components/shared/ChipMes';
-import { useQuery } from '@tanstack/react-query';
-import { dataProvider } from '@/config/dataProvider';
 import type { ColumnVisibility } from './ColumnVisibilityMenu';
 
 const estados: EstadoCliente[] = ['contratado', 'contactado_buena_pinta', 'en_negociacion', 'descartado'];
-const tiposCarga: TipoCarga[] = [
-  'general_fraccionada',
-  'frigorifica',
-  'adr_peligrosas',
-  'completa_ftl',
-  'fraccionada_ltl',
-  'a_granel',
-  'vehiculos',
-];
-const transportes: Transporte[] = ['nacional', 'internacional', 'peninsular'];
+const transportes: Transporte[] = ['nacional', 'internacional', 'peninsular', 'espana_francia', 'espana_portugal', 'espana_francia_portugal'];
 const meses = Array.from({ length: 12 }, (_, i) => i + 1);
 
 interface FiltrosContentProps {
@@ -48,6 +39,25 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
     queryKey: ['config'],
     queryFn: () => dataProvider.getConfig(),
   });
+  
+  // Obtener clientes para extraer tipos de carga únicos dinámicamente
+  const { data: clientesData } = useQuery({
+    queryKey: ['clientes-filtros'],
+    queryFn: () => dataProvider.listClientes(),
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
+  
+  // Extraer tipos de carga únicos de los clientes
+  const tiposCargaUnicos = useMemo(() => {
+    if (!clientesData?.items) return [];
+    const tipos = new Set<string>();
+    clientesData.items.forEach(cliente => {
+      if (cliente.tipoCarga && cliente.tipoCarga.trim() !== '') {
+        tipos.add(cliente.tipoCarga);
+      }
+    });
+    return Array.from(tipos).sort();
+  }, [clientesData]);
 
   useEffect(() => {
     const search = searchParams.get('search') || '';
@@ -211,15 +221,21 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
             Sin definir
           </DropdownMenuCheckboxItem>
           <DropdownMenuSeparator />
-          {tiposCarga.map((tipo) => (
-            <DropdownMenuCheckboxItem
-              key={tipo}
-              checked={filtros.tiposCarga?.includes(tipo) || false}
-              onCheckedChange={() => toggleTipoCarga(tipo)}
-            >
-              {enumToLabel.tipoCarga[tipo as keyof typeof enumToLabel.tipoCarga]}
-            </DropdownMenuCheckboxItem>
-          ))}
+          {tiposCargaUnicos.length === 0 ? (
+            <DropdownMenuLabel className="text-muted-foreground text-xs">
+              No hay mercancías registradas
+            </DropdownMenuLabel>
+          ) : (
+            tiposCargaUnicos.map((tipo) => (
+              <DropdownMenuCheckboxItem
+                key={tipo}
+                checked={filtros.tiposCarga?.includes(tipo) || false}
+                onCheckedChange={() => toggleTipoCarga(tipo)}
+              >
+                {tipo}
+              </DropdownMenuCheckboxItem>
+            ))
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
