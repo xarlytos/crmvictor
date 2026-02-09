@@ -8,8 +8,8 @@ export interface ICliente extends Omit<Cliente, 'id'>, Document {
 const PolizaSchema = new Schema({
   aseguradora: { type: String },
   numPoliza: { type: String },
-  fechaInicio: { type: Date, required: true },
-  fechaFin: { type: Date, required: true },
+  fechaInicio: { type: Date },
+  fechaFin: { type: Date },
   prima: { type: Number },
 }, { _id: false });
 
