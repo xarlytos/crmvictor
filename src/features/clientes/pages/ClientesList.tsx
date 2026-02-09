@@ -122,6 +122,7 @@ export function ClientesList() {
     mutationFn: (data: Partial<Cliente>) => dataProvider.createCliente(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes-filtros'] });
       queryClient.invalidateQueries({ queryKey: ['vencimientos'] });
       toast({
         title: 'Cliente creado',
@@ -142,6 +143,7 @@ export function ClientesList() {
       dataProvider.updateCliente(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes-filtros'] });
       queryClient.invalidateQueries({ queryKey: ['vencimientos'] });
       toast({
         title: 'Cliente actualizado',
@@ -161,6 +163,7 @@ export function ClientesList() {
     mutationFn: (id: string) => dataProvider.deleteCliente(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes-filtros'] });
       queryClient.invalidateQueries({ queryKey: ['vencimientos'] });
       toast({
         title: 'Cliente eliminado',
