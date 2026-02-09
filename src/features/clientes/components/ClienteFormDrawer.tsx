@@ -26,8 +26,8 @@ import { Trash2 } from 'lucide-react';
 import type { Cliente, EstadoCliente, Transporte } from '@/types';
 
 const clienteSchema = z.object({
-  empresa: z.string().optional(),
-  contacto: z.string().optional(),
+  empresa: z.string().min(1, 'El nombre de empresa es obligatorio'),
+  contacto: z.string().min(1, 'El nombre de contacto es obligatorio'),
   telefono: z.string().optional(),
   correo: z.string().optional(),
   cif: z.string().optional(),
@@ -63,17 +63,6 @@ const clienteSchema = z.object({
     pyme: z.string().optional(),
   }).optional(),
 }).refine(
-  (data) => {
-    // Al menos uno de empresa o contacto debe estar presente
-    const hasEmpresa = data.empresa && data.empresa.trim().length > 0;
-    const hasContacto = data.contacto && data.contacto.trim().length > 0;
-    return hasEmpresa || hasContacto;
-  },
-  {
-    message: 'Debe proporcionar al menos un nombre de empresa o contacto',
-    path: ['empresa'], // El error aparecerá en el campo empresa
-  }
-).refine(
   (data) => {
     // Validar email solo si está presente
     if (!data.correo || data.correo.trim().length === 0) return true;
@@ -212,15 +201,14 @@ export function ClienteFormDrawer({
   }, [open, cliente, reset]);
 
   const onFormSubmit = async (data: ClienteFormData) => {
-
-    // Limpiar strings vacíos y convertirlos a undefined
+    // Limpiar strings vacíos y convertirlos a undefined (excepto empresa y contacto que son obligatorios)
     const cleanString = (value: string | undefined): string | undefined => {
-      return value && value.trim() !== '' ? value : undefined;
+      return value && value.trim() !== '' ? value.trim() : undefined;
     };
 
     const submitData: Partial<Cliente> = {
-      empresa: data.empresa || data.contacto || '',
-      contacto: cleanString(data.contacto),
+      empresa: data.empresa.trim(),
+      contacto: data.contacto.trim(),
       cif: cleanString(data.cif),
       telefono: cleanString(data.telefono),
       correo: cleanString(data.correo),
@@ -290,9 +278,9 @@ export function ClienteFormDrawer({
               {errors.empresa && (
                 <p className="text-sm text-destructive">{errors.empresa.message}</p>
               )}
-              <p className="text-xs text-muted-foreground">
-                Debe proporcionar al menos un nombre de empresa o contacto
-              </p>
+              {errors.empresa?.message && (
+                <p className="text-sm text-destructive font-medium">{errors.empresa.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">

@@ -44,7 +44,6 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
   const { data: clientesData } = useQuery({
     queryKey: ['clientes-filtros'],
     queryFn: () => dataProvider.listClientes(),
-    staleTime: 5 * 60 * 1000, // 5 minutos
   });
   
   // Extraer tipos de carga únicos de los clientes
