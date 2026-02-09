@@ -36,8 +36,8 @@ export function ClientesList() {
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Cliente | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [sortField, setSortField] = useState<SortField>('createdAt');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortField, setSortField] = useState<SortField>('empresa');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
@@ -116,7 +116,7 @@ export function ClientesList() {
   }, [clientesData, sortField, sortDirection, page, pageSize]);
 
   const clientes = sortedAndPaginated.items;
-  const total = clientesData?.total || 0;
+  const total = sortedAndPaginated.total;
 
   const createMutation = useMutation({
     mutationFn: (data: Partial<Cliente>) => dataProvider.createCliente(data),
