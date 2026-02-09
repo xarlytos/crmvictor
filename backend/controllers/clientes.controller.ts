@@ -189,15 +189,28 @@ export const createCliente = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-
+    console.log('📝 Datos recibidos para crear cliente:', JSON.stringify(clienteData, null, 2));
 
     const cliente = new ClienteModel(clienteData);
     await cliente.save();
 
     res.status(201).json(formatCliente(cliente));
-  } catch (error) {
-    console.error('Error createCliente:', error);
-    res.status(500).json({ error: 'Error al crear cliente' });
+  } catch (error: any) {
+    console.error('❌ Error createCliente:', error);
+    console.error('❌ Error name:', error.name);
+    console.error('❌ Error message:', error.message);
+    if (error.errors) {
+      console.error('❌ Validation errors:', JSON.stringify(error.errors, null, 2));
+    }
+    
+    // Devolver el error específico al cliente
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e: any) => e.message);
+      res.status(400).json({ error: 'Error de validación', details: messages });
+      return;
+    }
+    
+    res.status(500).json({ error: 'Error al crear cliente', message: error.message });
   }
 };
 
