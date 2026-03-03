@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { EstadoBadge } from '@/components/shared/EstadoBadge';
 import { Phone, Mail, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import type { EstadoCliente, Cliente } from '@/types';
 
 const estadoLabels: Record<EstadoCliente, string> = {
@@ -35,24 +36,29 @@ export function VencimientosPage() {
     queryFn: () => dataProvider.listClientes(),
   });
 
-  // Extraer TODOS los vencimientos de todos los clientes
+  // Extraer TODOS los vencimientos de todos los clientes (estándar + personalizados)
   const todosVencimientos = useMemo(() => {
     if (!clientesData?.items) return [];
     
     const vencimientos: Array<{
       cliente: Cliente;
-      tipo: 'rc' | 'mercancias' | 'acc' | 'flotas' | 'pyme';
+      tipo: string;
       fecha: string;
       dias: number;
+      esPersonalizado: boolean;
     }> = [];
     
+
+    
     clientesData.items.forEach((cliente) => {
+      // Vencimientos estándar
       if (cliente.vencimientos?.rc) {
         vencimientos.push({
           cliente,
           tipo: 'rc',
           fecha: cliente.vencimientos.rc,
           dias: getDaysUntil(cliente.vencimientos.rc),
+          esPersonalizado: false,
         });
       }
       if (cliente.vencimientos?.mercancias) {
@@ -61,6 +67,7 @@ export function VencimientosPage() {
           tipo: 'mercancias',
           fecha: cliente.vencimientos.mercancias,
           dias: getDaysUntil(cliente.vencimientos.mercancias),
+          esPersonalizado: false,
         });
       }
       if (cliente.vencimientos?.acc) {
@@ -69,6 +76,7 @@ export function VencimientosPage() {
           tipo: 'acc',
           fecha: cliente.vencimientos.acc,
           dias: getDaysUntil(cliente.vencimientos.acc),
+          esPersonalizado: false,
         });
       }
       if (cliente.vencimientos?.flotas) {
@@ -77,6 +85,7 @@ export function VencimientosPage() {
           tipo: 'flotas',
           fecha: cliente.vencimientos.flotas,
           dias: getDaysUntil(cliente.vencimientos.flotas),
+          esPersonalizado: false,
         });
       }
       if (cliente.vencimientos?.pyme) {
@@ -85,6 +94,20 @@ export function VencimientosPage() {
           tipo: 'pyme',
           fecha: cliente.vencimientos.pyme,
           dias: getDaysUntil(cliente.vencimientos.pyme),
+          esPersonalizado: false,
+        });
+      }
+      
+      // Vencimientos personalizados
+      if (cliente.vencimientos?.personalizados && cliente.vencimientos.personalizados.length > 0) {
+        cliente.vencimientos.personalizados.forEach((v) => {
+          vencimientos.push({
+            cliente,
+            tipo: `personalizado:${v.nombre}`,
+            fecha: v.fecha,
+            dias: getDaysUntil(v.fecha),
+            esPersonalizado: true,
+          });
         });
       }
     });
@@ -206,7 +229,7 @@ export function VencimientosPage() {
           ) : (
             <div className="space-y-4">
               {vencimientos.map((vencimiento, index) => {
-                const { cliente, tipo, fecha, dias } = vencimiento;
+                const { cliente, tipo, fecha, dias, esPersonalizado } = vencimiento;
                 const porcentaje = Math.max(0, Math.min(100, (dias / 60) * 100));
                 const colorClass = getUrgenciaColor(dias);
                 const tipoLabels: Record<string, string> = {
@@ -215,6 +238,14 @@ export function VencimientosPage() {
                   acc: 'ACC',
                   flotas: 'Flotas',
                   pyme: 'PYME',
+                };
+
+                // Obtener el nombre del tipo de vencimiento
+                const getTipoLabel = () => {
+                  if (esPersonalizado) {
+                    return tipo.replace('personalizado:', '');
+                  }
+                  return tipoLabels[tipo] || tipo;
                 };
 
                 return (
@@ -228,8 +259,14 @@ export function VencimientosPage() {
                           <h3 className="text-lg font-semibold">{cliente.empresa}</h3>
                           <ChipMes fecha={fecha} config={config} />
                           <EstadoBadge estado={cliente.estado} />
-                          <span className="text-xs bg-muted px-2 py-1 rounded">
-                            {tipoLabels[tipo]}
+                          <span className={cn(
+                            "text-xs px-2 py-1 rounded",
+                            esPersonalizado 
+                              ? "bg-blue-100 text-blue-800 border border-blue-300" 
+                              : "bg-muted"
+                          )}>
+                            {getTipoLabel()}
+                            {esPersonalizado && <span className="ml-1">●</span>}
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">

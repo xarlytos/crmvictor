@@ -32,6 +32,7 @@ const formatCliente = (doc: any): Cliente => ({
     acc: doc.vencimientos.acc,
     flotas: doc.vencimientos.flotas,
     pyme: doc.vencimientos.pyme,
+    personalizados: doc.vencimientos.personalizados || [],
   } : undefined,
   numVehiculos: doc.numVehiculos,
   facturacion: doc.facturacion,
@@ -61,10 +62,15 @@ export const listVencimientos = async (req: Request, res: Response): Promise<voi
       { 'poliza.fechaFin': { $gte: now } },
     ];
 
-    // Añadir condiciones para cada tipo de vencimiento
+    // Añadir condiciones para cada tipo de vencimiento estándar
     const vencimientoFields = ['rc', 'mercancias', 'acc', 'flotas', 'pyme'];
     vencimientoFields.forEach(field => {
       orConditions.push({ [`vencimientos.${field}`]: { $exists: true, $ne: null } });
+    });
+
+    // Añadir condición para vencimientos personalizados
+    orConditions.push({ 
+      'vencimientos.personalizados': { $exists: true, $ne: null, $not: { $size: 0 } } 
     });
 
     let query: any = {
@@ -95,6 +101,15 @@ export const listVencimientos = async (req: Request, res: Response): Promise<voi
             allDates.push(new Date(dateStr));
           }
         });
+        
+        // Vencimientos personalizados
+        if (c.vencimientos.personalizados && Array.isArray(c.vencimientos.personalizados)) {
+          c.vencimientos.personalizados.forEach((v: any) => {
+            if (v.fecha) {
+              allDates.push(new Date(v.fecha));
+            }
+          });
+        }
       }
 
       // Verificar si hay alguna fecha en el futuro
@@ -117,6 +132,15 @@ export const listVencimientos = async (req: Request, res: Response): Promise<voi
               allDates.push(new Date(dateStr));
             }
           });
+          
+          // Vencimientos personalizados
+          if (c.vencimientos.personalizados && Array.isArray(c.vencimientos.personalizados)) {
+            c.vencimientos.personalizados.forEach((v: any) => {
+              if (v.fecha) {
+                allDates.push(new Date(v.fecha));
+              }
+            });
+          }
         }
 
         const futureLimit = new Date();
@@ -146,6 +170,15 @@ export const listVencimientos = async (req: Request, res: Response): Promise<voi
               allDates.push(new Date(dateStr));
             }
           });
+          
+          // Vencimientos personalizados
+          if (c.vencimientos.personalizados && Array.isArray(c.vencimientos.personalizados)) {
+            c.vencimientos.personalizados.forEach((v: any) => {
+              if (v.fecha) {
+                allDates.push(new Date(v.fecha));
+              }
+            });
+          }
         }
 
         return allDates.some(d => d.getMonth() + 1 === mes);
@@ -168,6 +201,15 @@ export const listVencimientos = async (req: Request, res: Response): Promise<voi
               allDates.push(new Date(dateStr));
             }
           });
+          
+          // Vencimientos personalizados
+          if (c.vencimientos.personalizados && Array.isArray(c.vencimientos.personalizados)) {
+            c.vencimientos.personalizados.forEach((v: any) => {
+              if (v.fecha) {
+                allDates.push(new Date(v.fecha));
+              }
+            });
+          }
         }
 
         if (allDates.length === 0) return Infinity;

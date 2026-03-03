@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -22,8 +22,14 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { DateInput } from '@/components/shared/DateInput';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Plus } from 'lucide-react';
 import type { Cliente, EstadoCliente, Transporte } from '@/types';
+
+const vencimientoPersonalizadoSchema = z.object({
+  id: z.string(),
+  nombre: z.string().min(1, 'El nombre es obligatorio'),
+  fecha: z.string().min(1, 'La fecha es obligatoria'),
+});
 
 const clienteSchema = z.object({
   empresa: z.string().min(1, 'El nombre de empresa es obligatorio'),
@@ -61,6 +67,7 @@ const clienteSchema = z.object({
     acc: z.string().optional(),
     flotas: z.string().optional(),
     pyme: z.string().optional(),
+    personalizados: z.array(vencimientoPersonalizadoSchema).default([]),
   }).optional(),
 }).refine(
   (data) => {
@@ -91,8 +98,6 @@ const estadoLabels: Record<EstadoCliente, string> = {
   descartado: 'Descartado',
 };
 
-/* removed tipoCargaLabels */
-
 const transporteLabels: Record<Transporte, string> = {
   nacional: 'Nacional',
   internacional: 'Internacional',
@@ -117,49 +122,45 @@ export function ClienteFormDrawer({
     reset,
     setValue,
     watch,
+    control,
   } = useForm<ClienteFormData>({
     resolver: zodResolver(clienteSchema),
-    defaultValues: cliente
-      ? {
-        empresa: cliente.empresa,
-        contacto: cliente.contacto,
-        cif: cliente.cif || '',
-        telefono: cliente.telefono,
-        correo: cliente.correo,
-        notas: cliente.notas || '',
-        estado: cliente.estado,
-        tipoCarga: cliente.tipoCarga || '',
-        transporte: cliente.transporte,
-        fechaLlamada: cliente.fechaLlamada ? cliente.fechaLlamada.split('T')[0] : '',
-        facturacion: cliente.facturacion || '',
-        numVehiculos: cliente.numVehiculos,
-        vencimientos: {
-          rc: cliente.vencimientos?.rc ? cliente.vencimientos.rc.split('T')[0] : '',
-          mercancias: cliente.vencimientos?.mercancias ? cliente.vencimientos.mercancias.split('T')[0] : '',
-          acc: cliente.vencimientos?.acc ? cliente.vencimientos.acc.split('T')[0] : '',
-          flotas: cliente.vencimientos?.flotas ? cliente.vencimientos.flotas.split('T')[0] : '',
-          pyme: cliente.vencimientos?.pyme ? cliente.vencimientos.pyme.split('T')[0] : '',
-        },
-      }
-      : {
-        empresa: '',
-        contacto: '',
-        cif: '',
-        telefono: '',
-        correo: '',
-        notas: '',
-        estado: undefined,
-        tipoCarga: '',
-        transporte: undefined,
-        fechaLlamada: '',
-        facturacion: '',
-        numVehiculos: undefined,
-        vencimientos: { rc: '', mercancias: '', acc: '', flotas: '', pyme: '' },
+    defaultValues: {
+      empresa: '',
+      contacto: '',
+      cif: '',
+      telefono: '',
+      correo: '',
+      notas: '',
+      estado: undefined,
+      tipoCarga: '',
+      transporte: undefined,
+      fechaLlamada: '',
+      facturacion: '',
+      numVehiculos: undefined,
+      vencimientos: { 
+        rc: '', 
+        mercancias: '', 
+        acc: '', 
+        flotas: '', 
+        pyme: '',
+        personalizados: []
       },
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'vencimientos.personalizados',
   });
 
   useEffect(() => {
     if (open && cliente) {
+      const personalizadosFormateados = cliente.vencimientos?.personalizados?.map(v => ({
+        ...v,
+        fecha: v.fecha ? v.fecha.split('T')[0] : ''
+      })) || [];
+
       reset({
         empresa: cliente.empresa,
         contacto: cliente.contacto,
@@ -179,6 +180,7 @@ export function ClienteFormDrawer({
           acc: cliente.vencimientos?.acc ? cliente.vencimientos.acc.split('T')[0] : '',
           flotas: cliente.vencimientos?.flotas ? cliente.vencimientos.flotas.split('T')[0] : '',
           pyme: cliente.vencimientos?.pyme ? cliente.vencimientos.pyme.split('T')[0] : '',
+          personalizados: personalizadosFormateados,
         },
       });
     } else if (open && !cliente) {
@@ -195,7 +197,7 @@ export function ClienteFormDrawer({
         fechaLlamada: '',
         facturacion: '',
         numVehiculos: undefined,
-        vencimientos: { rc: '', mercancias: '', acc: '', flotas: '', pyme: '' },
+        vencimientos: { rc: '', mercancias: '', acc: '', flotas: '', pyme: '', personalizados: [] },
       });
     }
   }, [open, cliente, reset]);
@@ -205,6 +207,14 @@ export function ClienteFormDrawer({
     const cleanString = (value: string | undefined): string | undefined => {
       return value && value.trim() !== '' ? value.trim() : undefined;
     };
+
+    const personalizadosLimpios = data.vencimientos?.personalizados
+      ?.filter(v => v.nombre.trim() !== '' && v.fecha.trim() !== '')
+      ?.map(v => ({
+        id: v.id,
+        nombre: v.nombre.trim(),
+        fecha: new Date(v.fecha).toISOString(),
+      })) || [];
 
     const submitData: Partial<Cliente> = {
       empresa: data.empresa.trim(),
@@ -226,6 +236,7 @@ export function ClienteFormDrawer({
         acc: data.vencimientos.acc ? new Date(data.vencimientos.acc).toISOString() : undefined,
         flotas: data.vencimientos.flotas ? new Date(data.vencimientos.flotas).toISOString() : undefined,
         pyme: data.vencimientos.pyme ? new Date(data.vencimientos.pyme).toISOString() : undefined,
+        personalizados: personalizadosLimpios.length > 0 ? personalizadosLimpios : undefined,
       } : undefined,
     };
 
@@ -244,8 +255,6 @@ export function ClienteFormDrawer({
     }
   };
 
-  /* Removed handleTipoCargaChange as it's now an input */
-
   const handleTransporteChange = (value: string) => {
     if (value === 'none') {
       setValue('transporte', undefined);
@@ -254,9 +263,17 @@ export function ClienteFormDrawer({
     }
   };
 
+  const agregarVencimientoPersonalizado = () => {
+    append({
+      id: crypto.randomUUID(),
+      nombre: '',
+      fecha: '',
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
             {cliente ? 'Editar Cliente' : 'Nuevo Cliente'}
@@ -461,6 +478,63 @@ export function ClienteFormDrawer({
                 />
               </div>
             </div>
+
+            {/* Vencimientos Personalizados */}
+            <div className="space-y-3 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium text-muted-foreground">Vencimientos Personalizados</h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={agregarVencimientoPersonalizado}
+                  className="h-8 gap-1"
+                >
+                  <Plus className="h-4 w-4" />
+                  Añadir vencimiento
+                </Button>
+              </div>
+
+              {fields.length === 0 && (
+                <p className="text-sm text-muted-foreground italic">
+                  No hay vencimientos personalizados. Haz clic en "Añadir vencimiento" para crear uno.
+                </p>
+              )}
+
+              <div className="space-y-3">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="grid gap-3 p-3 border rounded-lg bg-muted/30 sm:grid-cols-12 items-start">
+                    <div className="sm:col-span-5 space-y-1">
+                      <Label className="text-xs">Nombre</Label>
+                      <Input
+                        {...register(`vencimientos.personalizados.${index}.nombre`)}
+                        placeholder="Ej: Seguro especial"
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="sm:col-span-5 space-y-1">
+                      <Label className="text-xs">Fecha</Label>
+                      <DateInput
+                        value={watch(`vencimientos.personalizados.${index}.fecha`)}
+                        onChange={(v) => setValue(`vencimientos.personalizados.${index}.fecha`, v)}
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="sm:col-span-2 flex justify-end items-end h-full pb-0">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => remove(index)}
+                        className="h-9 w-9 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Fechas y Facturación */}
@@ -577,4 +651,3 @@ export function ClienteFormDrawer({
     </Dialog>
   );
 }
-

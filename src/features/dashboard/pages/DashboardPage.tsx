@@ -40,7 +40,7 @@ export function DashboardPage() {
 
   // Helper to get nearest expiration days
   const getNearestExpirationDays = (c: Cliente) => {
-    const dates = [
+    const dates: string[] = [
       c.poliza?.fechaFin,
       c.vencimientos?.rc,
       c.vencimientos?.mercancias,
@@ -48,6 +48,13 @@ export function DashboardPage() {
       c.vencimientos?.flotas,
       c.vencimientos?.pyme,
     ].filter(Boolean) as string[];
+
+    // Añadir vencimientos personalizados
+    if (c.vencimientos?.personalizados) {
+      c.vencimientos.personalizados.forEach(v => {
+        if (v.fecha) dates.push(v.fecha);
+      });
+    }
 
     if (dates.length === 0) return 9999;
 
@@ -86,6 +93,13 @@ export function DashboardPage() {
       addExp(c.vencimientos?.acc, 'Accidentes');
       addExp(c.vencimientos?.flotas, 'Flotas');
       addExp(c.vencimientos?.pyme, 'Pyme');
+
+      // Añadir vencimientos personalizados
+      if (c.vencimientos?.personalizados && c.vencimientos.personalizados.length > 0) {
+        c.vencimientos.personalizados.forEach(v => {
+          addExp(v.fecha, v.nombre);
+        });
+      }
     });
 
     // Crear un mapa de meses con vencimientos (12 meses desde el mes actual)
@@ -157,6 +171,13 @@ export function DashboardPage() {
       addVencimiento(c.vencimientos?.acc, 'ACC');
       addVencimiento(c.vencimientos?.flotas, 'Flotas');
       addVencimiento(c.vencimientos?.pyme, 'PYME');
+
+      // Añadir vencimientos personalizados
+      if (c.vencimientos?.personalizados) {
+        c.vencimientos.personalizados.forEach(v => {
+          addVencimiento(v.fecha, v.nombre);
+        });
+      }
     });
 
     // Ordenar por días (el que vence antes primero)

@@ -13,12 +13,19 @@ const PolizaSchema = new Schema({
   prima: { type: Number },
 }, { _id: false });
 
+const VencimientoPersonalizadoSchema = new Schema({
+  id: { type: String, required: true },
+  nombre: { type: String, required: true },
+  fecha: { type: String, required: true }, // ISO date string
+}, { _id: false });
+
 const VencimientosSchema = new Schema({
   rc: { type: String }, // ISO date string
   mercancias: { type: String }, // ISO date string
   acc: { type: String }, // ISO date string
   flotas: { type: String }, // ISO date string
   pyme: { type: String }, // ISO date string
+  personalizados: { type: [VencimientoPersonalizadoSchema], default: [] },
 }, { _id: false });
 
 const ClienteSchema = new Schema<ICliente>({

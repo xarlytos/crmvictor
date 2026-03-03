@@ -58,6 +58,13 @@ const sampleClientes = [
     vencimientos: {
       rc: addDays(15).toISOString(),
       mercancias: addMonths(2).toISOString(),
+      personalizados: [
+        {
+          id: 'venc-001',
+          nombre: 'Permiso especial',
+          fecha: addDays(25).toISOString(),
+        },
+      ],
     },
     numVehiculos: 5,
     facturacion: '500mil',
@@ -108,6 +115,18 @@ const sampleClientes = [
     vencimientos: {
       rc: addDays(30).toISOString(),
       flotas: addMonths(4).toISOString(),
+      personalizados: [
+        {
+          id: 'venc-002',
+          nombre: 'Certificado ADR',
+          fecha: addDays(40).toISOString(),
+        },
+        {
+          id: 'venc-003',
+          nombre: 'ITV flota',
+          fecha: addMonths(3).toISOString(),
+        },
+      ],
     },
     numVehiculos: 8,
     facturacion: '1.2M',

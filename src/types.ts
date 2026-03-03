@@ -18,12 +18,19 @@ export interface Poliza {
   prima?: number;
 }
 
+export interface Vencimiento {
+  id: string;
+  nombre: string;
+  fecha: string; // ISO
+}
+
 export interface Vencimientos {
   rc?: string; // ISO
   mercancias?: string; // ISO
   acc?: string; // ISO
   flotas?: string; // ISO
   pyme?: string; // ISO
+  personalizados?: Vencimiento[];
 }
 
 export interface Cliente {

@@ -123,6 +123,7 @@ export function ClientesList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       queryClient.invalidateQueries({ queryKey: ['clientes-filtros'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes', 'all'] });
       queryClient.invalidateQueries({ queryKey: ['vencimientos'] });
       toast({
         title: 'Cliente creado',
@@ -144,6 +145,7 @@ export function ClientesList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       queryClient.invalidateQueries({ queryKey: ['clientes-filtros'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes', 'all'] });
       queryClient.invalidateQueries({ queryKey: ['vencimientos'] });
       toast({
         title: 'Cliente actualizado',
@@ -164,6 +166,7 @@ export function ClientesList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       queryClient.invalidateQueries({ queryKey: ['clientes-filtros'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes', 'all'] });
       queryClient.invalidateQueries({ queryKey: ['vencimientos'] });
       toast({
         title: 'Cliente eliminado',

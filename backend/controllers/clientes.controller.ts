@@ -40,6 +40,7 @@ const formatCliente = (doc: any): Cliente => ({
     acc: doc.vencimientos.acc,
     flotas: doc.vencimientos.flotas,
     pyme: doc.vencimientos.pyme,
+    personalizados: doc.vencimientos.personalizados || [],
   } : undefined,
   numVehiculos: doc.numVehiculos,
   facturacion: doc.facturacion,

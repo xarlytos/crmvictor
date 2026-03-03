@@ -2,7 +2,7 @@ import { ChipMes } from './ChipMes';
 import { formatDate, diffDays } from '@/lib/date';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { Cliente, ConfigUsuario } from '@/types';
+import type { Cliente, ConfigUsuario, Vencimiento } from '@/types';
 import { AlertCircle } from 'lucide-react';
 
 interface VencimientoCellProps {
@@ -11,18 +11,19 @@ interface VencimientoCellProps {
   className?: string;
 }
 
-type TipoVencimiento = 'rc' | 'mercancias' | 'acc' | 'flotas' | 'pyme';
+type TipoVencimiento = 'rc' | 'mercancias' | 'acc' | 'flotas' | 'pyme' | 'personalizado';
 
 interface VencimientoInfo {
   tipo: TipoVencimiento;
   label: string;
   fecha: string;
   dias: number;
+  esPersonalizado?: boolean;
 }
 
 export function VencimientoCell({ cliente, config, className }: VencimientoCellProps) {
-  // Obtener todos los vencimientos disponibles con sus días
-  const vencimientos: VencimientoInfo[] = ([
+  // Obtener todos los vencimientos estándar disponibles con sus días
+  const vencimientosEstandar: VencimientoInfo[] = ([
     { tipo: 'rc' as const, label: 'RC', fecha: cliente.vencimientos?.rc },
     { tipo: 'mercancias' as const, label: 'Mercancías', fecha: cliente.vencimientos?.mercancias },
     { tipo: 'acc' as const, label: 'ACC', fecha: cliente.vencimientos?.acc },
@@ -30,7 +31,21 @@ export function VencimientoCell({ cliente, config, className }: VencimientoCellP
     { tipo: 'pyme' as const, label: 'PYME', fecha: cliente.vencimientos?.pyme },
   ] as { tipo: TipoVencimiento; label: string; fecha: string | undefined }[])
     .filter((v): v is { tipo: TipoVencimiento; label: string; fecha: string } => !!v.fecha)
-    .map(v => ({ ...v, dias: diffDays(v.fecha) }));
+    .map(v => ({ ...v, dias: diffDays(v.fecha), esPersonalizado: false }));
+
+  // Obtener vencimientos personalizados
+  const vencimientosPersonalizados: VencimientoInfo[] = (cliente.vencimientos?.personalizados || [])
+    .filter((v: Vencimiento): v is Vencimiento => !!v.fecha)
+    .map((v: Vencimiento) => ({ 
+      tipo: 'personalizado' as const, 
+      label: v.nombre, 
+      fecha: v.fecha, 
+      dias: diffDays(v.fecha),
+      esPersonalizado: true 
+    }));
+
+  // Combinar todos los vencimientos
+  const vencimientos: VencimientoInfo[] = [...vencimientosEstandar, ...vencimientosPersonalizados];
 
   // Agregar la fecha de fin de póliza como fallback si no hay vencimientos
   if (vencimientos.length === 0 && cliente.poliza?.fechaFin) {
@@ -121,7 +136,13 @@ function VencimientoItem({ vencimiento, config }: VencimientoItemProps) {
   return (
     <div className="flex items-center gap-2 py-0.5">
       <ChipMes fecha={vencimiento.fecha} config={config} size="sm" />
-      <span className="text-xs text-muted-foreground w-16">{vencimiento.label}</span>
+      <span className={cn(
+        "text-xs w-24 truncate",
+        vencimiento.esPersonalizado && "text-blue-600 font-medium"
+      )}>
+        {vencimiento.label}
+        {vencimiento.esPersonalizado && <span className="ml-1 text-[10px]">●</span>}
+      </span>
       <span className="text-xs">{formatDate(vencimiento.fecha)}</span>
       <span className={cn(
         'text-xs',
