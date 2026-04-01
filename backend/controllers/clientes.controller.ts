@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ClienteModel } from '../models/Cliente';
 import type { Cliente, FiltrosClientes } from '../../src/types';
+import { actualizarVencimientosCliente } from '../utils/vencimientos.utils';
 
 // Helper para parsear arrays de query params
 const parseQueryArray = (value: any): string[] | undefined => {
@@ -154,7 +155,20 @@ export const listClientes = async (req: Request, res: Response): Promise<void> =
     const clientes = await ClienteModel.find(query).sort({ createdAt: -1 }).lean();
     const total = clientes.length;
 
-    const formatted: Cliente[] = clientes.map(formatCliente);
+    // Actualizar vencimientos automáticamente y recargar si hubo cambios
+    const clientesActualizados = await Promise.all(
+      clientes.map(async (cliente: any) => {
+        const necesitaUpdate = await actualizarVencimientosCliente(cliente);
+        if (necesitaUpdate) {
+          // Recargar el cliente actualizado de la BD
+          const clienteActualizado = await ClienteModel.findById(cliente._id).lean();
+          return clienteActualizado || cliente;
+        }
+        return cliente;
+      })
+    );
+
+    const formatted: Cliente[] = clientesActualizados.map(formatCliente);
 
     res.json({ items: formatted, total });
   } catch (error) {
@@ -168,6 +182,15 @@ export const getCliente = async (req: Request, res: Response): Promise<void> => 
     const cliente = await ClienteModel.findById(req.params.id).lean();
     if (!cliente) {
       res.status(404).json({ error: 'Cliente no encontrado' });
+      return;
+    }
+
+    // Actualizar vencimientos automáticamente si es necesario
+    const necesitaUpdate = await actualizarVencimientosCliente(cliente);
+    if (necesitaUpdate) {
+      // Recargar el cliente actualizado de la BD
+      const clienteActualizado = await ClienteModel.findById(req.params.id).lean();
+      res.json(formatCliente(clienteActualizado || cliente));
       return;
     }
 

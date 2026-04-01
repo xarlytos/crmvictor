@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ClienteModel } from '../models/Cliente';
 import type { Cliente, EstadoCliente } from '../../src/types';
+import { actualizarVencimientosCliente } from '../utils/vencimientos.utils';
 
 // Helper para formatear cliente (mismo que en clientes.controller)
 const formatCliente = (doc: any): Cliente => ({
@@ -84,8 +85,21 @@ export const listVencimientos = async (req: Request, res: Response): Promise<voi
 
     const clientes = await ClienteModel.find(query).lean();
 
+    // Actualizar vencimientos automáticamente y recargar si hubo cambios
+    const clientesActualizados = await Promise.all(
+      clientes.map(async (cliente: any) => {
+        const necesitaUpdate = await actualizarVencimientosCliente(cliente);
+        if (necesitaUpdate) {
+          // Recargar el cliente actualizado de la BD
+          const clienteActualizado = await ClienteModel.findById(cliente._id).lean();
+          return clienteActualizado || cliente;
+        }
+        return cliente;
+      })
+    );
+
     // Filtrar y ordenar por proximidad de vencimiento
-    let filtered = clientes.filter((c: any) => {
+    let filtered = clientesActualizados.filter((c: any) => {
       const allDates: Date[] = [];
       
       // Fecha de fin de póliza

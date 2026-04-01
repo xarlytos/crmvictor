@@ -9,6 +9,7 @@ import { authRouter } from './routes/auth';
 import { clientesRouter } from './routes/clientes';
 import { vencimientosRouter } from './routes/vencimientos';
 import { configRouter } from './routes/config';
+import { iniciarCronJobs } from './services/cron-scheduler.service';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,6 +34,10 @@ app.use(express.json({ limit: '10mb' }));
 
 // Connect to MongoDB
 connectDB();
+
+// Iniciar Cron Jobs para actualización automática de vencimientos
+// Se ejecuta inmediatamente y luego todos los días a las 00:00
+iniciarCronJobs();
 
 // Health check (público)
 app.get('/api/health', (req, res) => {
