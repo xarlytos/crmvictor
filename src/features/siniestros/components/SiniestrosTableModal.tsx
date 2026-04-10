@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { SiniestroGrupo, Siniestro } from '@/types';
@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -21,7 +20,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import {
   Plus,
-  Save,
   Download,
   X,
   FileText,
@@ -30,8 +28,12 @@ import {
   Check,
 } from 'lucide-react';
 import { useSiniestrosStore } from '../store/siniestros.store';
-import { generateSiniestroPDF } from '../utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
+
+// Stub para generación de PDF - implementar cuando sea necesario
+const generateSiniestroPDF = (_grupo: SiniestroGrupo, _siniestros: Siniestro[]) => {
+  console.warn('PDF generator not implemented yet');
+};
 
 interface SiniestrosTableModalProps {
   isOpen: boolean;
