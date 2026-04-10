@@ -2,37 +2,279 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @layer base {
   :root {
+    /* Notion Design System Colors */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 0% / 0.95;
+
+    /* Notion Blue - Primary */
+    --primary: 207 100% 44%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 207 100% 35%;
+
+    /* Warm Neutrals */
+    --warm-white: 40 20% 96%;
+    --warm-dark: 40 6% 19%;
+    --warm-gray-500: 40 6% 36%;
+    --warm-gray-300: 40 6% 63%;
+
+    /* Card & Surface */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 0% / 0.95;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --popover-foreground: 0 0% 0% / 0.95;
+
+    /* Secondary & Muted */
+    --secondary: 40 20% 96%;
+    --secondary-foreground: 0 0% 0% / 0.95;
+
+    --muted: 40 20% 96%;
+    --muted-foreground: 40 6% 36%;
+
+    /* Accent */
+    --accent: 40 20% 96%;
+    --accent-foreground: 0 0% 0% / 0.95;
+
+    /* Destructive */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders - Whisper thin */
+    --border: 0 0% 0% / 0.1;
+    --input: 0 0% 0% / 0.1;
+    --ring: 207 100% 44%;
+
+    /* Radius */
+    --radius: 0.75rem;
+
+    /* Shadows - Multi-layer soft */
+    --shadow-card: 0 4px 18px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.03), 0 1px 3px rgba(0,0,0,0.02);
+    --shadow-deep: 0 14px 28px rgba(0,0,0,0.04), 0 7px 15px rgba(0,0,0,0.02), 0 3px 7px rgba(0,0,0,0.02), 0 1px 3px rgba(0,0,0,0.01);
+    --shadow-hover: 0 8px 30px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
   }
 
   * {
     @apply border-border;
   }
+
+  html {
+    font-feature-settings: "lnum" 1, "locl" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica', 'Arial', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    color: rgba(0, 0, 0, 0.95);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.95);
+    letter-spacing: -0.025em;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
+
+  h3 {
+    font-size: 1.375rem;
+    line-height: 1.27;
+    letter-spacing: -0.02em;
   }
 }
 
+@layer components {
+  /* Notion-style Cards */
+  .notion-card {
+    @apply bg-white rounded-xl border border-black/10;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .notion-card:hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  /* Notion-style Metric Cards */
+  .metric-card {
+    @apply bg-white rounded-2xl p-5 border border-black/10;
+    box-shadow: var(--shadow-card);
+    transition: all 0.2s ease;
+  }
+
+  .metric-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  /* Notion Blue Button */
+  .btn-primary {
+    @apply px-4 py-2 rounded-md font-semibold text-white;
+    background-color: #0075de;
+    transition: all 0.15s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: #005bab;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.95);
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply px-4 py-2 rounded-md font-semibold;
+    background-color: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.95);
+    transition: all 0.15s ease;
+  }
+
+  .btn-secondary:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+
+  /* Pill Badge */
+  .badge-pill {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    background-color: #f2f9ff;
+    color: #097fe8;
+    letter-spacing: 0.125px;
+  }
+
+  /* Status Badges */
+  .badge-status-llamado {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    background-color: rgba(0, 117, 222, 0.1);
+    color: #0075de;
+  }
+
+  .badge-status-gmail {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    background-color: rgba(221, 91, 0, 0.1);
+    color: #dd5b00;
+  }
+
+  .badge-status-reunido {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    background-color: rgba(57, 28, 87, 0.1);
+    color: #391c57;
+  }
+
+  .badge-status-propuesta {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    background-color: rgba(42, 157, 153, 0.1);
+    color: #2a9d99;
+  }
+
+  .badge-status-vendido {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    background-color: #1aae39;
+    color: white;
+  }
+
+  .badge-status-no-llegamos {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #615d59;
+  }
+
+  /* Warm White Section */
+  .section-warm {
+    background-color: #f6f5f4;
+  }
+
+  /* Whisper Divider */
+  .divider-whisper {
+    @apply border-t border-black/10;
+  }
+
+  /* Input Styling */
+  .notion-input {
+    @apply px-3 py-2 rounded-md border border-black/10 bg-white;
+    transition: all 0.15s ease;
+  }
+
+  .notion-input:focus {
+    @apply outline-none ring-2 ring-[#0075de]/20 border-[#0075de];
+  }
+
+  /* Navigation Item */
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .nav-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    color: rgba(0, 0, 0, 0.95);
+  }
+
+  .nav-item.active {
+    background-color: rgba(0, 117, 222, 0.1);
+    color: #0075de;
+  }
+}
+
+@layer utilities {
+  /* Letter spacing utilities for Notion typography */
+  .tracking-display {
+    letter-spacing: -0.04em;
+  }
+
+  .tracking-heading {
+    letter-spacing: -0.025em;
+  }
+
+  .tracking-tight {
+    letter-spacing: -0.015em;
+  }
+
+  /* Text colors */
+  .text-notion-black {
+    color: rgba(0, 0, 0, 0.95);
+  }
+
+  .text-notion-gray {
+    color: #615d59;
+  }
+
+  .text-notion-muted {
+    color: #a39e98;
+  }
+
+  .text-notion-blue {
+    color: #0075de;
+  }
+
+  /* Background colors */
+  .bg-warm-white {
+    background-color: #f6f5f4;
+  }
+
+  .bg-notion-blue {
+    background-color: #0075de;
+  }
+
+  /* Border colors */
+  .border-whisper {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+}

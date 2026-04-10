@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { dataProvider } from '@/config/dataProvider';
 import { KPI } from '@/components/shared/KPI';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Calendar, AlertCircle, TrendingUp } from 'lucide-react';
+import { Users, Calendar, AlertCircle, TrendingUp, ArrowRight, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatDate, getDaysUntil, getUrgenciaColor } from '@/lib/date';
 import { ChipMes } from '@/components/shared/ChipMes';
@@ -61,17 +60,16 @@ export function DashboardPage() {
     const days = dates.map(d => getDaysUntil(d));
     const futureDays = days.filter(d => d >= 0);
     if (futureDays.length > 0) return Math.min(...futureDays);
-    return Math.max(...days); // All expired
+    return Math.max(...days);
   };
 
-  // Calcular vencimientos por mes - TODOS los vencimientos de todos los clientes
+  // Calcular vencimientos por mes
   const vencimientosPorMes = useMemo(() => {
     const now = new Date();
     const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     const mesActual = now.getMonth() + 1;
     const añoActual = now.getFullYear();
 
-    // Recopilar TODOS los vencimientos de todos los clientes
     const todosVencimientos: Array<{ fecha: string; mes: number; año: number; client: Cliente; tipo: string }> = [];
 
     clientes.forEach((c) => {
@@ -94,7 +92,6 @@ export function DashboardPage() {
       addExp(c.vencimientos?.flotas, 'Flotas');
       addExp(c.vencimientos?.pyme, 'Pyme');
 
-      // Añadir vencimientos personalizados
       if (c.vencimientos?.personalizados && c.vencimientos.personalizados.length > 0) {
         c.vencimientos.personalizados.forEach(v => {
           addExp(v.fecha, v.nombre);
@@ -102,7 +99,6 @@ export function DashboardPage() {
       }
     });
 
-    // Crear un mapa de meses con vencimientos (12 meses desde el mes actual)
     const datosMeses: Array<{
       mes: string;
       numero: number;
@@ -149,7 +145,7 @@ export function DashboardPage() {
   const vendidos = clientes.filter((c) => c.estado === 'vendido').length;
   const tasaCierre = clientes.length > 0 ? ((vendidos / clientes.length) * 100).toFixed(1) : '0';
 
-  // Obtener TODOS los vencimientos individuales ordenados por fecha
+  // Próximos vencimientos
   const proximosVencimientos = useMemo(() => {
     const vencimientos: Array<{
       cliente: Cliente;
@@ -172,7 +168,6 @@ export function DashboardPage() {
       addVencimiento(c.vencimientos?.flotas, 'Flotas');
       addVencimiento(c.vencimientos?.pyme, 'PYME');
 
-      // Añadir vencimientos personalizados
       if (c.vencimientos?.personalizados) {
         c.vencimientos.personalizados.forEach(v => {
           addVencimiento(v.fecha, v.nombre);
@@ -180,199 +175,233 @@ export function DashboardPage() {
       }
     });
 
-    // Ordenar por días (el que vence antes primero)
     return vencimientos
       .sort((a, b) => a.dias - b.dias)
       .slice(0, 10);
   }, [clientes]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-black/95">Dashboard</h1>
+          <p className="text-[#615d59] mt-1">Visión general de tu cartera de clientes</p>
+        </div>
+        <Link to="/clientes">
+          <Button className="bg-[#0075de] hover:bg-[#005bab] text-white font-semibold">
+            Ver clientes
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </Link>
       </div>
 
+      {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KPI
           title="Total Clientes"
           value={clientes.length}
-          icon={<Users className="h-4 w-4" />}
+          subtitle="Clientes registrados"
+          icon={<Building2 className="h-5 w-5" />}
+          color="slate"
         />
         <KPI
           title="Vencen este Mes"
           value={vencenEsteMes}
-          icon={<Calendar className="h-4 w-4" />}
+          subtitle={`${mesActual === 1 ? 'Enero' : mesActual === 2 ? 'Febrero' : mesActual === 3 ? 'Marzo' : mesActual === 4 ? 'Abril' : mesActual === 5 ? 'Mayo' : mesActual === 6 ? 'Junio' : mesActual === 7 ? 'Julio' : mesActual === 8 ? 'Agosto' : mesActual === 9 ? 'Septiembre' : mesActual === 10 ? 'Octubre' : mesActual === 11 ? 'Noviembre' : 'Diciembre'}`}
+          icon={<Calendar className="h-5 w-5" />}
+          color="blue"
         />
         <KPI
-          title={`Vencen en ${config.alertWindowDays} días`}
+          title={`Próximos ${config.alertWindowDays} días`}
           value={vencenEnVentana}
-          icon={<AlertCircle className="h-4 w-4" />}
+          subtitle="Vencimientos urgentes"
+          icon={<AlertCircle className="h-5 w-5" />}
+          color="amber"
         />
         <KPI
           title="Tasa de Cierre"
           value={`${tasaCierre}%`}
-          subtitle={`${vendidos} vendidos`}
-          icon={<TrendingUp className="h-4 w-4" />}
+          subtitle={`${vendidos} vendidos de ${clientes.length}`}
+          icon={<TrendingUp className="h-5 w-5" />}
+          color="green"
         />
       </div>
 
       {/* Gráfico de Vencimientos por Mes */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Vencimientos por Mes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={450}>
-            <BarChart
-              data={vencimientosPorMes}
-              onClick={(data: any) => {
-                if (data && data.activePayload && data.activePayload.length > 0) {
-                  setSelectedMonth(data.activePayload[0].payload);
+      <div className="notion-card p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-bold text-black/95">Vencimientos por Mes</h2>
+            <p className="text-sm text-[#615d59]">Distribución anual de vencimientos</p>
+          </div>
+          <Link to="/vencimientos">
+            <Button variant="outline" className="border-black/10 hover:bg-[#f6f5f4]">
+              Ver detalles
+            </Button>
+          </Link>
+        </div>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart
+            data={vencimientosPorMes}
+            onClick={(data: any) => {
+              if (data && data.activePayload && data.activePayload.length > 0) {
+                setSelectedMonth(data.activePayload[0].payload);
+              }
+            }}
+            className="cursor-pointer"
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
+            <XAxis
+              dataKey="mes"
+              tick={{ fontSize: 11, fill: '#615d59' }}
+              angle={-45}
+              textAnchor="end"
+              height={80}
+              stroke="rgba(0,0,0,0.1)"
+            />
+            <YAxis
+              tick={{ fontSize: 12, fill: '#615d59' }}
+              allowDecimals={false}
+              domain={[0, 'dataMax']}
+              stroke="rgba(0,0,0,0.1)"
+            />
+            <Tooltip
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  const data = payload[0].payload;
+                  return (
+                    <div className="bg-white border border-black/10 rounded-lg p-3 shadow-lg">
+                      <p className="font-semibold text-black/95">{data.mes}</p>
+                      <p className="text-sm text-[#615d59]">
+                        Vencimientos: <span className="font-medium text-[#0075de]">{Math.round(data.vencimientos)}</span>
+                      </p>
+                      {data.esActual && (
+                        <span className="badge-pill mt-2">Mes actual</span>
+                      )}
+                    </div>
+                  );
                 }
+                return null;
               }}
-              className="cursor-pointer"
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="mes"
-                tick={{ fontSize: 12 }}
-                angle={-45}
-                textAnchor="end"
-                height={100}
-              />
-              <YAxis
-                label={{ value: 'Número de Vencimientos', angle: -90, position: 'insideLeft' }}
-                tick={{ fontSize: 12 }}
-                allowDecimals={false}
-                domain={[0, 'dataMax']}
-              />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload;
-                    return (
-                      <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
-                        <p className="font-semibold">{data.mes}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Vencimientos: <span className="font-medium text-foreground">{Math.round(data.vencimientos)}</span>
-                        </p>
-                        {data.esActual && (
-                          <p className="text-xs text-primary mt-1">Mes actual</p>
-                        )}
-                      </div>
-                    );
+            />
+            <Bar dataKey="vencimientos" radius={[6, 6, 0, 0]}>
+              {vencimientosPorMes.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.esActual
+                    ? '#0075de'
+                    : entry.vencimientos > 0
+                      ? config.monthColors[entry.numero] || '#a39e98'
+                      : '#e5e5e5'
                   }
-                  return null;
-                }}
-              />
-              <Bar dataKey="vencimientos" radius={[4, 4, 0, 0]}>
-                {vencimientosPorMes.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.esActual
-                      ? config.monthColors[entry.numero] || 'hsl(var(--primary))'
-                      : entry.vencimientos > 0
-                        ? config.monthColors[entry.numero] || 'hsl(var(--muted-foreground))'
-                        : 'hsl(var(--muted))'
-                    }
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
       {/* Próximos Vencimientos */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Próximos Vencimientos</CardTitle>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/vencimientos">Ver todos</Link>
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {proximosVencimientos.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No hay vencimientos próximos
-              </p>
-            ) : (
-              proximosVencimientos.map((item, index) => {
-                const dias = item.dias;
-                const porcentaje = Math.max(0, Math.min(100, (dias / 60) * 100));
-                const isVencido = dias < 0;
+      <div className="notion-card p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-bold text-black/95">Próximos Vencimientos</h2>
+            <p className="text-sm text-[#615d59]">Los 10 vencimientos más próximos</p>
+          </div>
+          <Link to="/vencimientos">
+            <Button variant="outline" className="border-black/10 hover:bg-[#f6f5f4]">
+              Ver todos
+            </Button>
+          </Link>
+        </div>
+        <div className="space-y-3">
+          {proximosVencimientos.length === 0 ? (
+            <div className="text-center py-8 text-[#a39e98]">
+              <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>No hay vencimientos próximos</p>
+            </div>
+          ) : (
+            proximosVencimientos.map((item, index) => {
+              const dias = item.dias;
+              const porcentaje = Math.max(0, Math.min(100, (dias / 60) * 100));
+              const isVencido = dias < 0;
 
-                return (
-                  <div
-                    key={`${item.cliente.id}-${item.tipo}-${index}`}
-                    className={cn(
-                      "flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors",
-                      isVencido && "border-red-300 bg-red-50/50",
-                      dias >= 0 && dias <= 15 && "border-amber-300 bg-amber-50/50"
-                    )}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium">{item.cliente.empresa}</span>
-                        <ChipMes fecha={item.fecha} config={config} />
-                        <span className={cn(
-                          "text-xs px-2 py-0.5 rounded-full font-medium",
-                          isVencido && "bg-red-100 text-red-700",
-                          dias >= 0 && dias <= 15 && "bg-amber-100 text-amber-700",
-                          dias > 15 && "bg-green-100 text-green-700"
-                        )}>
-                          {item.tipo}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {item.cliente.contacto} • {formatDate(item.fecha)}
+              return (
+                <div
+                  key={`${item.cliente.id}-${item.tipo}-${index}`}
+                  className={cn(
+                    "flex items-center justify-between p-4 rounded-xl border transition-all duration-200 hover:shadow-sm",
+                    isVencido
+                      ? "bg-red-50/50 border-red-200"
+                      : dias >= 0 && dias <= 15
+                        ? "bg-amber-50/50 border-amber-200"
+                        : "bg-white border-black/10"
+                  )}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="font-semibold text-black/95 truncate">{item.cliente.empresa}</span>
+                      <ChipMes fecha={item.fecha} config={config} />
+                      <span className={cn(
+                        "text-xs px-2.5 py-0.5 rounded-full font-semibold",
+                        isVencido && "bg-red-100 text-red-700",
+                        dias >= 0 && dias <= 15 && "bg-amber-100 text-amber-700",
+                        dias > 15 && "bg-emerald-100 text-emerald-700"
+                      )}>
+                        {item.tipo}
+                      </span>
+                    </div>
+                    <p className="text-sm text-[#615d59]">
+                      {item.cliente.contacto} • {formatDate(item.fecha)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 ml-4">
+                    <div className="text-right">
+                      <p className={cn(
+                        "text-sm font-semibold",
+                        isVencido && "text-red-600",
+                        dias >= 0 && dias <= 15 && "text-amber-600",
+                        dias > 15 && "text-emerald-600"
+                      )}>
+                        {isVencido
+                          ? `Vencido`
+                          : dias === 0
+                            ? 'Hoy'
+                            : `${dias} días`}
                       </p>
-                      <div className="mt-2">
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span className={cn(
-                            "font-medium",
-                            isVencido && "text-red-600",
-                            dias >= 0 && dias <= 15 && "text-amber-600"
-                          )}>
-                            {isVencido 
-                              ? `Vencido hace ${Math.abs(dias)} días` 
-                              : dias === 0 
-                                ? 'Vence hoy'
-                                : `Faltan ${dias} días`}
-                          </span>
-                          <span className={getUrgenciaColor(dias).replace('bg-', 'text-')}>
-                            {dias > 30 ? 'Baja' : dias >= 15 ? 'Media' : 'Alta'} urgencia
-                          </span>
-                        </div>
-                        <Progress value={100 - porcentaje} className="h-1" />
-                      </div>
+                      <p className="text-xs text-[#a39e98]">
+                        {isVencido ? `${Math.abs(dias)} días atrás` : 'restantes'}
+                      </p>
+                    </div>
+                    <div className="w-24">
+                      <Progress value={100 - porcentaje} className="h-1.5" />
                     </div>
                   </div>
-                );
-              })
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
 
       <Dialog open={!!selectedMonth} onOpenChange={(open) => !open && setSelectedMonth(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Vencimientos {selectedMonth?.mes}</DialogTitle>
+            <DialogTitle className="text-xl font-bold">Vencimientos {selectedMonth?.mes}</DialogTitle>
           </DialogHeader>
           <div className="h-[300px] mt-4 overflow-y-auto">
-            <div className="space-y-4">
+            <div className="space-y-3">
               {selectedMonth?.vencimientos.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center">No hay vencimientos este mes</p>
+                <p className="text-sm text-[#a39e98] text-center py-4">No hay vencimientos este mes</p>
               ) : (
                 selectedMonth?.vencimientos.map((item, i) => (
-                  <div key={i} className="flex flex-col p-3 border rounded-lg bg-card">
+                  <div key={i} className="flex flex-col p-4 rounded-xl border border-black/10 bg-white">
                     <div className="flex justify-between items-start">
-                      <span className="font-semibold">{item.client.empresa}</span>
-                      <Badge variant="outline">{item.tipo}</Badge>
+                      <span className="font-semibold text-black/95">{item.client.empresa}</span>
+                      <Badge variant="outline" className="border-black/10">{item.tipo}</Badge>
                     </div>
-                    <div className="flex justify-between mt-2 text-sm text-muted-foreground">
+                    <div className="flex justify-between mt-2 text-sm text-[#615d59]">
                       <span>{formatDate(item.fecha)}</span>
                       <span>{item.client.contacto}</span>
                     </div>
