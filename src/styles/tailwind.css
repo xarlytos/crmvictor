@@ -2,59 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    /* Notion Design System Colors */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0% / 0.95;
+    /* Modern Premium Color Palette */
+    --background: 220 33% 98%;
+    --foreground: 222 47% 11%;
 
-    /* Notion Blue - Primary */
-    --primary: 207 100% 44%;
+    /* Primary - Electric Blue */
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 207 100% 35%;
+    --primary-hover: 224 76% 48%;
+    --primary-light: 217 91% 96%;
 
-    /* Warm Neutrals */
-    --warm-white: 40 20% 96%;
-    --warm-dark: 40 6% 19%;
-    --warm-gray-500: 40 6% 36%;
-    --warm-gray-300: 40 6% 63%;
+    /* Secondary - Purple Accent */
+    --secondary: 262 83% 58%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-light: 260 100% 97%;
 
-    /* Card & Surface */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0% / 0.95;
+    /* Accent - Teal/Cyan */
+    --accent: 174 72% 45%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 166 76% 97%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0% / 0.95;
+    /* Surface Colors */
+    --surface: 0 0% 100%;
+    --surface-elevated: 0 0% 100%;
+    --surface-sunken: 220 33% 96%;
 
-    /* Secondary & Muted */
-    --secondary: 40 20% 96%;
-    --secondary-foreground: 0 0% 0% / 0.95;
+    /* Semantic Colors */
+    --success: 142 71% 45%;
+    --success-light: 142 76% 97%;
+    --warning: 38 92% 50%;
+    --warning-light: 48 100% 96%;
+    --error: 0 84% 60%;
+    --error-light: 0 93% 97%;
+    --info: 199 89% 48%;
+    --info-light: 199 89% 97%;
 
-    --muted: 40 20% 96%;
-    --muted-foreground: 40 6% 36%;
+    /* Text Colors */
+    --text-primary: 222 47% 11%;
+    --text-secondary: 215 20% 40%;
+    --text-tertiary: 215 16% 57%;
+    --text-disabled: 215 20% 65%;
 
-    /* Accent */
-    --accent: 40 20% 96%;
-    --accent-foreground: 0 0% 0% / 0.95;
+    /* Borders */
+    --border: 214 32% 91%;
+    --border-strong: 214 24% 84%;
+    --border-subtle: 210 40% 96%;
 
-    /* Destructive */
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    /* Shadows - Modern Layered */
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+    --shadow-colored: 0 10px 40px -10px rgb(59 130 246 / 0.5);
 
-    /* Borders - Whisper thin */
-    --border: 0 0% 0% / 0.1;
-    --input: 0 0% 0% / 0.1;
-    --ring: 207 100% 44%;
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+    --gradient-secondary: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+    --gradient-accent: linear-gradient(135deg, #14b8a6 0%, #0d9488 50%, #0f766e 100%);
+    --gradient-surface: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
 
     /* Radius */
     --radius: 0.75rem;
-
-    /* Shadows - Multi-layer soft */
-    --shadow-card: 0 4px 18px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.03), 0 1px 3px rgba(0,0,0,0.02);
-    --shadow-deep: 0 14px 28px rgba(0,0,0,0.04), 0 7px 15px rgba(0,0,0,0.02), 0 3px 7px rgba(0,0,0,0.02), 0 1px 3px rgba(0,0,0,0.01);
-    --shadow-hover: 0 8px 30px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+    --radius-sm: 0.5rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.25rem;
+    --radius-2xl: 1.5rem;
   }
 
   * {
@@ -62,219 +82,316 @@
   }
 
   html {
-    font-feature-settings: "lnum" 1, "locl" 1;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica', 'Arial', sans-serif;
-    font-weight: 400;
-    line-height: 1.5;
-    color: rgba(0, 0, 0, 0.95);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    @apply bg-background text-foreground antialiased;
+    background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 50%, #f0f9ff 100%);
+    min-height: 100vh;
   }
 
+  /* Modern Typography */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
-    color: rgba(0, 0, 0, 0.95);
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
+    color: hsl(var(--text-primary));
   }
 
   h1 {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
     line-height: 1.1;
-    letter-spacing: -0.04em;
+    font-weight: 800;
   }
 
   h2 {
     font-size: 1.75rem;
     line-height: 1.2;
-    letter-spacing: -0.03em;
   }
 
   h3 {
     font-size: 1.375rem;
-    line-height: 1.27;
-    letter-spacing: -0.02em;
+    line-height: 1.3;
   }
 }
 
 @layer components {
-  /* Notion-style Cards */
-  .notion-card {
-    @apply bg-white rounded-xl border border-black/10;
-    box-shadow: var(--shadow-card);
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  /* Glass Cards */
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-xl rounded-2xl;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.05),
+      0 10px 20px -5px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
   }
 
-  .notion-card:hover {
-    box-shadow: var(--shadow-hover);
-  }
-
-  /* Notion-style Metric Cards */
-  .metric-card {
-    @apply bg-white rounded-2xl p-5 border border-black/10;
-    box-shadow: var(--shadow-card);
-    transition: all 0.2s ease;
-  }
-
-  .metric-card:hover {
-    box-shadow: var(--shadow-hover);
+  .glass-card:hover {
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.08),
+      0 20px 40px -10px rgba(59, 130, 246, 0.15),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
     transform: translateY(-2px);
   }
 
-  /* Notion Blue Button */
-  .btn-primary {
-    @apply px-4 py-2 rounded-md font-semibold text-white;
-    background-color: #0075de;
-    transition: all 0.15s ease;
+  /* Premium Metric Cards */
+  .metric-card-premium {
+    @apply relative overflow-hidden rounded-2xl p-6 bg-white;
+    box-shadow:
+      0 1px 3px 0 rgba(0, 0, 0, 0.05),
+      0 10px 30px -5px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .btn-primary:hover {
-    background-color: #005bab;
+  .metric-card-premium:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 20px 40px -10px rgba(59, 130, 246, 0.2),
+      0 10px 20px -5px rgba(0, 0, 0, 0.1);
   }
 
-  .btn-primary:active {
-    transform: scale(0.95);
+  .metric-card-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
-  /* Secondary Button */
-  .btn-secondary {
-    @apply px-4 py-2 rounded-md font-semibold;
-    background-color: rgba(0, 0, 0, 0.05);
-    color: rgba(0, 0, 0, 0.95);
-    transition: all 0.15s ease;
+  .metric-card-premium:hover::before {
+    opacity: 1;
   }
 
-  .btn-secondary:hover {
-    background-color: rgba(0, 0, 0, 0.08);
+  /* Gradient Text */
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  /* Pill Badge */
-  .badge-pill {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
-    background-color: #f2f9ff;
-    color: #097fe8;
-    letter-spacing: 0.125px;
+  .gradient-text-purple {
+    background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  /* Status Badges */
-  .badge-status-llamado {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
-    background-color: rgba(0, 117, 222, 0.1);
-    color: #0075de;
+  /* Modern Buttons */
+  .btn-premium {
+    @apply relative px-6 py-2.5 rounded-xl font-semibold text-white overflow-hidden;
+    background: var(--gradient-primary);
+    box-shadow:
+      0 4px 6px -1px rgba(59, 130, 246, 0.4),
+      0 2px 4px -2px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .badge-status-gmail {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
-    background-color: rgba(221, 91, 0, 0.1);
-    color: #dd5b00;
+  .btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 10px 20px -5px rgba(59, 130, 246, 0.5),
+      0 4px 8px -2px rgba(59, 130, 246, 0.4);
   }
 
-  .badge-status-reunido {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
-    background-color: rgba(57, 28, 87, 0.1);
-    color: #391c57;
+  .btn-premium:active {
+    transform: translateY(0);
   }
 
-  .badge-status-propuesta {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
-    background-color: rgba(42, 157, 153, 0.1);
-    color: #2a9d99;
+  .btn-secondary-premium {
+    @apply px-6 py-2.5 rounded-xl font-semibold;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    color: hsl(var(--primary));
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
   }
 
-  .badge-status-vendido {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
-    background-color: #1aae39;
+  .btn-secondary-premium:hover {
+    background: rgba(59, 130, 246, 0.05);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
+
+  /* Status Badges - Vibrant */
+  .badge-modern {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold;
+    letter-spacing: 0.02em;
+  }
+
+  .badge-llamado {
+    @apply badge-modern;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+
+  .badge-gmail {
+    @apply badge-modern;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  .badge-reunido {
+    @apply badge-modern;
+    background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+    color: #5b21b6;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+  }
+
+  .badge-propuesta {
+    @apply badge-modern;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .badge-vendido {
+    @apply badge-modern;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
     color: white;
+    box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.4);
   }
 
-  .badge-status-no-llegamos {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
-    background-color: rgba(0, 0, 0, 0.05);
-    color: #615d59;
+  .badge-no-llegamos {
+    @apply badge-modern;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: #4b5563;
+    border: 1px solid rgba(107, 114, 128, 0.3);
   }
 
-  /* Warm White Section */
-  .section-warm {
-    background-color: #f6f5f4;
+  /* Navigation Items */
+  .nav-item-modern {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-300;
+    color: hsl(var(--text-secondary));
   }
 
-  /* Whisper Divider */
-  .divider-whisper {
-    @apply border-t border-black/10;
+  .nav-item-modern:hover {
+    background: rgba(59, 130, 246, 0.08);
+    color: hsl(var(--primary));
   }
 
-  /* Input Styling */
-  .notion-input {
-    @apply px-3 py-2 rounded-md border border-black/10 bg-white;
-    transition: all 0.15s ease;
+  .nav-item-modern.active {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
+    color: hsl(var(--primary));
+    border: 1px solid rgba(59, 130, 246, 0.2);
   }
 
-  .notion-input:focus {
-    @apply outline-none ring-2 ring-[#0075de]/20 border-[#0075de];
+  /* Input Fields */
+  .input-premium {
+    @apply px-4 py-3 rounded-xl bg-white border border-slate-200;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
   }
 
-  /* Navigation Item */
-  .nav-item {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200;
-    color: rgba(0, 0, 0, 0.6);
+  .input-premium:focus {
+    @apply outline-none border-blue-500;
+    box-shadow:
+      0 0 0 3px rgba(59, 130, 246, 0.15),
+      inset 0 2px 4px rgba(0, 0, 0, 0.02);
   }
 
-  .nav-item:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    color: rgba(0, 0, 0, 0.95);
+  /* Section Headers */
+  .section-header {
+    @apply flex items-center gap-3 mb-6;
   }
 
-  .nav-item.active {
-    background-color: rgba(0, 117, 222, 0.1);
-    color: #0075de;
+  .section-header-icon {
+    @apply w-10 h-10 rounded-xl flex items-center justify-center;
+    background: var(--gradient-primary);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  /* Tables */
+  .table-modern {
+    @apply w-full rounded-2xl overflow-hidden bg-white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .table-modern th {
+    @apply px-6 py-4 text-left text-xs font-bold uppercase tracking-wider;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    color: hsl(var(--text-secondary));
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .table-modern td {
+    @apply px-6 py-4 border-b border-slate-100;
+  }
+
+  /* Animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.5); }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.5s ease-out;
+  }
+
+  /* Decorative Elements */
+  .glow-blue {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .glow-purple {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
   }
 }
 
 @layer utilities {
-  /* Letter spacing utilities for Notion typography */
-  .tracking-display {
-    letter-spacing: -0.04em;
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
   }
 
-  .tracking-heading {
-    letter-spacing: -0.025em;
+  /* Backdrop blur utilities */
+  .backdrop-blur-premium {
+    backdrop-filter: blur(20px) saturate(180%);
   }
 
-  .tracking-tight {
-    letter-spacing: -0.015em;
-  }
-
-  /* Text colors */
-  .text-notion-black {
-    color: rgba(0, 0, 0, 0.95);
-  }
-
-  .text-notion-gray {
-    color: #615d59;
-  }
-
-  .text-notion-muted {
-    color: #a39e98;
-  }
-
-  .text-notion-blue {
-    color: #0075de;
-  }
-
-  /* Background colors */
-  .bg-warm-white {
-    background-color: #f6f5f4;
-  }
-
-  .bg-notion-blue {
-    background-color: #0075de;
-  }
-
-  /* Border colors */
-  .border-whisper {
-    border-color: rgba(0, 0, 0, 0.1);
+  /* Transition utilities */
+  .transition-premium {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }

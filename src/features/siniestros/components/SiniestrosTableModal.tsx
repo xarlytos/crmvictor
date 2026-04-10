@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -18,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import {
   Plus,
@@ -26,15 +24,7 @@ import {
   X,
   FileText,
   Trash2,
-  Edit2,
   Save,
-  Calendar,
-  Car,
-  User,
-  Building2,
-  Euro,
-  Scale,
-  MessageSquare,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
@@ -60,9 +50,28 @@ const CULPAS = [
 ];
 
 const VALORACIONES = [
-  { value: 'positiva', label: 'Positiva', color: 'text-emerald-600 bg-emerald-50' },
-  { value: 'intermedia', label: 'Intermedia', color: 'text-amber-600 bg-amber-50' },
-  { value: 'negativa', label: 'Negativa', color: 'text-red-600 bg-red-50' },
+  { value: 'positiva', label: 'Positiva' },
+  { value: 'intermedia', label: 'Intermedia' },
+  { value: 'negativa', label: 'Negativa' },
+];
+
+// Cabeceras de la tabla
+const HEADERS = [
+  { key: 'nombreTomador', label: 'Nombre tomador', width: 'w-40' },
+  { key: 'numeroPoliza', label: 'Nº póliza', width: 'w-28' },
+  { key: 'compania', label: 'Compañía', width: 'w-28' },
+  { key: 'matricula', label: 'Matrícula', width: 'w-24' },
+  { key: 'fechaOcurrencia', label: 'Fecha ocurrencia', width: 'w-32' },
+  { key: 'tipoSiniestro', label: 'Tipo', width: 'w-28' },
+  { key: 'fechaApertura', label: 'Fecha apertura', width: 'w-32' },
+  { key: 'numSiniestroCompania', label: 'Nº siniestro comp.', width: 'w-36' },
+  { key: 'numSiniestroElevia', label: 'Nº siniestro Elevia', width: 'w-36' },
+  { key: 'estado', label: 'Estado', width: 'w-24' },
+  { key: 'costeTotal', label: 'Coste total', width: 'w-24' },
+  { key: 'culpa', label: 'Culpa', width: 'w-24' },
+  { key: 'observaciones', label: 'Observaciones', width: 'w-40' },
+  { key: 'fechaCierre', label: 'Fecha cierre', width: 'w-32' },
+  { key: 'valoracion', label: 'Valoración', width: 'w-24' },
 ];
 
 export function SiniestrosTableModal({
@@ -106,7 +115,6 @@ export function SiniestrosTableModal({
 
     setSiniestrosLocales([...siniestrosLocales, siniestroCompleto]);
     setEditingId(id);
-    setExpandedIds(new Set(expandedIds).add(id));
 
     toast({
       title: 'Nuevo siniestro',
@@ -160,16 +168,6 @@ export function SiniestrosTableModal({
     });
   };
 
-  const toggleExpand = (id: string) => {
-    const newExpanded = new Set(expandedIds);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedIds(newExpanded);
-  };
-
   const formatDate = (date: string | null) => {
     if (!date) return '-';
     try {
@@ -182,86 +180,70 @@ export function SiniestrosTableModal({
   const siniestrosAbiertos = siniestrosLocales.filter((s) => s.estado === 'abierto').length;
   const siniestrosCerrados = siniestrosLocales.filter((s) => s.estado === 'cerrado').length;
 
+  const isEditing = (id: string) => editingId === id;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] max-h-[95vh] p-0 flex flex-col overflow-hidden">
+      <DialogContent className="max-w-[98vw] w-[98vw] h-[95vh] max-h-[95vh] p-0 flex flex-col overflow-hidden">
         {/* Header */}
-        <DialogHeader className="px-8 py-6 border-b bg-gradient-to-r from-slate-900 to-slate-800 text-white shrink-0">
+        <DialogHeader className="px-6 py-5 border-b bg-white shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 rounded-lg bg-slate-900 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-2xl font-bold text-white">
+                <DialogTitle className="text-xl font-bold text-slate-900">
                   Historial de Siniestros
                 </DialogTitle>
-                <p className="text-slate-300 mt-1">{grupo.empresa.nombre}</p>
+                <p className="text-sm text-slate-500">{grupo.empresa.nombre}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Stats */}
+              <div className="flex items-center gap-4 mr-4 text-sm">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span className="text-slate-600">{siniestrosAbiertos} abiertos</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="text-slate-600">{siniestrosCerrados} cerrados</span>
+                </div>
+                <div className="h-4 w-px bg-slate-200" />
+                <span className="text-slate-600">Total: {siniestrosLocales.length}</span>
+              </div>
+
               {siniestrosLocales.length > 0 && (
-                <Button
-                  variant="outline"
-                  className="border-white/20 text-white hover:bg-white/10"
-                  onClick={handleDownloadAll}
-                >
+                <Button variant="outline" onClick={handleDownloadAll}>
                   <Download className="w-4 h-4 mr-2" />
                   Descargar todo
                 </Button>
               )}
-              <Button
-                onClick={handleAddSiniestro}
-                className="bg-white text-slate-900 hover:bg-slate-100"
-              >
+              <Button onClick={handleAddSiniestro}>
                 <Plus className="w-4 h-4 mr-2" />
                 Añadir siniestro
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="text-white hover:bg-white/10"
-              >
+              <Button variant="ghost" size="icon" onClick={onClose}>
                 <X className="w-5 h-5" />
               </Button>
             </div>
           </div>
-
-          {/* Stats */}
-          <div className="flex items-center gap-6 mt-6">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-amber-500" />
-              <span className="text-sm text-slate-300">
-                <span className="font-semibold text-white">{siniestrosAbiertos}</span> abiertos
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-sm text-slate-300">
-                <span className="font-semibold text-white">{siniestrosCerrados}</span> cerrados
-              </span>
-            </div>
-            <div className="w-px h-4 bg-white/20" />
-            <span className="text-sm text-slate-300">
-              Total: <span className="font-semibold text-white">{siniestrosLocales.length}</span> siniestros
-            </span>
-          </div>
         </DialogHeader>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-8 bg-slate-50/50">
+        {/* Tabla tipo Excel */}
+        <div className="flex-1 overflow-auto bg-slate-50">
           {siniestrosLocales.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center">
-              <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center mb-6">
-                <FileText className="w-10 h-10 text-slate-300" />
+            <div className="h-full flex flex-col items-center justify-center text-center p-8">
+              <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                <FileText className="w-8 h-8 text-slate-300" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
                 No hay siniestros registrados
               </h3>
-              <p className="text-slate-500 mb-6 max-w-md">
-                Este cliente no tiene siniestros registrados. Haz clic en "Añadir siniestro" para crear el primero.
+              <p className="text-slate-500 mb-4">
+                Este cliente no tiene siniestros. Haz clic en "Añadir siniestro" para crear el primero.
               </p>
               <Button onClick={handleAddSiniestro}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -269,40 +251,255 @@ export function SiniestrosTableModal({
               </Button>
             </div>
           ) : (
-            <div className="space-y-4 max-w-7xl mx-auto">
-              {siniestrosLocales.map((siniestro, index) => {
-                const isEditing = editingId === siniestro.id;
-                const isExpanded = expandedIds.has(siniestro.id);
-                const estado = ESTADOS.find((e) => e.value === siniestro.estado);
-                const valoracion = VALORACIONES.find((v) => v.value === siniestro.valoracion);
+            <div className="min-w-max p-4">
+              <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 border-b border-slate-200 sticky top-0">
+                    <tr>
+                      <th className="px-3 py-3 text-left font-medium text-slate-600 w-20">
+                        Acciones
+                      </th>
+                      {HEADERS.map((h) => (
+                        <th
+                          key={h.key}
+                          className={cn(
+                            "px-3 py-3 text-left font-medium text-slate-600 whitespace-nowrap",
+                            h.width
+                          )}
+                        >
+                          {h.label}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {siniestrosLocales.map((siniestro, index) => {
+                      const editing = isEditing(siniestro.id);
+                      const estado = ESTADOS.find((e) => e.value === siniestro.estado);
 
-                return (
-                  <div
-                    key={siniestro.id}
-                    className={cn(
-                      "bg-white rounded-2xl border transition-all duration-200 overflow-hidden",
-                      isEditing
-                        ? "border-blue-500 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500"
-                        : "border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300"
-                    )}
-                  >
-                    {/* Card Header - Always visible */}
-                    <div
-                      className="p-5 cursor-pointer"
-                      onClick={() => !isEditing && toggleExpand(siniestro.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-600 font-semibold">
-                            {index + 1}
-                          </div>
+                      return (
+                        <tr
+                          key={siniestro.id}
+                          className={cn(
+                            "hover:bg-slate-50/50",
+                            editing && "bg-blue-50/50"
+                          )}
+                        >
+                          {/* Acciones */}
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            <div className="flex items-center gap-1">
+                              {editing ? (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={() => handleSave(siniestro.id)}
+                                  >
+                                    <Save className="w-4 h-4 text-emerald-600" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={() => setEditingId(null)}
+                                  >
+                                    <X className="w-4 h-4 text-red-600" />
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={() => setEditingId(siniestro.id)}
+                                  >
+                                    <FileText className="w-3.5 h-3.5" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={() => handleDelete(siniestro.id)}
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={() => handleDownload(siniestro)}
+                                  >
+                                    <Download className="w-3.5 h-3.5" />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </td>
 
-                          <div>
-                            <div className="flex items-center gap-3">
-                              <h4 className="font-semibold text-slate-900">
-                                {siniestro.nombreTomador || 'Sin nombre'}
-                              </h4>
+                          {/* Nombre tomador */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                value={siniestro.nombreTomador}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(siniestro.id, 'nombreTomador', e.target.value)
+                                }
+                                className="h-8 text-xs"
+                              />
+                            ) : (
+                              <span className="font-medium text-slate-900">
+                                {siniestro.nombreTomador || '-'}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Nº póliza */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                value={siniestro.numeroPoliza}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(siniestro.id, 'numeroPoliza', e.target.value)
+                                }
+                                className="h-8 text-xs"
+                              />
+                            ) : (
+                              siniestro.numeroPoliza || '-'
+                            )}
+                          </td>
+
+                          {/* Compañía */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                value={siniestro.compania}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(siniestro.id, 'compania', e.target.value)
+                                }
+                                className="h-8 text-xs"
+                              />
+                            ) : (
+                              siniestro.compania || '-'
+                            )}
+                          </td>
+
+                          {/* Matrícula */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                value={siniestro.matricula}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(siniestro.id, 'matricula', e.target.value)
+                                }
+                                className="h-8 text-xs"
+                              />
+                            ) : (
+                              siniestro.matricula || '-'
+                            )}
+                          </td>
+
+                          {/* Fecha ocurrencia */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                type="date"
+                                value={siniestro.fechaOcurrencia || ''}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(siniestro.id, 'fechaOcurrencia', e.target.value || null)
+                                }
+                                className="h-8 text-xs"
+                              />
+                            ) : (
+                              formatDate(siniestro.fechaOcurrencia)
+                            )}
+                          </td>
+
+                          {/* Tipo siniestro */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                value={siniestro.tipoSiniestro}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(siniestro.id, 'tipoSiniestro', e.target.value)
+                                }
+                                className="h-8 text-xs"
+                              />
+                            ) : (
+                              siniestro.tipoSiniestro || '-'
+                            )}
+                          </td>
+
+                          {/* Fecha apertura */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                type="date"
+                                value={siniestro.fechaApertura || ''}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(siniestro.id, 'fechaApertura', e.target.value || null)
+                                }
+                                className="h-8 text-xs"
+                              />
+                            ) : (
+                              formatDate(siniestro.fechaApertura)
+                            )}
+                          </td>
+
+                          {/* Nº siniestro compañía */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                value={siniestro.numSiniestroCompania}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(siniestro.id, 'numSiniestroCompania', e.target.value)
+                                }
+                                className="h-8 text-xs"
+                              />
+                            ) : (
+                              siniestro.numSiniestroCompania || '-'
+                            )}
+                          </td>
+
+                          {/* Nº siniestro Elevia */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                value={siniestro.numSiniestroElevia}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(siniestro.id, 'numSiniestroElevia', e.target.value)
+                                }
+                                className="h-8 text-xs"
+                              />
+                            ) : (
+                              siniestro.numSiniestroElevia || '-'
+                            )}
+                          </td>
+
+                          {/* Estado */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Select
+                                value={siniestro.estado}
+                                onValueChange={(v) =>
+                                  handleUpdateSiniestro(siniestro.id, 'estado', v)
+                                }
+                              >
+                                <SelectTrigger className="h-8 text-xs w-28">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {ESTADOS.map((e) => (
+                                    <SelectItem key={e.value} value={e.value}>
+                                      {e.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
                               <Badge
+                                variant="secondary"
                                 className={cn(
                                   "font-medium",
                                   siniestro.estado === 'abierto'
@@ -310,476 +507,140 @@ export function SiniestrosTableModal({
                                     : "bg-emerald-50 text-emerald-700 border-emerald-200"
                                 )}
                               >
-                                <span
-                                  className={cn(
-                                    "w-1.5 h-1.5 rounded-full mr-1.5",
-                                    estado?.color
-                                  )}
-                                />
+                                <span className={cn("w-1.5 h-1.5 rounded-full mr-1.5", estado?.color)} />
                                 {estado?.label}
                               </Badge>
-                              {valoracion && (
-                                <Badge variant="secondary" className={cn("font-medium", valoracion.color)}>
-                                  {valoracion.label}
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-4 mt-1.5 text-sm text-slate-500">
-                              {siniestro.compania && (
-                                <span className="flex items-center gap-1">
-                                  <Building2 className="w-3.5 h-3.5" />
-                                  {siniestro.compania}
-                                </span>
-                              )}
-                              {siniestro.matricula && (
-                                <span className="flex items-center gap-1">
-                                  <Car className="w-3.5 h-3.5" />
-                                  {siniestro.matricula}
-                                </span>
-                              )}
-                              {siniestro.fechaOcurrencia && (
-                                <span className="flex items-center gap-1">
-                                  <Calendar className="w-3.5 h-3.5" />
-                                  {formatDate(siniestro.fechaOcurrencia)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+                            )}
+                          </td>
 
-                        <div className="flex items-center gap-2">
-                          {!isEditing ? (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-9 w-9 text-slate-400 hover:text-slate-600"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingId(siniestro.id);
-                                  setExpandedIds(new Set(expandedIds).add(siniestro.id));
-                                }}
+                          {/* Coste total */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                type="number"
+                                step="0.01"
+                                value={siniestro.costeTotal || ''}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(
+                                    siniestro.id,
+                                    'costeTotal',
+                                    e.target.value ? parseFloat(e.target.value) : null
+                                  )
+                                }
+                                className="h-8 text-xs"
+                              />
+                            ) : (
+                              siniestro.costeTotal ? `€${siniestro.costeTotal.toFixed(2)}` : '-'
+                            )}
+                          </td>
+
+                          {/* Culpa */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Select
+                                value={siniestro.culpa || '__none__'}
+                                onValueChange={(v) =>
+                                  handleUpdateSiniestro(siniestro.id, 'culpa', v === '__none__' ? null : v)
+                                }
                               >
-                                <Edit2 className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-9 w-9 text-slate-400 hover:text-red-600"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(siniestro.id);
-                                }}
+                                <SelectTrigger className="h-8 text-xs w-24">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="__none__">-</SelectItem>
+                                  {CULPAS.map((c) => (
+                                    <SelectItem key={c.value} value={c.value}>
+                                      {c.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              siniestro.culpa === 'tomador'
+                                ? 'Tomador'
+                                : siniestro.culpa === 'contrario'
+                                ? 'Contrario'
+                                : '-'
+                            )}
+                          </td>
+
+                          {/* Observaciones */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                value={siniestro.observaciones}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(siniestro.id, 'observaciones', e.target.value)
+                                }
+                                className="h-8 text-xs"
+                              />
+                            ) : (
+                              <span className="truncate block max-w-[150px]">
+                                {siniestro.observaciones || '-'}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Fecha cierre */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Input
+                                type="date"
+                                value={siniestro.fechaCierre || ''}
+                                onChange={(e) =>
+                                  handleUpdateSiniestro(siniestro.id, 'fechaCierre', e.target.value || null)
+                                }
+                                className="h-8 text-xs"
+                                disabled={siniestro.estado !== 'cerrado'}
+                              />
+                            ) : (
+                              formatDate(siniestro.fechaCierre)
+                            )}
+                          </td>
+
+                          {/* Valoración */}
+                          <td className="px-3 py-2">
+                            {editing ? (
+                              <Select
+                                value={siniestro.valoracion || '__none__'}
+                                onValueChange={(v) =>
+                                  handleUpdateSiniestro(siniestro.id, 'valoracion', v === '__none__' ? null : v)
+                                }
                               >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-9 w-9 text-slate-400 hover:text-slate-600"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDownload(siniestro);
-                                }}
-                              >
-                                <Download className="w-4 h-4" />
-                              </Button>
-                            </>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="sm"
-                                className="bg-blue-600 hover:bg-blue-700"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSave(siniestro.id);
-                                }}
-                              >
-                                <Save className="w-4 h-4 mr-1.5" />
-                                Guardar
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingId(null);
-                                }}
-                              >
-                                Cancelar
-                              </Button>
-                            </div>
-                          )}
-                          {!isEditing && (
-                            <Button variant="ghost" size="icon" className="h-9 w-9">
-                              {isExpanded ? (
-                                <ChevronUp className="w-5 h-5 text-slate-400" />
-                              ) : (
-                                <ChevronDown className="w-5 h-5 text-slate-400" />
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Expanded Content */}
-                    {(isExpanded || isEditing) && (
-                      <div className="px-5 pb-5 border-t border-slate-100">
-                        <div className="pt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                          {/* Column 1: Datos básicos */}
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1.5">
-                                <User className="w-3.5 h-3.5" />
-                                Nombre del tomador
-                              </Label>
-                              {isEditing ? (
-                                <Input
-                                  value={siniestro.nombreTomador}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(siniestro.id, 'nombreTomador', e.target.value)
-                                  }
-                                  className="h-9"
-                                />
-                              ) : (
-                                <p className="text-sm text-slate-900">{siniestro.nombreTomador || '-'}</p>
-                              )}
-                            </div>
-
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1.5">
-                                <FileText className="w-3.5 h-3.5" />
-                                Número de póliza
-                              </Label>
-                              {isEditing ? (
-                                <Input
-                                  value={siniestro.numeroPoliza}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(siniestro.id, 'numeroPoliza', e.target.value)
-                                  }
-                                  className="h-9"
-                                />
-                              ) : (
-                                <p className="text-sm text-slate-900">{siniestro.numeroPoliza || '-'}</p>
-                              )}
-                            </div>
-
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1.5">
-                                <Building2 className="w-3.5 h-3.5" />
-                                Compañía
-                              </Label>
-                              {isEditing ? (
-                                <Input
-                                  value={siniestro.compania}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(siniestro.id, 'compania', e.target.value)
-                                  }
-                                  className="h-9"
-                                />
-                              ) : (
-                                <p className="text-sm text-slate-900">{siniestro.compania || '-'}</p>
-                              )}
-                            </div>
-
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1.5">
-                                <Car className="w-3.5 h-3.5" />
-                                Matrícula
-                              </Label>
-                              {isEditing ? (
-                                <Input
-                                  value={siniestro.matricula}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(siniestro.id, 'matricula', e.target.value)
-                                  }
-                                  className="h-9"
-                                />
-                              ) : (
-                                <p className="text-sm text-slate-900">{siniestro.matricula || '-'}</p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Column 2: Fechas */}
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1.5">
-                                <Calendar className="w-3.5 h-3.5" />
-                                Fecha de ocurrencia
-                              </Label>
-                              {isEditing ? (
-                                <Input
-                                  type="date"
-                                  value={siniestro.fechaOcurrencia || ''}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(siniestro.id, 'fechaOcurrencia', e.target.value || null)
-                                  }
-                                  className="h-9"
-                                />
-                              ) : (
-                                <p className="text-sm text-slate-900">{formatDate(siniestro.fechaOcurrencia)}</p>
-                              )}
-                            </div>
-
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1.5">
-                                Tipo de siniestro
-                              </Label>
-                              {isEditing ? (
-                                <Input
-                                  value={siniestro.tipoSiniestro}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(siniestro.id, 'tipoSiniestro', e.target.value)
-                                  }
-                                  className="h-9"
-                                  placeholder="Ej: Colisión, Robo..."
-                                />
-                              ) : (
-                                <p className="text-sm text-slate-900">{siniestro.tipoSiniestro || '-'}</p>
-                              )}
-                            </div>
-
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1.5">
-                                <Calendar className="w-3.5 h-3.5" />
-                                Fecha de apertura
-                              </Label>
-                              {isEditing ? (
-                                <Input
-                                  type="date"
-                                  value={siniestro.fechaApertura || ''}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(siniestro.id, 'fechaApertura', e.target.value || null)
-                                  }
-                                  className="h-9"
-                                />
-                              ) : (
-                                <p className="text-sm text-slate-900">{formatDate(siniestro.fechaApertura)}</p>
-                              )}
-                            </div>
-
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1.5">
-                                <Calendar className="w-3.5 h-3.5" />
-                                Fecha de cierre
-                              </Label>
-                              {isEditing ? (
-                                <Input
-                                  type="date"
-                                  value={siniestro.fechaCierre || ''}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(siniestro.id, 'fechaCierre', e.target.value || null)
-                                  }
-                                  className="h-9"
-                                  disabled={siniestro.estado !== 'cerrado'}
-                                />
-                              ) : (
-                                <p className="text-sm text-slate-900">{formatDate(siniestro.fechaCierre)}</p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Column 3: Números y estado */}
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 mb-1.5">
-                                Nº siniestro compañía
-                              </Label>
-                              {isEditing ? (
-                                <Input
-                                  value={siniestro.numSiniestroCompania}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(siniestro.id, 'numSiniestroCompania', e.target.value)
-                                  }
-                                  className="h-9"
-                                />
-                              ) : (
-                                <p className="text-sm text-slate-900">{siniestro.numSiniestroCompania || '-'}</p>
-                              )}
-                            </div>
-
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 mb-1.5">
-                                Nº siniestro Elevia
-                              </Label>
-                              {isEditing ? (
-                                <Input
-                                  value={siniestro.numSiniestroElevia}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(siniestro.id, 'numSiniestroElevia', e.target.value)
-                                  }
-                                  className="h-9"
-                                />
-                              ) : (
-                                <p className="text-sm text-slate-900">{siniestro.numSiniestroElevia || '-'}</p>
-                              )}
-                            </div>
-
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1.5">
-                                <Euro className="w-3.5 h-3.5" />
-                                Coste total
-                              </Label>
-                              {isEditing ? (
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  value={siniestro.costeTotal || ''}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(
-                                      siniestro.id,
-                                      'costeTotal',
-                                      e.target.value ? parseFloat(e.target.value) : null
-                                    )
-                                  }
-                                  className="h-9"
-                                  placeholder="0.00"
-                                />
-                              ) : (
-                                <p className="text-sm text-slate-900">
-                                  {siniestro.costeTotal ? `€${siniestro.costeTotal.toFixed(2)}` : '-'}
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label className="text-xs font-medium text-slate-500 mb-1.5">Estado</Label>
-                                {isEditing ? (
-                                  <Select
-                                    value={siniestro.estado}
-                                    onValueChange={(v) =>
-                                      handleUpdateSiniestro(siniestro.id, 'estado', v)
-                                    }
-                                  >
-                                    <SelectTrigger className="h-9">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {ESTADOS.map((e) => (
-                                        <SelectItem key={e.value} value={e.value}>
-                                          {e.label}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                ) : (
-                                  <Badge
-                                    className={cn(
-                                      siniestro.estado === 'abierto'
-                                        ? "bg-amber-50 text-amber-700"
-                                        : "bg-emerald-50 text-emerald-700"
-                                    )}
-                                  >
-                                    {estado?.label}
-                                  </Badge>
-                                )}
-                              </div>
-
-                              <div>
-                                <Label className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1.5">
-                                  <Scale className="w-3.5 h-3.5" />
-                                  Culpa
-                                </Label>
-                                {isEditing ? (
-                                  <Select
-                                    value={siniestro.culpa || '__none__'}
-                                    onValueChange={(v) =>
-                                      handleUpdateSiniestro(siniestro.id, 'culpa', v === '__none__' ? null : v)
-                                    }
-                                  >
-                                    <SelectTrigger className="h-9">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="__none__">-</SelectItem>
-                                      {CULPAS.map((c) => (
-                                        <SelectItem key={c.value} value={c.value}>
-                                          {c.label}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                ) : (
-                                  <p className="text-sm text-slate-900">
-                                    {siniestro.culpa === 'tomador'
-                                      ? 'Tomador'
-                                      : siniestro.culpa === 'contrario'
-                                      ? 'Contrario'
-                                      : '-'}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Column 4: Valoración y observaciones */}
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-xs font-medium text-slate-500 mb-1.5">Valoración</Label>
-                              {isEditing ? (
-                                <Select
-                                  value={siniestro.valoracion || '__none__'}
-                                  onValueChange={(v) =>
-                                    handleUpdateSiniestro(siniestro.id, 'valoracion', v === '__none__' ? null : v)
-                                  }
-                                >
-                                  <SelectTrigger className="h-9">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="__none__">-</SelectItem>
-                                    {VALORACIONES.map((v) => (
-                                      <SelectItem key={v.value} value={v.value}>
-                                        {v.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              ) : (
-                                <p className="text-sm text-slate-900">
-                                  {siniestro.valoracion ? (
-                                    <Badge className={valoracion?.color}>{valoracion?.label}</Badge>
-                                  ) : (
-                                    '-'
+                                <SelectTrigger className="h-8 text-xs w-28">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="__none__">-</SelectItem>
+                                  {VALORACIONES.map((v) => (
+                                    <SelectItem key={v.value} value={v.value}>
+                                      {v.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              siniestro.valoracion && (
+                                <Badge
+                                  variant="secondary"
+                                  className={cn(
+                                    "font-medium",
+                                    siniestro.valoracion === 'positiva' && "bg-emerald-50 text-emerald-700",
+                                    siniestro.valoracion === 'intermedia' && "bg-amber-50 text-amber-700",
+                                    siniestro.valoracion === 'negativa' && "bg-red-50 text-red-700"
                                   )}
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="flex-1">
-                              <Label className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1.5">
-                                <MessageSquare className="w-3.5 h-3.5" />
-                                Observaciones
-                              </Label>
-                              {isEditing ? (
-                                <Textarea
-                                  value={siniestro.observaciones}
-                                  onChange={(e) =>
-                                    handleUpdateSiniestro(siniestro.id, 'observaciones', e.target.value)
-                                  }
-                                  className="min-h-[100px] resize-none"
-                                  placeholder="Añade observaciones relevantes..."
-                                />
-                              ) : (
-                                <div className="bg-slate-50 rounded-lg p-3 min-h-[100px]">
-                                  <p className="text-sm text-slate-700 whitespace-pre-wrap">
-                                    {siniestro.observaciones || (
-                                      <span className="text-slate-400 italic">Sin observaciones</span>
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                                >
+                                  {VALORACIONES.find((v) => v.value === siniestro.valoracion)?.label}
+                                </Badge>
+                              )
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
