@@ -23,8 +23,6 @@ import {
   FileText,
   MoreVertical,
   Trash2,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
 import {
   DropdownMenu,
