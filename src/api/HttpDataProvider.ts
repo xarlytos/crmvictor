@@ -4,6 +4,11 @@ import type {
   FiltrosClientes,
   ConfigUsuario,
   EstadoCliente,
+  SiniestroGrupo,
+  Siniestro,
+  FiltrosSiniestros,
+  CalendarEvent,
+  EventType,
 } from '@/types';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -184,5 +189,137 @@ export class HttpDataProvider implements DataProvider {
   getUser(): any | null {
     const userStr = localStorage.getItem('crm_user');
     return userStr ? JSON.parse(userStr) : null;
+  }
+
+  // ========== SINIESTROS ==========
+
+  async listSiniestroGrupos(filtros?: FiltrosSiniestros): Promise<SiniestroGrupo[]> {
+    const queryParams = new URLSearchParams();
+    if (filtros?.search) queryParams.append('search', filtros.search);
+    if (filtros?.estado) queryParams.append('estado', filtros.estado);
+    if (filtros?.valoracion) queryParams.append('valoracion', filtros.valoracion);
+
+    const query = queryParams.toString();
+    const response = await this.request<{ success: boolean; data: SiniestroGrupo[] }>(
+      `/siniestros${query ? `?${query}` : ''}`
+    );
+    return response.data;
+  }
+
+  async getSiniestroGrupo(id: string): Promise<SiniestroGrupo> {
+    const response = await this.request<{ success: boolean; data: SiniestroGrupo }>(`/siniestros/${id}`);
+    return response.data;
+  }
+
+  async createSiniestroGrupo(dto: Omit<SiniestroGrupo, 'id' | 'createdAt' | 'updatedAt'>): Promise<SiniestroGrupo> {
+    const response = await this.request<{ success: boolean; data: SiniestroGrupo }>('/siniestros', {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    });
+    return response.data;
+  }
+
+  async updateSiniestroGrupo(id: string, dto: Partial<SiniestroGrupo>): Promise<SiniestroGrupo> {
+    const response = await this.request<{ success: boolean; data: SiniestroGrupo }>(`/siniestros/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(dto),
+    });
+    return response.data;
+  }
+
+  async deleteSiniestroGrupo(id: string): Promise<void> {
+    await this.request<void>(`/siniestros/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async addSiniestro(grupoId: string, siniestro: Omit<Siniestro, 'id' | 'createdAt' | 'updatedAt'>): Promise<Siniestro> {
+    const response = await this.request<{ success: boolean; data: Siniestro }>(`/siniestros/${grupoId}/siniestros`, {
+      method: 'POST',
+      body: JSON.stringify(siniestro),
+    });
+    return response.data;
+  }
+
+  async updateSiniestro(grupoId: string, siniestroId: string, updates: Partial<Siniestro>): Promise<Siniestro> {
+    const response = await this.request<{ success: boolean; data: Siniestro }>(
+      `/siniestros/${grupoId}/siniestros/${siniestroId}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(updates),
+      }
+    );
+    return response.data;
+  }
+
+  async deleteSiniestro(grupoId: string, siniestroId: string): Promise<void> {
+    await this.request<void>(`/siniestros/${grupoId}/siniestros/${siniestroId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // ========== CALENDARIO - EVENTOS ==========
+
+  async listEventos(year?: number, month?: number): Promise<CalendarEvent[]> {
+    const queryParams = new URLSearchParams();
+    if (year !== undefined) queryParams.append('year', String(year));
+    if (month !== undefined) queryParams.append('month', String(month));
+
+    const query = queryParams.toString();
+    const response = await this.request<{ success: boolean; data: CalendarEvent[] }>(
+      `/eventos${query ? `?${query}` : ''}`
+    );
+    return response.data;
+  }
+
+  async createEvento(dto: Omit<CalendarEvent, 'id' | 'createdAt'>): Promise<CalendarEvent> {
+    const response = await this.request<{ success: boolean; data: CalendarEvent }>('/eventos', {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    });
+    return response.data;
+  }
+
+  async updateEvento(id: string, dto: Partial<Omit<CalendarEvent, 'id' | 'createdAt'>>): Promise<CalendarEvent> {
+    const response = await this.request<{ success: boolean; data: CalendarEvent }>(`/eventos/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(dto),
+    });
+    return response.data;
+  }
+
+  async deleteEvento(id: string): Promise<void> {
+    await this.request<void>(`/eventos/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // ========== CALENDARIO - TIPOS DE EVENTO ==========
+
+  async listTiposEvento(): Promise<EventType[]> {
+    const response = await this.request<{ success: boolean; data: EventType[] }>('/eventos/tipos/list');
+    return response.data;
+  }
+
+  async createTipoEvento(dto: Omit<EventType, 'id' | 'createdAt'>): Promise<EventType> {
+    const response = await this.request<{ success: boolean; data: EventType }>('/eventos/tipos', {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    });
+    return response.data;
+  }
+
+  async updateTipoEvento(id: string, dto: Partial<Omit<EventType, 'id' | 'createdAt'>>): Promise<EventType> {
+    const response = await this.request<{ success: boolean; data: EventType }>(`/eventos/tipos/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(dto),
+    });
+    return response.data;
+  }
+
+  async deleteTipoEvento(id: string): Promise<void> {
+    await this.request<void>(`/eventos/tipos/${id}`, {
+      method: 'DELETE',
+    });
   }
 }

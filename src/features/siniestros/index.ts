@@ -5,8 +5,16 @@ export { SiniestrosPage } from './pages/SiniestrosPage';
 export { ClienteSelectorModal } from './components/ClienteSelectorModal';
 export { SiniestrosTableModal } from './components/SiniestrosTableModal';
 
-// Exportar store
-export { useSiniestrosStore } from './store/siniestros.store';
+// Exportar hooks
+export {
+  useSiniestros,
+  useCreateSiniestroGrupo,
+  useUpdateSiniestroGrupo,
+  useDeleteSiniestroGrupo,
+  useAddSiniestro,
+  useUpdateSiniestro,
+  useDeleteSiniestro,
+} from './hooks/useSiniestros';
 
 // Exportar utilidades
 export { generateSiniestroPDF } from './utils/pdfGenerator';

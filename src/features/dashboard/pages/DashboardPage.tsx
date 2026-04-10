@@ -3,20 +3,18 @@ import { dataProvider } from '@/config/dataProvider';
 import { KPI } from '@/components/shared/KPI';
 import { Button } from '@/components/ui/button';
 import {
-  Users,
   Calendar,
   AlertCircle,
-  TrendingUp,
   ArrowRight,
   Building2,
   Zap,
   Target,
   Clock,
+  LayoutDashboard,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { formatDate, getDaysUntil, getUrgenciaColor } from '@/lib/date';
+import { formatDate, getDaysUntil } from '@/lib/date';
 import { ChipMes } from '@/components/shared/ChipMes';
-import { Progress } from '@/components/ui/progress';
 import { useMemo, useState } from 'react';
 import {
   BarChart,
@@ -234,13 +232,18 @@ export function DashboardPage() {
     <div className="space-y-8 animate-slide-up">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">
-            Dashboard
-          </h1>
-          <p className="text-slate-500 mt-1">
-            Visión general de tu cartera de clientes
-          </p>
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <LayoutDashboard className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">
+              Dashboard
+            </h1>
+            <p className="text-slate-500 mt-1">
+              Visión general de tu cartera de clientes
+            </p>
+          </div>
         </div>
         <Link to="/clientes">
           <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300">

@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface DataTableProps {
@@ -9,9 +8,9 @@ interface DataTableProps {
 
 export function DataTable({ children, className }: DataTableProps) {
   return (
-    <Card className={cn('rounded-xl shadow-sm overflow-hidden', className)}>
+    <div className={cn('glass-card overflow-hidden', className)}>
       {children}
-    </Card>
+    </div>
   );
 }
 
@@ -24,7 +23,7 @@ export function DataTableHeader({ children, className }: DataTableHeaderProps) {
   return (
     <div
       className={cn(
-        'sticky top-0 z-10 bg-muted/30 border-b border-border backdrop-blur-sm',
+        'sticky top-0 z-10 bg-gradient-to-r from-slate-50/80 to-slate-100/50 border-b border-slate-200/60',
         className
       )}
     >
@@ -56,10 +55,10 @@ export function DataTableRow({ children, className, selected, ...props }: DataTa
   return (
     <tr
       className={cn(
-        'h-20 border-b border-border transition-colors',
-        'odd:bg-background even:bg-muted/[0.35]',
-        'hover:bg-primary/5',
-        selected && 'bg-primary/10 hover:bg-primary/15',
+        'h-20 border-b border-slate-100 transition-all duration-200',
+        'bg-white/50',
+        'hover:bg-white hover:shadow-sm',
+        selected && 'bg-blue-50/50 hover:bg-blue-50',
         'group',
         className
       )}
@@ -104,16 +103,16 @@ export function DataTableHeaderCell({
   onSort,
   'aria-sort': ariaSort,
 }: DataTableHeaderCellProps) {
-  const ArrowUpDown = () => <span className="text-muted-foreground">⇅</span>;
-  const ArrowUp = () => <span className="text-foreground">↑</span>;
-  const ArrowDown = () => <span className="text-foreground">↓</span>;
+  const ArrowUpDown = () => <span className="text-slate-400 text-xs">⇅</span>;
+  const ArrowUp = () => <span className="text-blue-600 text-xs font-bold">↑</span>;
+  const ArrowDown = () => <span className="text-blue-600 text-xs font-bold">↓</span>;
 
   return (
     <th
       className={cn(
-        'px-5 py-4 text-left text-sm font-semibold',
-        sortable && 'cursor-pointer select-none hover:bg-muted/50',
-        sortDirection && 'text-foreground',
+        'px-5 py-4 text-left text-sm font-bold text-slate-700 uppercase tracking-wider',
+        sortable && 'cursor-pointer select-none hover:bg-slate-100/50 transition-colors',
+        sortDirection && 'text-blue-600',
         className
       )}
       onClick={sortable ? onSort : undefined}

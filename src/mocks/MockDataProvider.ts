@@ -6,6 +6,11 @@ import type {
   TipoCarga,
   Transporte,
   ConfigUsuario,
+  SiniestroGrupo,
+  Siniestro,
+  FiltrosSiniestros,
+  CalendarEvent,
+  EventType,
 } from '@/types';
 
 const STORAGE_KEY = 'crm-clientes';
@@ -635,10 +640,184 @@ export class MockDataProvider implements DataProvider {
     return updated;
   }
 
+  // ========== SINIESTROS (Mock en memoria) ==========
+  private siniestroGrupos: SiniestroGrupo[] = [];
+
+  async listSiniestroGrupos(filtros?: FiltrosSiniestros): Promise<SiniestroGrupo[]> {
+    let grupos = this.siniestroGrupos;
+
+    if (filtros?.search) {
+      const search = filtros.search.toLowerCase();
+      grupos = grupos.filter(g => g.empresa.nombre.toLowerCase().startsWith(search));
+    }
+
+    if (filtros?.estado) {
+      grupos = grupos.filter(g => g.siniestros.some(s => s.estado === filtros.estado));
+    }
+
+    if (filtros?.valoracion) {
+      grupos = grupos.filter(g => g.siniestros.some(s => s.valoracion === filtros.valoracion));
+    }
+
+    return grupos;
+  }
+
+  async getSiniestroGrupo(id: string): Promise<SiniestroGrupo> {
+    const grupo = this.siniestroGrupos.find(g => g.id === id);
+    if (!grupo) throw new Error('Grupo no encontrado');
+    return grupo;
+  }
+
+  async createSiniestroGrupo(dto: Omit<SiniestroGrupo, 'id' | 'createdAt' | 'updatedAt'>): Promise<SiniestroGrupo> {
+    const existente = this.siniestroGrupos.find(g => g.clienteId === dto.clienteId);
+    if (existente) throw new Error('Ya existe un historial para este cliente');
+
+    const nuevo: SiniestroGrupo = {
+      ...dto,
+      id: `sg-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.siniestroGrupos.push(nuevo);
+    return nuevo;
+  }
+
+  async updateSiniestroGrupo(id: string, dto: Partial<SiniestroGrupo>): Promise<SiniestroGrupo> {
+    const index = this.siniestroGrupos.findIndex(g => g.id === id);
+    if (index === -1) throw new Error('Grupo no encontrado');
+
+    const actualizado = {
+      ...this.siniestroGrupos[index],
+      ...dto,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    this.siniestroGrupos[index] = actualizado;
+    return actualizado;
+  }
+
+  async deleteSiniestroGrupo(id: string): Promise<void> {
+    this.siniestroGrupos = this.siniestroGrupos.filter(g => g.id !== id);
+  }
+
+  async addSiniestro(grupoId: string, siniestro: Omit<Siniestro, 'id' | 'createdAt' | 'updatedAt'>): Promise<Siniestro> {
+    const grupo = this.siniestroGrupos.find(g => g.id === grupoId);
+    if (!grupo) throw new Error('Grupo no encontrado');
+
+    const nuevo: Siniestro = {
+      ...siniestro,
+      id: `sin-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    grupo.siniestros.push(nuevo);
+    grupo.updatedAt = new Date().toISOString();
+    return nuevo;
+  }
+
+  async updateSiniestro(grupoId: string, siniestroId: string, updates: Partial<Siniestro>): Promise<Siniestro> {
+    const grupo = this.siniestroGrupos.find(g => g.id === grupoId);
+    if (!grupo) throw new Error('Grupo no encontrado');
+
+    const index = grupo.siniestros.findIndex(s => s.id === siniestroId);
+    if (index === -1) throw new Error('Siniestro no encontrado');
+
+    const actualizado = {
+      ...grupo.siniestros[index],
+      ...updates,
+      id: siniestroId,
+      updatedAt: new Date().toISOString(),
+    };
+    grupo.siniestros[index] = actualizado;
+    grupo.updatedAt = new Date().toISOString();
+    return actualizado;
+  }
+
+  async deleteSiniestro(grupoId: string, siniestroId: string): Promise<void> {
+    const grupo = this.siniestroGrupos.find(g => g.id === grupoId);
+    if (!grupo) throw new Error('Grupo no encontrado');
+
+    grupo.siniestros = grupo.siniestros.filter(s => s.id !== siniestroId);
+    grupo.updatedAt = new Date().toISOString();
+  }
+
+  // ========== CALENDARIO (Mock en memoria) ==========
+  private eventos: CalendarEvent[] = [];
+  private tiposEvento: EventType[] = [];
+
+  async listEventos(year?: number, month?: number): Promise<CalendarEvent[]> {
+    let eventos = this.eventos;
+
+    if (year !== undefined && month !== undefined) {
+      eventos = eventos.filter(e => {
+        const date = new Date(e.date);
+        return date.getFullYear() === year && date.getMonth() === month;
+      });
+    }
+
+    return eventos.sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return a.startTime.localeCompare(b.startTime);
+    });
+  }
+
+  async createEvento(dto: Omit<CalendarEvent, 'id' | 'createdAt'>): Promise<CalendarEvent> {
+    const nuevo: CalendarEvent = {
+      ...dto,
+      id: `ev-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    this.eventos.push(nuevo);
+    return nuevo;
+  }
+
+  async updateEvento(id: string, dto: Partial<Omit<CalendarEvent, 'id' | 'createdAt'>>): Promise<CalendarEvent> {
+    const index = this.eventos.findIndex(e => e.id === id);
+    if (index === -1) throw new Error('Evento no encontrado');
+
+    const actualizado = { ...this.eventos[index], ...dto, id };
+    this.eventos[index] = actualizado;
+    return actualizado;
+  }
+
+  async deleteEvento(id: string): Promise<void> {
+    this.eventos = this.eventos.filter(e => e.id !== id);
+  }
+
+  async listTiposEvento(): Promise<EventType[]> {
+    return this.tiposEvento.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async createTipoEvento(dto: Omit<EventType, 'id' | 'createdAt'>): Promise<EventType> {
+    const nuevo: EventType = {
+      ...dto,
+      id: `et-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    this.tiposEvento.push(nuevo);
+    return nuevo;
+  }
+
+  async updateTipoEvento(id: string, dto: Partial<Omit<EventType, 'id' | 'createdAt'>>): Promise<EventType> {
+    const index = this.tiposEvento.findIndex(t => t.id === id);
+    if (index === -1) throw new Error('Tipo no encontrado');
+
+    const actualizado = { ...this.tiposEvento[index], ...dto, id };
+    this.tiposEvento[index] = actualizado;
+    return actualizado;
+  }
+
+  async deleteTipoEvento(id: string): Promise<void> {
+    this.tiposEvento = this.tiposEvento.filter(t => t.id !== id);
+  }
+
   // Método helper para reiniciar datos
   resetData(): void {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(CONFIG_KEY);
+    this.siniestroGrupos = [];
+    this.eventos = [];
+    this.tiposEvento = [];
   }
 }
 

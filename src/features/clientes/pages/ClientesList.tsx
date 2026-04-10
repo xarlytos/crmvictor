@@ -15,7 +15,7 @@ import { useClientesStore } from '../store/clientes.store';
 import type { Cliente, EstadoCliente } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
-import { Users, TrendingUp, Calendar, FileText } from 'lucide-react';
+import { Users, TrendingUp, Calendar, FileText, UserCircle } from 'lucide-react';
 import { getDaysUntil } from '@/lib/date';
 import {
   Select,
@@ -391,15 +391,22 @@ export function ClientesList() {
     <TooltipProvider>
       <div className="space-y-6 font-sans">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Clientes</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Gestiona tus clientes y controla sus vencimientos
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+              <UserCircle className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">
+                Clientes
+              </h1>
+              <p className="text-slate-500 mt-1">
+                Gestiona tus clientes y controla sus vencimientos
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={handleCreate} className="rounded-lg gap-2">
+            <Button onClick={handleCreate} className="rounded-xl gap-2 bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 shadow-lg shadow-violet-500/25">
               <Plus className="h-4 w-4" />
               Nuevo Cliente
             </Button>
@@ -407,28 +414,36 @@ export function ClientesList() {
         </div>
 
         {/* KPIs */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           <KPI
             title="Total Clientes"
             value={total}
-            icon={<Users className="h-4 w-4 text-muted-foreground/60" />}
+            subtitle="Clientes registrados"
+            icon={<Users className="h-6 w-6" />}
+            color="violet"
           />
           <KPI
             title="Vendidos"
             value={vendidos}
             subtitle={`${tasaCierre}% tasa de cierre`}
-            icon={<TrendingUp className="h-4 w-4 text-muted-foreground/60" />}
+            icon={<TrendingUp className="h-6 w-6" />}
+            color="emerald"
+            trend="up"
+            trendValue={`${tasaCierre}%`}
           />
           <KPI
             title="Próximos Vencimientos"
             value={proximosVencimientos}
             subtitle="En los próximos 60 días"
-            icon={<Calendar className="h-4 w-4 text-muted-foreground/60" />}
+            icon={<Calendar className="h-6 w-6" />}
+            color="amber"
           />
           <KPI
             title="Propuestas Activas"
             value={propuestasActivas}
-            icon={<FileText className="h-4 w-4 text-muted-foreground/60" />}
+            subtitle="En negociación"
+            icon={<FileText className="h-6 w-6" />}
+            color="blue"
           />
         </div>
 
@@ -442,7 +457,7 @@ export function ClientesList() {
         <DataTable>
           <DataTableContent>
             <table className="w-full table-auto">
-              <thead className="sticky top-0 z-10 bg-muted/30 border-b border-border backdrop-blur-sm">
+              <thead className="sticky top-0 z-10 bg-gradient-to-r from-slate-50/80 to-slate-100/50 border-b border-slate-200/60">
                 <tr>
                   <th className="w-12 px-5 py-4">
                     <input
@@ -544,22 +559,22 @@ export function ClientesList() {
                 ) : clientes.length === 0 ? (
                   <tr>
                     <td colSpan={Object.values(columnVisibility).filter(Boolean).length + 1} className="px-5 py-16 text-center">
-                      <div className="flex flex-col items-center gap-4">
-                        <PackageSearch className="h-12 w-12 text-muted-foreground/50" />
+                      <div className="flex flex-col items-center gap-5">
+                        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                          <PackageSearch className="h-10 w-10 text-slate-400" />
+                        </div>
                         <div>
-                          <p className="text-lg font-medium">No se encontraron clientes</p>
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="text-xl font-bold text-slate-800">No se encontraron clientes</p>
+                          <p className="text-sm text-slate-500 mt-2 max-w-sm">
                             {Object.keys(filtros).length > 0
                               ? 'Intenta ajustar los filtros para ver más resultados'
                               : 'Comienza agregando tu primer cliente'}
                           </p>
                         </div>
-                        <div className="flex gap-2">
-                          <Button onClick={handleCreate} variant="default">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Nuevo Cliente
-                          </Button>
-                        </div>
+                        <Button onClick={handleCreate} className="bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 shadow-lg shadow-violet-500/25 rounded-xl">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Nuevo Cliente
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -583,18 +598,18 @@ export function ClientesList() {
 
         {/* Paginación */}
         {!isLoading && clientes.length > 0 && (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center justify-between glass-card p-4">
+            <div className="flex items-center gap-2 text-sm text-slate-500">
               <span>
-                Mostrando {((page - 1) * pageSize) + 1} - {Math.min(page * pageSize, sortedAndPaginated.total)} de {sortedAndPaginated.total}
+                Mostrando <span className="font-bold text-slate-800">{((page - 1) * pageSize) + 1} - {Math.min(page * pageSize, sortedAndPaginated.total)}</span> de <span className="font-bold text-slate-800">{sortedAndPaginated.total}</span>
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Select value={String(pageSize)} onValueChange={(v) => {
                 setPageSize(Number(v));
                 setPage(1);
               }}>
-                <SelectTrigger className="w-[80px]">
+                <SelectTrigger className="w-[80px] h-10 bg-white/50 border-slate-200 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -603,27 +618,31 @@ export function ClientesList() {
                   <SelectItem value="50">50</SelectItem>
                 </SelectContent>
               </Select>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                aria-label="Página anterior"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm px-2">
-                {page} / {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                aria-label="Página siguiente"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  aria-label="Página anterior"
+                  className="h-9 w-9 rounded-lg hover:bg-white hover:shadow-sm"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm font-bold px-3 min-w-[60px] text-center">
+                  {page} / {totalPages}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  aria-label="Página siguiente"
+                  className="h-9 w-9 rounded-lg hover:bg-white hover:shadow-sm"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         )}

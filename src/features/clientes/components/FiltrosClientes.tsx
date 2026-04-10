@@ -152,23 +152,23 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
     <div className={isMobile ? "space-y-4" : "flex items-center gap-2 flex-wrap w-full"}>
       {/* Search */}
       <div className={isMobile ? "relative w-full" : "relative flex-1 min-w-[200px] max-w-[400px]"}>
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         <Input
           id="search"
           placeholder="Buscar..."
           value={filtros.search || ''}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="pl-9 h-9"
+          className="pl-9 h-10 bg-white/50 border-slate-200 rounded-xl focus:bg-white transition-colors"
         />
       </div>
 
       {/* Estado - Multi Select Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className={`h-9 gap-2 ${isMobile ? 'w-full justify-between' : ''}`}>
+          <Button variant="outline" size="sm" className={`h-10 gap-2 rounded-xl border-slate-200 hover:bg-slate-50 ${isMobile ? 'w-full justify-between' : ''}`}>
             Estado
             {estadosCount > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs bg-violet-100 text-violet-700">
                 {estadosCount}
               </Badge>
             )}
@@ -200,10 +200,10 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
       {/* Mercancía - Multi Select Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className={`h-9 gap-2 ${isMobile ? 'w-full justify-between' : ''}`}>
+          <Button variant="outline" size="sm" className={`h-10 gap-2 rounded-xl border-slate-200 hover:bg-slate-50 ${isMobile ? 'w-full justify-between' : ''}`}>
             Mercancía
             {tiposCargaCount > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs bg-amber-100 text-amber-700">
                 {tiposCargaCount}
               </Badge>
             )}
@@ -241,10 +241,10 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
       {/* Transporte - Multi Select Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className={`h-9 gap-2 ${isMobile ? 'w-full justify-between' : ''}`}>
+          <Button variant="outline" size="sm" className={`h-10 gap-2 rounded-xl border-slate-200 hover:bg-slate-50 ${isMobile ? 'w-full justify-between' : ''}`}>
             Transporte
             {transportesCount > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs bg-blue-100 text-blue-700">
                 {transportesCount}
               </Badge>
             )}
@@ -278,7 +278,7 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
         value={filtros.mesVencimiento ? String(filtros.mesVencimiento) : 'all'}
         onValueChange={handleMesChange}
       >
-        <SelectTrigger className={isMobile ? "h-9 w-full" : "h-9 w-[180px]"}>
+        <SelectTrigger className={isMobile ? "h-10 w-full bg-white/50 border-slate-200 rounded-xl" : "h-10 w-[180px] bg-white/50 border-slate-200 rounded-xl"}>
           <SelectValue placeholder="Mes Vencimiento" />
         </SelectTrigger>
         <SelectContent>
@@ -300,7 +300,7 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
 
       {/* Clear Filters Button */}
       {hasActiveFilters && (
-        <Button variant="ghost" size="sm" onClick={resetFiltros} className={`h-9 gap-2 ${isMobile ? 'w-full' : ''}`}>
+        <Button variant="ghost" size="sm" onClick={resetFiltros} className={`h-10 gap-2 rounded-xl text-slate-600 hover:text-slate-800 hover:bg-slate-100 ${isMobile ? 'w-full' : ''}`}>
           <X className="h-4 w-4" />
           Limpiar filtros
         </Button>
@@ -310,11 +310,11 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
       {columnVisibility && onColumnsChange && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className={`h-9 gap-2 ${isMobile ? 'w-full justify-between' : ''}`}>
+            <Button variant="outline" size="sm" className={`h-10 gap-2 rounded-xl border-slate-200 hover:bg-slate-50 ${isMobile ? 'w-full justify-between' : ''}`}>
               <Columns2 className="h-4 w-4" />
               <span>Columnas</span>
               {!isMobile && (
-                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs bg-slate-100 text-slate-700">
                   {Object.values(columnVisibility).filter(Boolean).length}
                 </Badge>
               )}
@@ -412,7 +412,7 @@ export function FiltrosClientes({ columnVisibility, onColumnsChange }: FiltrosCl
     <>
       {/* Desktop */}
       <div className="hidden lg:block w-full">
-        <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border w-full">
+        <div className="flex items-center gap-3 p-4 glass-card w-full">
           <FiltrosContent columnVisibility={columnVisibility} onColumnsChange={onColumnsChange} />
         </div>
       </div>

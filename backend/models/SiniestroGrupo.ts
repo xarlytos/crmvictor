@@ -54,7 +54,17 @@ const SiniestroSchema = new Schema<ISiniestro>(
     fechaCierre: { type: Date, default: null },
     valoracion: { type: String, enum: ['positiva', 'intermedia', 'negativa', null], default: null },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform: function(doc, ret) {
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      }
+    }
+  }
 );
 
 const SiniestroGrupoSchema = new Schema<ISiniestroGrupo>(
@@ -69,7 +79,17 @@ const SiniestroGrupoSchema = new Schema<ISiniestroGrupo>(
     observacionesGenerales: { type: String, default: '' },
     siniestros: [SiniestroSchema],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform: function(doc, ret) {
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      }
+    }
+  }
 );
 
 export default mongoose.model<ISiniestroGrupo>('SiniestroGrupo', SiniestroGrupoSchema);

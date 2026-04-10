@@ -43,29 +43,29 @@ export function CalendarDay({
     <div
       onClick={handleDayClick}
       className={cn(
-        'min-h-[120px] p-2 border border-border',
+        'min-h-[120px] p-2 border border-slate-200/60',
         'flex flex-col gap-1',
-        'cursor-pointer transition-colors duration-150',
-        'hover:bg-accent/50',
-        !isCurrentMonth && 'bg-muted/30 text-muted-foreground',
-        isToday && 'bg-primary/5'
+        'cursor-pointer transition-all duration-200',
+        'hover:bg-white/60 hover:shadow-sm',
+        !isCurrentMonth && 'bg-slate-50/50 text-slate-400',
+        isToday && 'bg-emerald-50/30'
       )}
     >
       {/* Header del día */}
       <div className="flex items-center justify-between mb-1">
         <span
           className={cn(
-            'text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full',
+            'text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full transition-all duration-200',
             isToday
-              ? 'bg-primary text-primary-foreground'
-              : 'text-foreground'
+              ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/20'
+              : 'text-slate-700'
           )}
         >
           {date.getDate()}
         </span>
         {dayEvents.length > 0 && (
-          <span className="text-xs text-muted-foreground">
-            {dayEvents.length} evento{dayEvents.length !== 1 ? 's' : ''}
+          <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+            {dayEvents.length}
           </span>
         )}
       </div>
@@ -85,7 +85,9 @@ export function CalendarDay({
       {/* Estado vacío sutil con botón de añadir al hover */}
       {dayEvents.length === 0 && (
         <div className="flex-1 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-          <Plus className="w-4 h-4 text-muted-foreground/50" />
+          <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
+            <Plus className="w-4 h-4 text-slate-400" />
+          </div>
         </div>
       )}
     </div>

@@ -8,5 +8,14 @@ export { EventItem } from './components/EventItem';
 export { EventModal } from './components/EventModal';
 export { EventTypeManager } from './components/EventTypeManager';
 
-// Exportar store
-export { useCalendarioStore } from './store/calendario.store';
+// Exportar hooks
+export {
+  useEventos,
+  useTiposEvento,
+  useCreateEvento,
+  useUpdateEvento,
+  useDeleteEvento,
+  useCreateTipoEvento,
+  useUpdateTipoEvento,
+  useDeleteTipoEvento,
+} from './hooks/useCalendario';

@@ -19,8 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertCircle, Trash2 } from 'lucide-react';
-import { useCalendarioStore } from '../store/calendario.store';
+import { AlertCircle, Trash2, CalendarPlus, Clock, CalendarDays, Type, Palette, FileText } from 'lucide-react';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -28,6 +27,8 @@ interface EventModalProps {
   event: CalendarEvent | null;
   selectedDate: Date;
   eventTypes: EventType[];
+  onSave: (eventData: Omit<CalendarEvent, 'id' | 'createdAt'>) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function EventModal({
@@ -36,8 +37,9 @@ export function EventModal({
   event,
   selectedDate,
   eventTypes,
+  onSave,
+  onDelete,
 }: EventModalProps) {
-  const { addEvent, updateEvent, deleteEvent, checkOverlap } = useCalendarioStore();
 
   const [title, setTitle] = useState('');
   const [typeId, setTypeId] = useState<string | undefined>(undefined);
@@ -83,41 +85,23 @@ export function EventModal({
       return;
     }
 
-    // Verificar solapamiento
-    const hasOverlap = checkOverlap(
-      date,
-      startTime,
-      endTime,
-      event?.id
-    );
-
-    if (hasOverlap) {
-      setError('Ya existe un evento en ese horario');
-      return;
-    }
-
-    const eventData = {
+    const eventData: Omit<CalendarEvent, 'id' | 'createdAt'> = {
       title: title.trim(),
       typeId: typeId || '',
       date,
       startTime,
       endTime,
       description: description.trim() || undefined,
-      customColor: customColor || undefined,
+      customColor: customColor || null,
     };
 
-    if (event) {
-      updateEvent(event.id, eventData);
-    } else {
-      addEvent(eventData);
-    }
-
+    onSave(eventData);
     onClose();
   };
 
   const handleDelete = () => {
-    if (event) {
-      deleteEvent(event.id);
+    if (event && onDelete) {
+      onDelete(event.id);
       onClose();
     }
   };
@@ -126,34 +110,54 @@ export function EventModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Editar Evento' : 'Nuevo Evento'}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden">
+        {/* Header con gradiente */}
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                {isEditing ? <CalendarDays className="w-5 h-5 text-white" /> : <CalendarPlus className="w-5 h-5 text-white" />}
+              </div>
+              <DialogTitle className="text-xl font-bold text-white">
+                {isEditing ? 'Editar Evento' : 'Nuevo Evento'}
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+        </div>
 
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-5 p-6">
           {/* Título */}
           <div className="grid gap-2">
-            <Label htmlFor="title">Título *</Label>
+            <Label htmlFor="title" className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <Type className="w-4 h-4 text-emerald-500" />
+              Título *
+            </Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ej: Reunión con cliente"
               autoFocus
+              className="h-11 bg-slate-50 border-slate-200 rounded-xl focus:bg-white focus:border-emerald-500 focus:ring-emerald-500/20"
             />
           </div>
 
           {/* Tipo de evento */}
           <div className="grid gap-2">
-            <Label htmlFor="type">Tipo de evento (opcional)</Label>
+            <Label htmlFor="type" className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <Palette className="w-4 h-4 text-emerald-500" />
+              Tipo de evento (opcional)
+            </Label>
             <Select
               value={typeId || '__none__'}
-              onValueChange={(value) => setTypeId(value === '__none__' ? undefined : value)}
+              onValueChange={(value) => {
+                const newTypeId = value === '__none__' ? undefined : value;
+                setTypeId(newTypeId);
+                // Limpiar color personalizado al cambiar de tipo para que se use el color del nuevo tipo
+                setCustomColor('');
+              }}
             >
-              <SelectTrigger id="type">
+              <SelectTrigger id="type" className="h-11 bg-slate-50 border-slate-200 rounded-xl">
                 <SelectValue placeholder="Sin tipo" />
               </SelectTrigger>
               <SelectContent position="popper" className="z-[200]">
@@ -180,52 +184,67 @@ export function EventModal({
 
           {/* Fecha */}
           <div className="grid gap-2">
-            <Label htmlFor="date">Fecha</Label>
+            <Label htmlFor="date" className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <CalendarDays className="w-4 h-4 text-emerald-500" />
+              Fecha
+            </Label>
             <Input
               id="date"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
+              className="h-11 bg-slate-50 border-slate-200 rounded-xl"
             />
           </div>
 
           {/* Horas */}
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="startTime">Hora inicio *</Label>
+              <Label htmlFor="startTime" className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <Clock className="w-4 h-4 text-emerald-500" />
+                Hora inicio *
+              </Label>
               <Input
                 id="startTime"
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
+                className="h-11 bg-slate-50 border-slate-200 rounded-xl"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="endTime">Hora fin *</Label>
+              <Label htmlFor="endTime" className="text-sm font-semibold text-slate-700 pt-6"
+>Hora fin *</Label>
               <Input
                 id="endTime"
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
+                className="h-11 bg-slate-50 border-slate-200 rounded-xl"
               />
             </div>
           </div>
 
           {/* Descripción */}
           <div className="grid gap-2">
-            <Label htmlFor="description">Descripción</Label>
+            <Label htmlFor="description" className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <FileText className="w-4 h-4 text-emerald-500" />
+              Descripción
+            </Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Notas adicionales..."
               rows={3}
+              className="bg-slate-50 border-slate-200 rounded-xl resize-none focus:bg-white"
             />
           </div>
 
           {/* Color personalizado (opcional) */}
-          <div className="grid gap-2">
-            <Label htmlFor="customColor">
+          <div className="grid gap-3 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+            <Label htmlFor="customColor" className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <Palette className="w-4 h-4 text-emerald-500" />
               Color personalizado
               {selectedType && !customColor ? (
                 <span
@@ -241,18 +260,24 @@ export function EventModal({
               ) : null}
             </Label>
             <div className="flex items-center gap-3">
-              <Input
-                id="customColor"
-                type="color"
-                value={customColor || selectedType?.color || '#9ca3af'}
-                onChange={(e) => setCustomColor(e.target.value)}
-                className="w-16 h-10 p-1 cursor-pointer"
-              />
+              <div
+                className="w-14 h-11 rounded-xl border-2 border-slate-200 cursor-pointer overflow-hidden"
+                style={{ backgroundColor: customColor || selectedType?.color || '#9ca3af' }}
+              >
+                <Input
+                  id="customColor"
+                  type="color"
+                  value={customColor || selectedType?.color || '#9ca3af'}
+                  onChange={(e) => setCustomColor(e.target.value)}
+                  className="opacity-0 w-full h-full cursor-pointer"
+                />
+              </div>
               {customColor && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setCustomColor('')}
+                  className="text-slate-500 hover:text-slate-700"
                 >
                   {selectedType ? 'Restaurar color del tipo' : 'Restaurar color por defecto'}
                 </Button>
@@ -262,28 +287,28 @@ export function EventModal({
 
           {/* Error */}
           {error && (
-            <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+            <div className="flex items-center gap-2 text-sm text-rose-600 bg-rose-50 p-4 rounded-xl border border-rose-100">
               <AlertCircle className="w-4 h-4 shrink-0" />
               {error}
             </div>
           )}
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 p-6 border-t bg-slate-50/50">
           {isEditing && (
             <Button
               variant="destructive"
               onClick={handleDelete}
-              className="mr-auto"
+              className="mr-auto rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 border-0"
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Eliminar
             </Button>
           )}
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} className="rounded-xl border-slate-200 hover:bg-white">
             Cancelar
           </Button>
-          <Button onClick={handleSave}>
+          <Button onClick={handleSave} className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25">
             {isEditing ? 'Guardar cambios' : 'Crear evento'}
           </Button>
         </DialogFooter>

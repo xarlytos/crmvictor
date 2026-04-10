@@ -13,18 +13,18 @@ export function AppLayout() {
 
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-background">
-        <Sidebar 
-          collapsed={sidebarCollapsed} 
-          onToggle={toggleSidebar} 
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-violet-50/20">
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={toggleSidebar}
         />
-        <div 
+        <div
           className={cn(
-            'transition-all duration-300 ease-in-out',
-            sidebarCollapsed ? 'ml-16' : 'ml-64'
+            'transition-all duration-500 ease-out min-h-screen',
+            sidebarCollapsed ? 'ml-20' : 'ml-72'
           )}
         >
-          <main className="p-6">
+          <main className="p-8">
             <Outlet />
           </main>
         </div>

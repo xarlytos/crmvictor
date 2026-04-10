@@ -102,13 +102,20 @@ export function ClienteRow({
         {/* Empresa / Contacto */}
         {visibility.empresa && (
           <DataTableCell className="min-w-[300px]">
-            <div className="flex flex-col gap-0.5">
-              <span className="font-medium whitespace-normal" title={cliente.empresa}>
-                {cliente.empresa}
-              </span>
-              <span className="text-xs text-muted-foreground line-clamp-1" title={cliente.contacto}>
-                {cliente.contacto}
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shrink-0">
+                <span className="text-white font-bold text-sm">
+                  {cliente.empresa.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="font-bold text-slate-800 whitespace-normal" title={cliente.empresa}>
+                  {cliente.empresa}
+                </span>
+                <span className="text-xs text-slate-500 line-clamp-1" title={cliente.contacto}>
+                  {cliente.contacto}
+                </span>
+              </div>
             </div>
           </DataTableCell>
         )}
@@ -120,13 +127,13 @@ export function ClienteRow({
               <a
                 href={`tel:${cliente.telefono}`}
                 onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1.5 bg-muted px-2 py-1 rounded-md hover:bg-muted/80 transition-colors"
+                className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors font-medium"
               >
-                <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                <Phone className="h-3.5 w-3.5" />
                 <span className="text-sm">{formatPhone(cliente.telefono)}</span>
               </a>
             ) : (
-              <span className="text-sm text-muted-foreground">-</span>
+              <span className="text-sm text-slate-400">-</span>
             )}
           </DataTableCell>
         )}
@@ -138,14 +145,14 @@ export function ClienteRow({
               <a
                 href={`mailto:${cliente.correo}`}
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1.5 text-primary hover:underline w-full overflow-hidden"
+                className="inline-flex items-center gap-1.5 bg-violet-50 text-violet-700 px-3 py-1.5 rounded-lg hover:bg-violet-100 transition-colors font-medium w-full overflow-hidden"
                 title={cliente.correo}
               >
                 <Mail className="h-3.5 w-3.5 shrink-0" />
                 <span className="text-sm truncate min-w-0 flex-1">{formatEmail(cliente.correo)}</span>
               </a>
             ) : (
-              <span className="text-sm text-muted-foreground">-</span>
+              <span className="text-sm text-slate-400">-</span>
             )}
           </DataTableCell>
         )}
@@ -160,7 +167,7 @@ export function ClienteRow({
         {/* Mercancía */}
         {visibility.mercancia && (
           <DataTableCell className="w-[200px]">
-            <span className="text-sm line-clamp-1" title={cliente.tipoCarga || 'Sin definir'}>
+            <span className="text-sm font-medium text-slate-700 line-clamp-1 bg-slate-100 px-2 py-1 rounded-md inline-block" title={cliente.tipoCarga || 'Sin definir'}>
               {cliente.tipoCarga || 'Sin definir'}
             </span>
           </DataTableCell>
@@ -169,7 +176,7 @@ export function ClienteRow({
         {/* Transporte */}
         {visibility.transporte && (
           <DataTableCell className="w-[140px]">
-            <span className="text-sm">{cliente.transporte ? enumToLabel.transporte[cliente.transporte] : 'Sin definir'}</span>
+            <span className="text-sm font-medium text-slate-700">{cliente.transporte ? enumToLabel.transporte[cliente.transporte] : 'Sin definir'}</span>
           </DataTableCell>
         )}
 
@@ -183,14 +190,14 @@ export function ClienteRow({
         {/* Facturación */}
         {visibility.facturacion && (
           <DataTableCell className="w-[120px] text-right">
-            <span className="text-sm">{cliente.facturacion || '-'}</span>
+            <span className="text-sm font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">{cliente.facturacion || '-'}</span>
           </DataTableCell>
         )}
 
         {/* Fecha de Llamada */}
         {visibility.fechaLlamada && (
           <DataTableCell className="w-[160px]">
-            <span className="text-sm">
+            <span className="text-sm font-medium text-slate-600">
               {cliente.fechaLlamada ? formatDate(cliente.fechaLlamada) : '-'}
             </span>
           </DataTableCell>
@@ -199,7 +206,7 @@ export function ClienteRow({
         {/* Número de Vehículos */}
         {visibility.numVehiculos && (
           <DataTableCell className="w-[150px]">
-            <span className="text-sm">{cliente.numVehiculos ?? '-'}</span>
+            <span className="text-sm font-bold text-slate-700">{cliente.numVehiculos ?? '-'}</span>
           </DataTableCell>
         )}
       </DataTableRow>

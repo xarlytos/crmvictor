@@ -56,13 +56,13 @@ export function CalendarMonth({
   }, [days]);
 
   return (
-    <div className="flex flex-col h-full bg-background rounded-lg border border-border overflow-hidden">
+    <div className="flex flex-col h-full glass-card overflow-hidden">
       {/* Header de días de la semana */}
-      <div className="grid grid-cols-7 bg-muted/50 border-b border-border">
+      <div className="grid grid-cols-7 bg-gradient-to-r from-slate-50/80 to-slate-100/50 border-b border-slate-200/60">
         {WEEK_DAYS.map((day) => (
           <div
             key={day}
-            className="py-2 px-3 text-center text-sm font-semibold text-muted-foreground uppercase tracking-wider"
+            className="py-3 px-3 text-center text-sm font-bold text-slate-500 uppercase tracking-wider"
           >
             {day}
           </div>
@@ -70,7 +70,7 @@ export function CalendarMonth({
       </div>
 
       {/* Grid del calendario */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-white/30">
         {weeks.map((week, weekIndex) => (
           <div key={weekIndex} className="grid grid-cols-7 flex-1">
             {week.map((day) => (
@@ -107,15 +107,15 @@ export function MonthNavigator({
   onToday,
 }: MonthNavigatorProps) {
   return (
-    <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg mb-4">
+    <div className="flex items-center justify-between p-5 glass-card mb-5">
       <div className="flex items-center gap-4">
-        <h2 className="text-2xl font-bold text-foreground capitalize min-w-[200px]">
+        <h2 className="text-2xl font-extrabold text-slate-800 capitalize min-w-[220px]">
           {format(currentDate, 'MMMM yyyy', { locale: es })}
         </h2>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
           <button
             onClick={onPreviousMonth}
-            className="p-2 hover:bg-accent rounded-lg transition-colors"
+            className="p-2 hover:bg-white rounded-lg transition-all duration-200 shadow-sm hover:shadow"
             title="Mes anterior"
           >
             <svg
@@ -128,13 +128,14 @@ export function MonthNavigator({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              className="text-slate-600"
             >
               <path d="m15 18-6-6 6-6" />
             </svg>
           </button>
           <button
             onClick={onNextMonth}
-            className="p-2 hover:bg-accent rounded-lg transition-colors"
+            className="p-2 hover:bg-white rounded-lg transition-all duration-200 shadow-sm hover:shadow"
             title="Mes siguiente"
           >
             <svg
@@ -147,6 +148,7 @@ export function MonthNavigator({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              className="text-slate-600"
             >
               <path d="m9 18 6-6-6-6" />
             </svg>
@@ -156,7 +158,7 @@ export function MonthNavigator({
 
       <button
         onClick={onToday}
-        className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+        className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300"
       >
         Hoy
       </button>

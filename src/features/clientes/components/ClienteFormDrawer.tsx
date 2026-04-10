@@ -22,7 +22,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { DateInput } from '@/components/shared/DateInput';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, UserCircle, X } from 'lucide-react';
 import type { Cliente, EstadoCliente, Transporte } from '@/types';
 
 const vencimientoPersonalizadoSchema = z.object({
@@ -275,222 +275,236 @@ export function ClienteFormDrawer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
-            {cliente ? 'Editar Cliente' : 'Nuevo Cliente'}
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6 mt-4">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0">
+        {/* Header con gradiente */}
+        <div className="bg-gradient-to-r from-violet-500 to-purple-600 p-6 text-white">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                <UserCircle className="w-5 h-5 text-white" />
+              </div>
+              <DialogTitle className="text-xl font-bold text-white">
+                {cliente ? 'Editar Cliente' : 'Nuevo Cliente'}
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+        </div>
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6 p-6">
           {/* Información Básica */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="empresa" className="text-sm font-medium">
-                Empresa o Nombre
-              </Label>
-              <Input
-                id="empresa"
-                {...register('empresa')}
-                placeholder="Nombre de la empresa o contacto"
-                className="h-10"
-              />
-              {errors.empresa && (
-                <p className="text-sm text-destructive">{errors.empresa.message}</p>
-              )}
-              {errors.empresa?.message && (
-                <p className="text-sm text-destructive font-medium">{errors.empresa.message}</p>
-              )}
-            </div>
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-xs">1</span>
+              Información Básica
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="empresa" className="text-sm font-semibold text-slate-700">
+                  Empresa o Nombre *
+                </Label>
+                <Input
+                  id="empresa"
+                  {...register('empresa')}
+                  placeholder="Nombre de la empresa o contacto"
+                  className="h-11 bg-white border-slate-200 rounded-xl focus:border-violet-500 focus:ring-violet-500/20"
+                />
+                {errors.empresa && (
+                  <p className="text-sm text-rose-500 font-medium flex items-center gap-1">
+                    <X className="w-3 h-3" /> {errors.empresa.message}
+                  </p>
+                )}
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="contacto" className="text-sm font-medium">
-                Contacto
-              </Label>
-              <Input
-                id="contacto"
-                {...register('contacto')}
-                placeholder="Nombre del contacto"
-                className="h-10"
-              />
-              {errors.contacto && (
-                <p className="text-sm text-destructive">{errors.contacto.message}</p>
-              )}
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="contacto" className="text-sm font-semibold text-slate-700">
+                  Contacto *
+                </Label>
+                <Input
+                  id="contacto"
+                  {...register('contacto')}
+                  placeholder="Nombre del contacto"
+                  className="h-11 bg-white border-slate-200 rounded-xl focus:border-violet-500 focus:ring-violet-500/20"
+                />
+                {errors.contacto && (
+                  <p className="text-sm text-rose-500 font-medium flex items-center gap-1">
+                    <X className="w-3 h-3" /> {errors.contacto.message}
+                  </p>
+                )}
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="cif" className="text-sm font-medium">
-                CIF
-              </Label>
-              <Input
-                id="cif"
-                {...register('cif')}
-                placeholder="CIF / DNI"
-                className="h-10"
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="cif" className="text-sm font-semibold text-slate-700">
+                  CIF / DNI
+                </Label>
+                <Input
+                  id="cif"
+                  {...register('cif')}
+                  placeholder="CIF / DNI"
+                  className="h-11 bg-white border-slate-200 rounded-xl focus:border-violet-500 focus:ring-violet-500/20"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="telefono" className="text-sm font-medium">
-                Teléfono
-              </Label>
-              <Input
-                id="telefono"
-                type="tel"
-                {...register('telefono')}
-                placeholder="+34 600 000 000"
-                className="h-10"
-              />
-              {errors.telefono && (
-                <p className="text-sm text-destructive">{errors.telefono.message}</p>
-              )}
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="telefono" className="text-sm font-semibold text-slate-700">
+                  Teléfono
+                </Label>
+                <Input
+                  id="telefono"
+                  type="tel"
+                  {...register('telefono')}
+                  placeholder="+34 600 000 000"
+                  className="h-11 bg-white border-slate-200 rounded-xl focus:border-violet-500 focus:ring-violet-500/20"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="correo" className="text-sm font-medium">
-                Correo
-              </Label>
-              <Input
-                id="correo"
-                type="email"
-                {...register('correo')}
-                placeholder="contacto@empresa.com"
-                className="h-10"
-              />
-              {errors.correo && (
-                <p className="text-sm text-destructive">{errors.correo.message}</p>
-              )}
+              <div className="space-y-2">
+                <Label htmlFor="correo" className="text-sm font-semibold text-slate-700">
+                  Correo
+                </Label>
+                <Input
+                  id="correo"
+                  type="email"
+                  {...register('correo')}
+                  placeholder="contacto@empresa.com"
+                  className="h-11 bg-white border-slate-200 rounded-xl focus:border-violet-500 focus:ring-violet-500/20"
+                />
+                {errors.correo && (
+                  <p className="text-sm text-rose-500 font-medium flex items-center gap-1">
+                    <X className="w-3 h-3" /> {errors.correo.message}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Estado y Clasificación */}
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="estado" className="text-sm font-medium">
-                Estado
-              </Label>
-              <Select
-                value={estadoValue ? String(estadoValue) : 'none'}
-                onValueChange={handleEstadoChange}
-              >
-                <SelectTrigger className="h-10" id="estado">
-                  <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent className="z-[200]" position="popper" sideOffset={5}>
-                  <SelectItem value="none">Sin definir</SelectItem>
-                  {Object.entries(estadoLabels).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.estado && (
-                <p className="text-sm text-destructive">{errors.estado.message}</p>
-              )}
-            </div>
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-xs">2</span>
+              Estado y Clasificación
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-3 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+              <div className="space-y-2">
+                <Label htmlFor="estado" className="text-sm font-semibold text-slate-700">
+                  Estado
+                </Label>
+                <Select
+                  value={estadoValue ? String(estadoValue) : 'none'}
+                  onValueChange={handleEstadoChange}
+                >
+                  <SelectTrigger className="h-11 bg-white border-slate-200 rounded-xl" id="estado">
+                    <SelectValue placeholder="Seleccionar estado" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[200]" position="popper" sideOffset={5}>
+                    <SelectItem value="none">Sin definir</SelectItem>
+                    {Object.entries(estadoLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="tipoCarga" className="text-sm font-medium">
-                Mercancía
-              </Label>
-              <Input
-                id="tipoCarga"
-                {...register('tipoCarga')}
-                placeholder="Ej: General, Frigorífica..."
-                className="h-10"
-              />
-              {errors.tipoCarga && (
-                <p className="text-sm text-destructive">{errors.tipoCarga.message}</p>
-              )}
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="tipoCarga" className="text-sm font-semibold text-slate-700">
+                  Mercancía
+                </Label>
+                <Input
+                  id="tipoCarga"
+                  {...register('tipoCarga')}
+                  placeholder="Ej: General, Frigorífica..."
+                  className="h-11 bg-white border-slate-200 rounded-xl"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="transporte" className="text-sm font-medium">
-                Transporte
-              </Label>
-              <Select
-                value={transporteValue ? String(transporteValue) : 'none'}
-                onValueChange={handleTransporteChange}
-              >
-                <SelectTrigger className="h-10" id="transporte">
-                  <SelectValue placeholder="Seleccionar transporte" />
-                </SelectTrigger>
-                <SelectContent className="z-[200]" position="popper" sideOffset={5}>
-                  <SelectItem value="none">Sin definir</SelectItem>
-                  {Object.entries(transporteLabels).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.transporte && (
-                <p className="text-sm text-destructive">{errors.transporte.message}</p>
-              )}
+              <div className="space-y-2">
+                <Label htmlFor="transporte" className="text-sm font-semibold text-slate-700">
+                  Transporte
+                </Label>
+                <Select
+                  value={transporteValue ? String(transporteValue) : 'none'}
+                  onValueChange={handleTransporteChange}
+                >
+                  <SelectTrigger className="h-11 bg-white border-slate-200 rounded-xl" id="transporte">
+                    <SelectValue placeholder="Seleccionar transporte" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[200]" position="popper" sideOffset={5}>
+                    <SelectItem value="none">Sin definir</SelectItem>
+                    {Object.entries(transporteLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
           {/* Vencimientos */}
-          <div className="space-y-4 border-t pt-4">
-            <h3 className="font-semibold">Vencimientos</h3>
-            <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center text-xs">3</span>
+              Vencimientos
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
               <div className="space-y-2">
-                <Label htmlFor="vencRC" className="text-sm font-medium">Responsabilidad Civil</Label>
+                <Label htmlFor="vencRC" className="text-sm font-semibold text-slate-700">Responsabilidad Civil</Label>
                 <DateInput
                   id="vencRC"
                   value={watch('vencimientos.rc')}
                   onChange={(v) => setValue('vencimientos.rc', v)}
-                  className="h-10"
+                  className="h-11 bg-white border-slate-200 rounded-xl"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="vencACC" className="text-sm font-medium">Accidentes Convenio</Label>
+                <Label htmlFor="vencACC" className="text-sm font-semibold text-slate-700">Accidentes Convenio</Label>
                 <DateInput
                   id="vencACC"
                   value={watch('vencimientos.acc')}
                   onChange={(v) => setValue('vencimientos.acc', v)}
-                  className="h-10"
+                  className="h-11 bg-white border-slate-200 rounded-xl"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="vencFlota" className="text-sm font-medium">Flota</Label>
+                <Label htmlFor="vencFlota" className="text-sm font-semibold text-slate-700">Flota</Label>
                 <DateInput
                   id="vencFlota"
                   value={watch('vencimientos.flotas')}
                   onChange={(v) => setValue('vencimientos.flotas', v)}
-                  className="h-10"
+                  className="h-11 bg-white border-slate-200 rounded-xl"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="vencMercancias" className="text-sm font-medium">Mercancías</Label>
+                <Label htmlFor="vencMercancias" className="text-sm font-semibold text-slate-700">Mercancías</Label>
                 <DateInput
                   id="vencMercancias"
                   value={watch('vencimientos.mercancias')}
                   onChange={(v) => setValue('vencimientos.mercancias', v)}
-                  className="h-10"
+                  className="h-11 bg-white border-slate-200 rounded-xl"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="vencPyme" className="text-sm font-medium">Pyme</Label>
+                <Label htmlFor="vencPyme" className="text-sm font-semibold text-slate-700">Pyme</Label>
                 <DateInput
                   id="vencPyme"
                   value={watch('vencimientos.pyme')}
                   onChange={(v) => setValue('vencimientos.pyme', v)}
-                  className="h-10"
+                  className="h-11 bg-white border-slate-200 rounded-xl"
                 />
               </div>
             </div>
 
             {/* Vencimientos Personalizados */}
-            <div className="space-y-3 pt-4 border-t">
+            <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium text-muted-foreground">Vencimientos Personalizados</h4>
+                <h4 className="text-sm font-semibold text-slate-600">Vencimientos Personalizados</h4>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={agregarVencimientoPersonalizado}
-                  className="h-8 gap-1"
+                  className="h-9 gap-1 rounded-xl border-violet-200 text-violet-700 hover:bg-violet-50"
                 >
                   <Plus className="h-4 w-4" />
                   Añadir vencimiento
@@ -498,28 +512,28 @@ export function ClienteFormDrawer({
               </div>
 
               {fields.length === 0 && (
-                <p className="text-sm text-muted-foreground italic">
+                <p className="text-sm text-slate-400 italic bg-slate-50 p-4 rounded-xl text-center">
                   No hay vencimientos personalizados. Haz clic en "Añadir vencimiento" para crear uno.
                 </p>
               )}
 
               <div className="space-y-3">
                 {fields.map((field, index) => (
-                  <div key={field.id} className="grid gap-3 p-3 border rounded-lg bg-muted/30 sm:grid-cols-12 items-start">
+                  <div key={field.id} className="grid gap-3 p-4 border border-slate-200 rounded-xl bg-white sm:grid-cols-12 items-start">
                     <div className="sm:col-span-5 space-y-1">
-                      <Label className="text-xs">Nombre</Label>
+                      <Label className="text-xs font-medium text-slate-600">Nombre</Label>
                       <Input
                         {...register(`vencimientos.personalizados.${index}.nombre`)}
                         placeholder="Ej: Seguro especial"
-                        className="h-9"
+                        className="h-10 bg-slate-50 border-slate-200 rounded-lg"
                       />
                     </div>
                     <div className="sm:col-span-5 space-y-1">
-                      <Label className="text-xs">Fecha</Label>
+                      <Label className="text-xs font-medium text-slate-600">Fecha</Label>
                       <DateInput
                         value={watch(`vencimientos.personalizados.${index}.fecha`)}
                         onChange={(v) => setValue(`vencimientos.personalizados.${index}.fecha`, v)}
-                        className="h-9"
+                        className="h-10 bg-slate-50 border-slate-200 rounded-lg"
                       />
                     </div>
                     <div className="sm:col-span-2 flex justify-end items-end h-full pb-0">
@@ -528,7 +542,7 @@ export function ClienteFormDrawer({
                         variant="ghost"
                         size="icon"
                         onClick={() => remove(index)}
-                        className="h-9 w-9 text-destructive hover:text-destructive"
+                        className="h-10 w-10 text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -540,63 +554,70 @@ export function ClienteFormDrawer({
           </div>
 
           {/* Fechas y Facturación */}
-          <div className="grid gap-4 sm:grid-cols-2 pt-4 border-t">
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">4</span>
+              Información Comercial
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+              <div className="space-y-2">
+                <Label htmlFor="fechaLlamada" className="text-sm font-semibold text-slate-700">
+                  Fecha de Llamada
+                </Label>
+                <DateInput
+                  id="fechaLlamada"
+                  value={watch('fechaLlamada') || ''}
+                  onChange={(value) => setValue('fechaLlamada', value || undefined)}
+                  className="h-11 bg-white border-slate-200 rounded-xl"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="fechaLlamada" className="text-sm font-medium">
-                Fecha de Llamada
-              </Label>
-              <DateInput
-                id="fechaLlamada"
-                value={watch('fechaLlamada') || ''}
-                onChange={(value) => setValue('fechaLlamada', value || undefined)}
-                className="h-10"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="facturacion" className="text-sm font-semibold text-slate-700">
+                  Facturación
+                </Label>
+                <Input
+                  id="facturacion"
+                  {...register('facturacion')}
+                  placeholder="Ej: 7,3M, 3M, 700mil"
+                  className="h-11 bg-white border-slate-200 rounded-xl"
+                />
+              </div>
+
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="numVehiculos" className="text-sm font-semibold text-slate-700">
+                  Número de Vehículos
+                </Label>
+                <Input
+                  id="numVehiculos"
+                  type="number"
+                  min="0"
+                  {...register('numVehiculos')}
+                  placeholder="Ej: 17"
+                  className="h-11 bg-white border-slate-200 rounded-xl"
+                />
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="facturacion" className="text-sm font-medium">
-                Facturación
-              </Label>
-              <Input
-                id="facturacion"
-                {...register('facturacion')}
-                placeholder="Ej: 7,3M, 3M, 700mil"
-                className="h-10"
-              />
-            </div>
-          </div>
-
-          {/* Número de Vehículos */}
-          <div className="space-y-2">
-            <Label htmlFor="numVehiculos" className="text-sm font-medium">
-              Número de Vehículos
-            </Label>
-            <Input
-              id="numVehiculos"
-              type="number"
-              min="0"
-              {...register('numVehiculos')}
-              placeholder="Ej: 17"
-              className="h-10"
-            />
           </div>
 
           {/* Notas */}
-          <div className="space-y-2">
-            <Label htmlFor="notas" className="text-sm font-medium">
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs">5</span>
               Notas
-            </Label>
-            <Textarea
-              id="notas"
-              {...register('notas')}
-              rows={4}
-              placeholder="Información adicional, recordatorios, observaciones..."
-              className="resize-none"
-            />
+            </h3>
+            <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+              <Textarea
+                id="notas"
+                {...register('notas')}
+                rows={4}
+                placeholder="Información adicional, recordatorios, observaciones..."
+                className="resize-none bg-white border-slate-200 rounded-xl focus:border-violet-500 focus:ring-violet-500/20"
+              />
+            </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row border-t pt-6 mt-6">
             <div className="flex-1">
               {cliente && onDelete && (
                 <Button
@@ -604,7 +625,7 @@ export function ClienteFormDrawer({
                   variant="destructive"
                   onClick={() => setDeleteConfirmOpen(true)}
                   disabled={isSubmitting}
-                  className="h-10 gap-2"
+                  className="h-11 gap-2 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 border-0"
                 >
                   <Trash2 className="h-4 w-4" />
                   Eliminar Cliente
@@ -617,16 +638,16 @@ export function ClienteFormDrawer({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
-                className="h-10"
+                className="h-11 rounded-xl border-slate-200 hover:bg-slate-50"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="h-10 px-6"
+                className="h-11 px-8 rounded-xl bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 shadow-lg shadow-violet-500/25"
               >
-                {isSubmitting ? 'Guardando...' : cliente ? 'Actualizar' : 'Crear Cliente'}
+                {isSubmitting ? 'Guardando...' : cliente ? 'Actualizar Cliente' : 'Crear Cliente'}
               </Button>
             </div>
           </DialogFooter>

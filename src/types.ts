@@ -80,6 +80,30 @@ export interface DataProvider {
 
   getConfig(): Promise<ConfigUsuario>;
   updateConfig(patch: Partial<ConfigUsuario>): Promise<ConfigUsuario>;
+
+  // Siniestros
+  listSiniestroGrupos(filtros?: FiltrosSiniestros): Promise<SiniestroGrupo[]>;
+  getSiniestroGrupo(id: string): Promise<SiniestroGrupo>;
+  createSiniestroGrupo(dto: Omit<SiniestroGrupo, 'id' | 'createdAt' | 'updatedAt'>): Promise<SiniestroGrupo>;
+  updateSiniestroGrupo(id: string, dto: Partial<SiniestroGrupo>): Promise<SiniestroGrupo>;
+  deleteSiniestroGrupo(id: string): Promise<void>;
+
+  // Siniestros individuales
+  addSiniestro(grupoId: string, siniestro: Omit<Siniestro, 'id' | 'createdAt' | 'updatedAt'>): Promise<Siniestro>;
+  updateSiniestro(grupoId: string, siniestroId: string, updates: Partial<Siniestro>): Promise<Siniestro>;
+  deleteSiniestro(grupoId: string, siniestroId: string): Promise<void>;
+
+  // Calendario - Eventos
+  listEventos(year?: number, month?: number): Promise<CalendarEvent[]>;
+  createEvento(dto: Omit<CalendarEvent, 'id' | 'createdAt'>): Promise<CalendarEvent>;
+  updateEvento(id: string, dto: Partial<Omit<CalendarEvent, 'id' | 'createdAt'>>): Promise<CalendarEvent>;
+  deleteEvento(id: string): Promise<void>;
+
+  // Calendario - Tipos de Evento
+  listTiposEvento(): Promise<EventType[]>;
+  createTipoEvento(dto: Omit<EventType, 'id' | 'createdAt'>): Promise<EventType>;
+  updateTipoEvento(id: string, dto: Partial<Omit<EventType, 'id' | 'createdAt'>>): Promise<EventType>;
+  deleteTipoEvento(id: string): Promise<void>;
 }
 
 // ========== CALENDAR TYPES ==========
@@ -100,7 +124,7 @@ export interface CalendarEvent {
   startTime: string; // "09:00"
   endTime: string; // "10:00"
   description?: string;
-  customColor?: string; // override del color del tipo
+  customColor?: string | null; // override del color del tipo
   createdAt: string;
 }
 

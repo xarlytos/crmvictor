@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { X, FileDown, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -40,16 +39,19 @@ export function BulkBar({
   if (selectedCount === 0) return null;
 
   return (
-    <Card className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 shadow-lg border-2">
-      <div className="flex items-center gap-4 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">
-            {selectedCount} {selectedCount === 1 ? 'cliente seleccionado' : 'clientes seleccionados'}
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 shadow-2xl rounded-2xl border border-violet-200 bg-gradient-to-r from-violet-500 via-violet-600 to-purple-600 text-white px-6 py-4">
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+            <span className="font-bold">{selectedCount}</span>
+          </div>
+          <span className="text-sm font-semibold">
+            {selectedCount === 1 ? 'cliente seleccionado' : 'clientes seleccionados'}
           </span>
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="h-7 w-7 rounded-lg bg-white/10 hover:bg-white/20 text-white"
             onClick={onClearSelection}
             aria-label="Limpiar selección"
           >
@@ -59,7 +61,7 @@ export function BulkBar({
 
         <div className="flex items-center gap-2">
           <Select value={estadoValue} onValueChange={handleEstadoChange}>
-            <SelectTrigger className="h-9 w-[180px]">
+            <SelectTrigger className="h-9 w-[180px] bg-white/10 border-white/20 text-white rounded-xl hover:bg-white/20">
               <SelectValue placeholder="Cambiar estado" />
             </SelectTrigger>
             <SelectContent>
@@ -72,21 +74,21 @@ export function BulkBar({
           </Select>
 
           {onBulkExport && (
-            <Button variant="outline" size="sm" onClick={onBulkExport} className="gap-2">
+            <Button variant="outline" size="sm" onClick={onBulkExport} className="gap-2 rounded-xl bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
               <FileDown className="h-4 w-4" />
               <span className="sr-only md:not-sr-only">Exportar PDF</span>
             </Button>
           )}
 
           {onBulkDelete && (
-            <Button variant="destructive" size="sm" onClick={onBulkDelete} className="gap-2">
+            <Button variant="destructive" size="sm" onClick={onBulkDelete} className="gap-2 rounded-xl bg-rose-500 hover:bg-rose-600 border-0">
               <Trash2 className="h-4 w-4" />
               <span className="sr-only md:not-sr-only">Eliminar</span>
             </Button>
           )}
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
 

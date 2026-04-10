@@ -1,14 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { dataProvider } from '@/config/dataProvider';
-import { formatDate, getDaysUntil, getUrgenciaColor } from '@/lib/date';
+import { formatDate, getDaysUntil } from '@/lib/date';
 import { ChipMes } from '@/components/shared/ChipMes';
-import { Progress } from '@/components/ui/progress';
 import { EstadoBadge } from '@/components/shared/EstadoBadge';
-import { Phone, Mail, ExternalLink } from 'lucide-react';
+import { Phone, Mail, ExternalLink, CalendarDays, Filter, AlertCircle, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import type { EstadoCliente, Cliente } from '@/types';
@@ -152,175 +150,251 @@ export function VencimientosPage() {
   const isLoading = !clientesData;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Vencimientos</h1>
+    <div className="space-y-8 animate-slide-up">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+            <CalendarDays className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">
+              Vencimientos
+            </h1>
+            <p className="text-slate-500 mt-1">
+              Gestiona todos los vencimientos de tu cartera
+            </p>
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
-              <Label>Rango de días</Label>
-              <Select value={rangoDias} onValueChange={setRangoDias}>
-                <SelectTrigger className="mt-2">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="15">Menos de 15 días</SelectItem>
-                  <SelectItem value="30">15-30 días</SelectItem>
-                  <SelectItem value="60">30-60 días</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      {/* Filtros */}
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <Filter className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-slate-800">Filtros</h2>
+            <p className="text-sm text-slate-500">Refina los resultados</p>
+          </div>
+        </div>
+        <div className="grid gap-5 md:grid-cols-3">
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-slate-700">Rango de días</Label>
+            <Select value={rangoDias} onValueChange={setRangoDias}>
+              <SelectTrigger className="h-11 bg-white/50 border-slate-200 rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="15">Menos de 15 días</SelectItem>
+                <SelectItem value="30">15-30 días</SelectItem>
+                <SelectItem value="60">30-60 días</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div>
-              <Label>Mes</Label>
-              <Select value={mes} onValueChange={setMes}>
-                <SelectTrigger className="mt-2">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los meses</SelectItem>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                    <SelectItem key={m} value={String(m)}>
-                      {new Date(2000, m - 1, 1).toLocaleDateString('es-ES', { month: 'long' })}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-slate-700">Mes</Label>
+            <Select value={mes} onValueChange={setMes}>
+              <SelectTrigger className="h-11 bg-white/50 border-slate-200 rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="all">Todos los meses</SelectItem>
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                  <SelectItem key={m} value={String(m)}>
+                    {new Date(2000, m - 1, 1).toLocaleDateString('es-ES', { month: 'long' })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-slate-700">Estado</Label>
+            <Select value={estado} onValueChange={(v) => setEstado(v as EstadoCliente | 'all')}>
+              <SelectTrigger className="h-11 bg-white/50 border-slate-200 rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="all">Todos</SelectItem>
+                {Object.entries(estadoLabels).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {/* Lista de Vencimientos */}
+      <div className="glass-card p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
+              <AlertCircle className="w-5 h-5 text-white" />
+            </div>
             <div>
-              <Label>Estado</Label>
-              <Select value={estado} onValueChange={(v) => setEstado(v as EstadoCliente | 'all')}>
-                <SelectTrigger className="mt-2">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  {Object.entries(estadoLabels).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <h2 className="text-lg font-bold text-slate-800">
+                Vencimientos
+              </h2>
+              <p className="text-sm text-slate-500">
+                {vencimientos.length} {vencimientos.length === 1 ? 'resultado' : 'resultados'}
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            Vencimientos ({vencimientos.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground">Cargando...</div>
-          ) : vencimientos.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              No se encontraron vencimientos con los filtros seleccionados
+        {isLoading ? (
+          <div className="p-12 text-center">
+            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-slate-500">Cargando vencimientos...</p>
+          </div>
+        ) : vencimientos.length === 0 ? (
+          <div className="p-12 text-center">
+            <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center mx-auto mb-6">
+              <Clock className="w-10 h-10 text-slate-300" />
             </div>
-          ) : (
-            <div className="space-y-4">
-              {vencimientos.map((vencimiento, index) => {
-                const { cliente, tipo, fecha, dias, esPersonalizado } = vencimiento;
-                const porcentaje = Math.max(0, Math.min(100, (dias / 60) * 100));
-                const colorClass = getUrgenciaColor(dias);
-                const tipoLabels: Record<string, string> = {
-                  rc: 'RC',
-                  mercancias: 'Mercancías',
-                  acc: 'ACC',
-                  flotas: 'Flotas',
-                  pyme: 'PYME',
-                };
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              No se encontraron vencimientos
+            </h3>
+            <p className="text-slate-500 max-w-sm mx-auto">
+              Prueba ajustando los filtros para ver más resultados
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {vencimientos.map((vencimiento, index) => {
+              const { cliente, tipo, fecha, dias, esPersonalizado } = vencimiento;
+              const porcentaje = Math.max(0, Math.min(100, (dias / 60) * 100));
+              const isVencido = dias < 0;
+              const isUrgente = dias >= 0 && dias <= 15;
+              const tipoLabels: Record<string, string> = {
+                rc: 'RC',
+                mercancias: 'Mercancías',
+                acc: 'ACC',
+                flotas: 'Flotas',
+                pyme: 'PYME',
+              };
 
-                // Obtener el nombre del tipo de vencimiento
-                const getTipoLabel = () => {
-                  if (esPersonalizado) {
-                    return tipo.replace('personalizado:', '');
-                  }
-                  return tipoLabels[tipo] || tipo;
-                };
+              const getTipoLabel = () => {
+                if (esPersonalizado) {
+                  return tipo.replace('personalizado:', '');
+                }
+                return tipoLabels[tipo] || tipo;
+              };
 
-                return (
-                  <div
-                    key={`${cliente.id}-${tipo}-${index}`}
-                    className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold">{cliente.empresa}</h3>
-                          <ChipMes fecha={fecha} config={config} />
-                          <EstadoBadge estado={cliente.estado} />
+              return (
+                <div
+                  key={`${cliente.id}-${tipo}-${index}`}
+                  className={cn(
+                    'p-5 rounded-2xl border transition-all duration-300 group hover:shadow-lg',
+                    isVencido
+                      ? 'bg-gradient-to-r from-rose-50 to-rose-50/50 border-rose-200'
+                      : isUrgente
+                      ? 'bg-gradient-to-r from-amber-50 to-amber-50/50 border-amber-200'
+                      : 'bg-white/70 border-slate-200 hover:border-slate-300'
+                  )}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-3 mb-3">
+                        <h3 className="text-lg font-bold text-slate-800">{cliente.empresa}</h3>
+                        <ChipMes fecha={fecha} config={config} />
+                        <EstadoBadge estado={cliente.estado} />
+                        <span className={cn(
+                          "text-xs font-semibold px-3 py-1 rounded-full border",
+                          esPersonalizado
+                            ? "bg-gradient-to-r from-violet-100 to-violet-50 text-violet-700 border-violet-200"
+                            : "bg-slate-100 text-slate-600 border-slate-200"
+                        )}>
+                          {getTipoLabel()}
+                          {esPersonalizado && <span className="ml-1.5">✦</span>}
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-500 mb-3">
+                        <span className="font-medium text-slate-700">{cliente.contacto}</span>
+                        <span className="mx-2">•</span>
+                        {formatDate(fecha)}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-4 mb-4">
+                        {cliente.telefono && (
+                          <a
+                            href={`tel:${cliente.telefono}`}
+                            className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                          >
+                            <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
+                              <Phone className="h-3.5 w-3.5" />
+                            </div>
+                            {cliente.telefono}
+                          </a>
+                        )}
+                        {cliente.correo && (
+                          <a
+                            href={`mailto:${cliente.correo}`}
+                            className="flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-700 font-medium transition-colors"
+                          >
+                            <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
+                              <Mail className="h-3.5 w-3.5" />
+                            </div>
+                            {cliente.correo}
+                          </a>
+                        )}
+                        <Link
+                          to={`/clientes?search=${encodeURIComponent(cliente.empresa)}`}
+                          className="flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+                        >
+                          <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </div>
+                          Ver cliente
+                        </Link>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-slate-500">
+                            Días restantes: <span className={cn(
+                              'font-bold',
+                              isVencido ? 'text-rose-600' : isUrgente ? 'text-amber-600' : 'text-emerald-600'
+                            )}>{dias}</span>
+                          </span>
                           <span className={cn(
-                            "text-xs px-2 py-1 rounded",
-                            esPersonalizado 
-                              ? "bg-blue-100 text-blue-800 border border-blue-300" 
-                              : "bg-muted"
+                            'text-xs font-bold px-2.5 py-1 rounded-full',
+                            isVencido
+                              ? 'bg-rose-100 text-rose-700'
+                              : isUrgente
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-emerald-100 text-emerald-700'
                           )}>
-                            {getTipoLabel()}
-                            {esPersonalizado && <span className="ml-1">●</span>}
+                            {isVencido ? 'Vencido' : dias > 30 ? 'Baja urgencia' : dias >= 15 ? 'Media urgencia' : 'Alta urgencia'}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {cliente.contacto} • {formatDate(fecha)}
-                        </p>
-                        <div className="flex items-center gap-4 mb-3">
-                          {cliente.telefono && (
-                            <a
-                              href={`tel:${cliente.telefono}`}
-                              className="text-primary hover:underline flex items-center gap-1 text-sm"
-                            >
-                              <Phone className="h-4 w-4" />
-                              {cliente.telefono}
-                            </a>
-                          )}
-                          {cliente.correo && (
-                            <a
-                              href={`mailto:${cliente.correo}`}
-                              className="text-primary hover:underline flex items-center gap-1 text-sm"
-                            >
-                              <Mail className="h-4 w-4" />
-                              {cliente.correo}
-                            </a>
-                          )}
-                          <Link
-                            to={`/clientes?search=${encodeURIComponent(cliente.empresa)}`}
-                            className="text-primary hover:underline flex items-center gap-1 text-sm"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            Ver cliente
-                          </Link>
-                        </div>
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground">
-                              Días restantes: <strong>{dias}</strong>
-                            </span>
-                            <span className={`font-medium ${colorClass.replace('bg-', 'text-')}`}>
-                              {dias > 30 ? 'Baja urgencia' : dias >= 15 ? 'Media urgencia' : 'Alta urgencia'}
-                            </span>
-                          </div>
-                          <Progress value={100 - porcentaje} className="h-2" />
+                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className={cn(
+                              'h-full rounded-full transition-all duration-500',
+                              isVencido
+                                ? 'bg-rose-500'
+                                : isUrgente
+                                ? 'bg-amber-500'
+                                : 'bg-emerald-500'
+                            )}
+                            style={{ width: `${Math.max(5, 100 - porcentaje)}%` }}
+                          />
                         </div>
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

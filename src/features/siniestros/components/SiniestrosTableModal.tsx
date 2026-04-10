@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { SiniestroGrupo, Siniestro } from '@/types';
@@ -23,12 +23,15 @@ import {
   Download,
   X,
   FileText,
-  Trash2,
   Save,
-  ChevronDown,
-  ChevronUp,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
-import { useSiniestrosStore } from '../store/siniestros.store';
+import {
+  useAddSiniestro,
+  useUpdateSiniestro,
+  useDeleteSiniestro,
+} from '../hooks/useSiniestros';
 import { generateSiniestroPDF } from '../utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -55,7 +58,7 @@ const VALORACIONES = [
   { value: 'negativa', label: 'Negativa' },
 ];
 
-// Cabeceras de la tabla
+// Cabeceras de la tabla (sin columna de acciones)
 const HEADERS = [
   { key: 'nombreTomador', label: 'Nombre tomador', width: 'w-40' },
   { key: 'numeroPoliza', label: 'Nº póliza', width: 'w-28' },
@@ -66,12 +69,12 @@ const HEADERS = [
   { key: 'fechaApertura', label: 'Fecha apertura', width: 'w-32' },
   { key: 'numSiniestroCompania', label: 'Nº siniestro comp.', width: 'w-36' },
   { key: 'numSiniestroElevia', label: 'Nº siniestro Elevia', width: 'w-36' },
-  { key: 'estado', label: 'Estado', width: 'w-24' },
+  { key: 'estado', label: 'Estado', width: 'w-28' },
   { key: 'costeTotal', label: 'Coste total', width: 'w-24' },
-  { key: 'culpa', label: 'Culpa', width: 'w-24' },
+  { key: 'culpa', label: 'Culpa', width: 'w-28' },
   { key: 'observaciones', label: 'Observaciones', width: 'w-40' },
   { key: 'fechaCierre', label: 'Fecha cierre', width: 'w-32' },
-  { key: 'valoracion', label: 'Valoración', width: 'w-24' },
+  { key: 'valoracion', label: 'Valoración', width: 'w-28' },
 ];
 
 export function SiniestrosTableModal({
@@ -79,47 +82,58 @@ export function SiniestrosTableModal({
   onClose,
   grupo,
 }: SiniestrosTableModalProps) {
-  const { addSiniestro, updateSiniestro, deleteSiniestro } = useSiniestrosStore();
   const { toast } = useToast();
+  const addSiniestro = useAddSiniestro();
+  const updateSiniestro = useUpdateSiniestro();
+  const deleteSiniestro = useDeleteSiniestro();
 
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [isEditingMode, setIsEditingMode] = useState(false);
   const [siniestrosLocales, setSiniestrosLocales] = useState<Siniestro[]>(grupo.siniestros);
 
-  const handleAddSiniestro = () => {
-    const newSiniestro: Omit<Siniestro, 'id' | 'createdAt' | 'updatedAt'> = {
-      nombreTomador: '',
-      numeroPoliza: '',
-      compania: '',
-      matricula: '',
-      fechaOcurrencia: null,
-      tipoSiniestro: '',
-      fechaApertura: new Date().toISOString().split('T')[0],
-      numSiniestroCompania: '',
-      numSiniestroElevia: '',
-      estado: 'abierto',
-      costeTotal: null,
-      culpa: null,
-      observaciones: '',
-      fechaCierre: null,
-      valoracion: null,
-    };
+  // Sincronizar cuando cambia el grupo
+  useEffect(() => {
+    setSiniestrosLocales(grupo.siniestros);
+  }, [grupo.siniestros]);
 
-    const id = addSiniestro(grupo.id, newSiniestro);
-    const siniestroCompleto = {
-      ...newSiniestro,
-      id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  const handleAddSiniestro = async () => {
+    try {
+      const newSiniestro: Omit<Siniestro, 'id' | 'createdAt' | 'updatedAt'> = {
+        nombreTomador: '',
+        numeroPoliza: '',
+        compania: '',
+        matricula: '',
+        fechaOcurrencia: null,
+        tipoSiniestro: '',
+        fechaApertura: new Date().toISOString().split('T')[0],
+        numSiniestroCompania: '',
+        numSiniestroElevia: '',
+        estado: 'abierto',
+        costeTotal: null,
+        culpa: null,
+        observaciones: '',
+        fechaCierre: null,
+        valoracion: null,
+      };
 
-    setSiniestrosLocales([...siniestrosLocales, siniestroCompleto]);
-    setEditingId(id);
+      const creado = await addSiniestro.mutateAsync({ grupoId: grupo.id, siniestro: newSiniestro });
 
-    toast({
-      title: 'Nuevo siniestro',
-      description: 'Completa la información y guarda los cambios',
-    });
+      // Añadir inmediatamente a la lista local para que se vea
+      setSiniestrosLocales((prev) => [...prev, creado]);
+
+      // Entrar en modo edición automáticamente para el nuevo
+      setIsEditingMode(true);
+
+      toast({
+        title: 'Nuevo siniestro',
+        description: 'Se ha añadido una nueva fila. Completa la información y guarda.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo añadir el siniestro',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleUpdateSiniestro = (id: string, field: keyof Siniestro, value: any) => {
@@ -128,35 +142,68 @@ export function SiniestrosTableModal({
     );
   };
 
-  const handleSave = (id: string) => {
-    const siniestro = siniestrosLocales.find((s) => s.id === id);
-    if (siniestro) {
-      updateSiniestro(grupo.id, id, siniestro);
-      setEditingId(null);
+  const handleSaveAll = async () => {
+    try {
+      const updatedSiniestros: Siniestro[] = [];
+
+      // Guardar todos los siniestros que han cambiado
+      for (const siniestro of siniestrosLocales) {
+        const original = grupo.siniestros.find((s) => s.id === siniestro.id);
+        if (original) {
+          const haCambiado = JSON.stringify(original) !== JSON.stringify(siniestro);
+          if (haCambiado) {
+            const actualizado = await updateSiniestro.mutateAsync({
+              grupoId: grupo.id,
+              siniestroId: siniestro.id,
+              updates: siniestro,
+            });
+            updatedSiniestros.push(actualizado);
+          } else {
+            updatedSiniestros.push(siniestro);
+          }
+        } else {
+          // Siniestro nuevo que no estaba en el grupo original
+          updatedSiniestros.push(siniestro);
+        }
+      }
+
+      // Actualizar la lista local con los valores guardados
+      setSiniestrosLocales(updatedSiniestros);
+      setIsEditingMode(false);
+
       toast({
-        title: 'Siniestro guardado',
-        description: 'Los cambios se han guardado correctamente',
+        title: 'Cambios guardados',
+        description: 'Todos los siniestros se han actualizado correctamente',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudieron guardar los cambios',
+        variant: 'destructive',
       });
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('¿Estás seguro de que quieres eliminar este siniestro?')) {
-      deleteSiniestro(grupo.id, id);
-      setSiniestrosLocales((prev) => prev.filter((s) => s.id !== id));
-      toast({
-        title: 'Siniestro eliminado',
-        description: 'El siniestro se ha eliminado correctamente',
-      });
-    }
-  };
+      try {
+        await deleteSiniestro.mutateAsync({ grupoId: grupo.id, siniestroId: id });
 
-  const handleDownload = (siniestro: Siniestro) => {
-    generateSiniestroPDF(grupo, [siniestro]);
-    toast({
-      title: 'PDF generado',
-      description: 'Descargando documento...',
-    });
+        // Eliminar inmediatamente de la lista local
+        setSiniestrosLocales((prev) => prev.filter((s) => s.id !== id));
+
+        toast({
+          title: 'Siniestro eliminado',
+          description: 'El siniestro se ha eliminado correctamente',
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: error.message || 'No se pudo eliminar el siniestro',
+          variant: 'destructive',
+        });
+      }
+    }
   };
 
   const handleDownloadAll = () => {
@@ -180,11 +227,9 @@ export function SiniestrosTableModal({
   const siniestrosAbiertos = siniestrosLocales.filter((s) => s.estado === 'abierto').length;
   const siniestrosCerrados = siniestrosLocales.filter((s) => s.estado === 'cerrado').length;
 
-  const isEditing = (id: string) => editingId === id;
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[98vw] w-[98vw] h-[95vh] max-h-[95vh] p-0 flex flex-col overflow-hidden">
+      <DialogContent hideCloseButton className="max-w-[98vw] w-[98vw] h-[95vh] max-h-[95vh] p-0 flex flex-col overflow-hidden">
         {/* Header */}
         <DialogHeader className="px-6 py-5 border-b bg-white shrink-0">
           <div className="flex items-center justify-between">
@@ -215,16 +260,33 @@ export function SiniestrosTableModal({
                 <span className="text-slate-600">Total: {siniestrosLocales.length}</span>
               </div>
 
+              {/* Botones de acción */}
               {siniestrosLocales.length > 0 && (
                 <Button variant="outline" onClick={handleDownloadAll}>
                   <Download className="w-4 h-4 mr-2" />
                   Descargar todo
                 </Button>
               )}
+
               <Button onClick={handleAddSiniestro}>
                 <Plus className="w-4 h-4 mr-2" />
                 Añadir siniestro
               </Button>
+
+              {isEditingMode ? (
+                <Button variant="default" onClick={handleSaveAll} className="bg-emerald-600 hover:bg-emerald-700">
+                  <Save className="w-4 h-4 mr-2" />
+                  Guardar
+                </Button>
+              ) : (
+                siniestrosLocales.length > 0 && (
+                  <Button variant="outline" onClick={() => setIsEditingMode(true)}>
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Editar
+                  </Button>
+                )
+              )}
+
               <Button variant="ghost" size="icon" onClick={onClose}>
                 <X className="w-5 h-5" />
               </Button>
@@ -256,9 +318,6 @@ export function SiniestrosTableModal({
                 <table className="w-full text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200 sticky top-0">
                     <tr>
-                      <th className="px-3 py-3 text-left font-medium text-slate-600 w-20">
-                        Acciones
-                      </th>
                       {HEADERS.map((h) => (
                         <th
                           key={h.key}
@@ -270,11 +329,16 @@ export function SiniestrosTableModal({
                           {h.label}
                         </th>
                       ))}
+                      {/* Columna de eliminar solo en modo edición */}
+                      {isEditingMode && (
+                        <th className="px-3 py-3 text-left font-medium text-slate-600 w-20">
+                          Eliminar
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {siniestrosLocales.map((siniestro, index) => {
-                      const editing = isEditing(siniestro.id);
+                    {siniestrosLocales.map((siniestro) => {
                       const estado = ESTADOS.find((e) => e.value === siniestro.estado);
 
                       return (
@@ -282,65 +346,12 @@ export function SiniestrosTableModal({
                           key={siniestro.id}
                           className={cn(
                             "hover:bg-slate-50/50",
-                            editing && "bg-blue-50/50"
+                            isEditingMode && "bg-blue-50/30"
                           )}
                         >
-                          {/* Acciones */}
-                          <td className="px-3 py-2 whitespace-nowrap">
-                            <div className="flex items-center gap-1">
-                              {editing ? (
-                                <>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    onClick={() => handleSave(siniestro.id)}
-                                  >
-                                    <Save className="w-4 h-4 text-emerald-600" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    onClick={() => setEditingId(null)}
-                                  >
-                                    <X className="w-4 h-4 text-red-600" />
-                                  </Button>
-                                </>
-                              ) : (
-                                <>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    onClick={() => setEditingId(siniestro.id)}
-                                  >
-                                    <FileText className="w-3.5 h-3.5" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    onClick={() => handleDelete(siniestro.id)}
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    onClick={() => handleDownload(siniestro)}
-                                  >
-                                    <Download className="w-3.5 h-3.5" />
-                                  </Button>
-                                </>
-                              )}
-                            </div>
-                          </td>
-
                           {/* Nombre tomador */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 value={siniestro.nombreTomador}
                                 onChange={(e) =>
@@ -357,7 +368,7 @@ export function SiniestrosTableModal({
 
                           {/* Nº póliza */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 value={siniestro.numeroPoliza}
                                 onChange={(e) =>
@@ -372,7 +383,7 @@ export function SiniestrosTableModal({
 
                           {/* Compañía */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 value={siniestro.compania}
                                 onChange={(e) =>
@@ -387,7 +398,7 @@ export function SiniestrosTableModal({
 
                           {/* Matrícula */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 value={siniestro.matricula}
                                 onChange={(e) =>
@@ -402,7 +413,7 @@ export function SiniestrosTableModal({
 
                           {/* Fecha ocurrencia */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 type="date"
                                 value={siniestro.fechaOcurrencia || ''}
@@ -418,7 +429,7 @@ export function SiniestrosTableModal({
 
                           {/* Tipo siniestro */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 value={siniestro.tipoSiniestro}
                                 onChange={(e) =>
@@ -433,7 +444,7 @@ export function SiniestrosTableModal({
 
                           {/* Fecha apertura */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 type="date"
                                 value={siniestro.fechaApertura || ''}
@@ -449,7 +460,7 @@ export function SiniestrosTableModal({
 
                           {/* Nº siniestro compañía */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 value={siniestro.numSiniestroCompania}
                                 onChange={(e) =>
@@ -464,7 +475,7 @@ export function SiniestrosTableModal({
 
                           {/* Nº siniestro Elevia */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 value={siniestro.numSiniestroElevia}
                                 onChange={(e) =>
@@ -477,9 +488,9 @@ export function SiniestrosTableModal({
                             )}
                           </td>
 
-                          {/* Estado */}
+                          {/* Estado - Select funcional en modo edición */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Select
                                 value={siniestro.estado}
                                 onValueChange={(v) =>
@@ -489,7 +500,7 @@ export function SiniestrosTableModal({
                                 <SelectTrigger className="h-8 text-xs w-28">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent position="popper" className="z-[200]">
                                   {ESTADOS.map((e) => (
                                     <SelectItem key={e.value} value={e.value}>
                                       {e.label}
@@ -515,7 +526,7 @@ export function SiniestrosTableModal({
 
                           {/* Coste total */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 type="number"
                                 step="0.01"
@@ -534,19 +545,19 @@ export function SiniestrosTableModal({
                             )}
                           </td>
 
-                          {/* Culpa */}
+                          {/* Culpa - Select funcional en modo edición */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Select
                                 value={siniestro.culpa || '__none__'}
                                 onValueChange={(v) =>
                                   handleUpdateSiniestro(siniestro.id, 'culpa', v === '__none__' ? null : v)
                                 }
                               >
-                                <SelectTrigger className="h-8 text-xs w-24">
+                                <SelectTrigger className="h-8 text-xs w-28">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent position="popper" className="z-[200]">
                                   <SelectItem value="__none__">-</SelectItem>
                                   {CULPAS.map((c) => (
                                     <SelectItem key={c.value} value={c.value}>
@@ -556,17 +567,24 @@ export function SiniestrosTableModal({
                                 </SelectContent>
                               </Select>
                             ) : (
-                              siniestro.culpa === 'tomador'
-                                ? 'Tomador'
-                                : siniestro.culpa === 'contrario'
-                                ? 'Contrario'
-                                : '-'
+                              <span className={cn(
+                                "text-xs font-medium",
+                                siniestro.culpa === 'tomador' && "text-blue-600",
+                                siniestro.culpa === 'contrario' && "text-rose-600",
+                                !siniestro.culpa && "text-slate-400"
+                              )}>
+                                {siniestro.culpa === 'tomador'
+                                  ? 'Tomador'
+                                  : siniestro.culpa === 'contrario'
+                                  ? 'Contrario'
+                                  : '-'}
+                              </span>
                             )}
                           </td>
 
                           {/* Observaciones */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 value={siniestro.observaciones}
                                 onChange={(e) =>
@@ -583,7 +601,7 @@ export function SiniestrosTableModal({
 
                           {/* Fecha cierre */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Input
                                 type="date"
                                 value={siniestro.fechaCierre || ''}
@@ -591,16 +609,15 @@ export function SiniestrosTableModal({
                                   handleUpdateSiniestro(siniestro.id, 'fechaCierre', e.target.value || null)
                                 }
                                 className="h-8 text-xs"
-                                disabled={siniestro.estado !== 'cerrado'}
                               />
                             ) : (
                               formatDate(siniestro.fechaCierre)
                             )}
                           </td>
 
-                          {/* Valoración */}
+                          {/* Valoración - Select funcional en modo edición */}
                           <td className="px-3 py-2">
-                            {editing ? (
+                            {isEditingMode ? (
                               <Select
                                 value={siniestro.valoracion || '__none__'}
                                 onValueChange={(v) =>
@@ -610,7 +627,7 @@ export function SiniestrosTableModal({
                                 <SelectTrigger className="h-8 text-xs w-28">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent position="popper" className="z-[200]">
                                   <SelectItem value="__none__">-</SelectItem>
                                   {VALORACIONES.map((v) => (
                                     <SelectItem key={v.value} value={v.value}>
@@ -620,7 +637,7 @@ export function SiniestrosTableModal({
                                 </SelectContent>
                               </Select>
                             ) : (
-                              siniestro.valoracion && (
+                              siniestro.valoracion ? (
                                 <Badge
                                   variant="secondary"
                                   className={cn(
@@ -632,9 +649,23 @@ export function SiniestrosTableModal({
                                 >
                                   {VALORACIONES.find((v) => v.value === siniestro.valoracion)?.label}
                                 </Badge>
-                              )
+                              ) : '-'
                             )}
                           </td>
+
+                          {/* Columna eliminar solo en modo edición */}
+                          {isEditingMode && (
+                            <td className="px-3 py-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => handleDelete(siniestro.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </td>
+                          )}
                         </tr>
                       );
                     })}

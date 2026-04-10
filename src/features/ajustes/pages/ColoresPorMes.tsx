@@ -1,14 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ConfigUsuario } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { dataProvider } from '@/config/dataProvider';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut } from 'lucide-react';
+import { LogOut, Palette, Bell, Shield, RotateCcw, Trash2 } from 'lucide-react';
 
 const meses = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -113,112 +112,167 @@ export function ColoresPorMesPage() {
   };
 
   if (isLoading || !config) {
-    return <div className="p-8 text-center text-muted-foreground">Cargando...</div>;
+    return (
+      <div className="p-12 text-center">
+        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-slate-500">Cargando configuración...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Ajustes</h1>
-          <p className="text-muted-foreground mt-1">
-            Configura los colores por mes y la ventana de alerta de vencimientos
-          </p>
+    <div className="space-y-8 animate-slide-up">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center shadow-lg shadow-slate-500/20">
+            <Shield className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">
+              Ajustes
+            </h1>
+            <p className="text-slate-500 mt-1">
+              Personaliza tu experiencia en el CRM
+            </p>
+          </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {import.meta.env.VITE_USE_MOCK === 'true' && (
-            <Button variant="destructive" onClick={handleResetData}>
+            <Button
+              variant="destructive"
+              onClick={handleResetData}
+              className="gap-2 rounded-xl"
+            >
+              <Trash2 className="h-4 w-4" />
               Reiniciar datos
             </Button>
           )}
-          <Button variant="outline" onClick={handleReset}>
+          <Button
+            variant="outline"
+            onClick={handleReset}
+            className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50"
+          >
+            <RotateCcw className="h-4 w-4" />
             Restaurar por defecto
           </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Colores por Mes</CardTitle>
-          <CardDescription>
-            Personaliza los colores que se mostrarán en los chips de mes para cada mes del año
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {meses.map((mes, index) => {
-              const mesNum = index + 1;
-              const color = config.monthColors[mesNum] || defaultColors[mesNum];
+      {/* Colores por Mes */}
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <Palette className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-slate-800">Colores por Mes</h2>
+            <p className="text-sm text-slate-500">
+              Personaliza los colores de los chips de mes en el calendario
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {meses.map((mes, index) => {
+            const mesNum = index + 1;
+            const color = config.monthColors[mesNum] || defaultColors[mesNum];
 
-              return (
-                <div key={mesNum} className="space-y-2">
-                  <Label htmlFor={`mes-${mesNum}`}>{mes}</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
+            return (
+              <div key={mesNum} className="space-y-2">
+                <Label htmlFor={`mes-${mesNum}`} className="text-sm font-semibold text-slate-700">
+                  {mes}
+                </Label>
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-12 h-10 rounded-xl border-2 border-slate-200 cursor-pointer overflow-hidden relative group"
+                    style={{ backgroundColor: color }}
+                  >
+                    <input
                       id={`mes-${mesNum}`}
                       type="color"
                       value={color}
                       onChange={(e) => handleColorChange(mesNum, e.target.value)}
-                      className="w-20 h-10 cursor-pointer"
-                    />
-                    <Input
-                      type="text"
-                      value={color}
-                      onChange={(e) => handleColorChange(mesNum, e.target.value)}
-                      className="flex-1"
-                      placeholder="#000000"
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                     />
                   </div>
+                  <Input
+                    type="text"
+                    value={color}
+                    onChange={(e) => handleColorChange(mesNum, e.target.value)}
+                    className="flex-1 h-10 rounded-xl bg-white/50 border-slate-200 font-mono text-sm"
+                    placeholder="#000000"
+                  />
                 </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Ventana de Alerta</CardTitle>
-          <CardDescription>
-            Configura el rango de días para filtrar los vencimientos que se muestran en "Próximos Vencimientos" del dashboard
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2 max-w-md">
-            <Label htmlFor="alertWindowDays">Días para filtrar vencimientos</Label>
-            <Input
-              id="alertWindowDays"
-              type="number"
-              min="1"
-              max="365"
-              value={config.alertWindowDays}
-              onChange={(e) => handleAlertWindowChange(Number(e.target.value))}
-            />
-            <p className="text-sm text-muted-foreground">
-              Los vencimientos que ocurran dentro de los próximos {config.alertWindowDays} días se mostrarán en la sección "Próximos Vencimientos" del dashboard
+      {/* Ventana de Alerta */}
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+            <Bell className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-slate-800">Ventana de Alerta</h2>
+            <p className="text-sm text-slate-500">
+              Configura cuándo mostrar vencimientos como urgentes
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="max-w-md space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="alertWindowDays" className="text-sm font-semibold text-slate-700">
+              Días para alerta de vencimientos
+            </Label>
+            <div className="flex items-center gap-4">
+              <Input
+                id="alertWindowDays"
+                type="number"
+                min="1"
+                max="365"
+                value={config.alertWindowDays}
+                onChange={(e) => handleAlertWindowChange(Number(e.target.value))}
+                className="h-11 rounded-xl bg-white/50 border-slate-200 w-32 text-center font-bold text-lg"
+              />
+              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(100, (config.alertWindowDays / 365) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+          <p className="text-sm text-slate-500 bg-slate-50 p-3 rounded-xl">
+            Los vencimientos que ocurran dentro de los próximos <span className="font-bold text-slate-700">{config.alertWindowDays} días</span> se mostrarán en la sección "Próximos Vencimientos" del dashboard
+          </p>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Sesión</CardTitle>
-          <CardDescription>
-            Gestiona tu sesión de usuario
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            variant="destructive"
-            onClick={handleLogout}
-            className="gap-2"
-          >
-            <LogOut className="h-4 w-4" />
-            Cerrar sesión
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Sesión */}
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center shadow-lg shadow-rose-500/20">
+            <LogOut className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-slate-800">Sesión</h2>
+            <p className="text-sm text-slate-500">
+              Gestiona tu sesión de usuario
+            </p>
+          </div>
+        </div>
+        <Button
+          variant="destructive"
+          onClick={handleLogout}
+          className="gap-2 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 border-0"
+        >
+          <LogOut className="h-4 w-4" />
+          Cerrar sesión
+        </Button>
+      </div>
     </div>
   );
 }
