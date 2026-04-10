@@ -38,7 +38,7 @@ const clienteSchema = z.object({
   correo: z.string().optional(),
   cif: z.string().optional(),
   notas: z.string().optional(),
-  estado: z.enum(['contratado', 'contactado_buena_pinta', 'en_negociacion', 'descartado']).optional(),
+  estado: z.enum(['llamado', 'gmail_enviado', 'reunido', 'propuesta_activa', 'vendido', 'no_llegamos']).optional(),
   tipoCarga: z.string().optional(),
   transporte: z.enum([
     'nacional',
@@ -92,10 +92,12 @@ interface ClienteFormDrawerProps {
 }
 
 const estadoLabels: Record<EstadoCliente, string> = {
-  contratado: 'Contratado',
-  contactado_buena_pinta: 'Contactado - Buena Pinta',
-  en_negociacion: 'En Negociación',
-  descartado: 'Descartado',
+  llamado: 'Llamado',
+  gmail_enviado: 'Gmail enviado',
+  reunido: 'Reunido',
+  propuesta_activa: 'Propuesta activa',
+  vendido: 'Vendido',
+  no_llegamos: 'No llegamos',
 };
 
 const transporteLabels: Record<Transporte, string> = {

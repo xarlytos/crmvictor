@@ -3,6 +3,7 @@ import { AppLayout } from './AppLayout';
 import { DashboardPage } from '@/features/dashboard/pages/DashboardPage';
 import { ClientesList } from '@/features/clientes/pages/ClientesList';
 import { VencimientosPage } from '@/features/vencimientos/pages/VencimientosPage';
+import { CalendarioPage } from '@/features/calendario/pages/CalendarioPage';
 import { ColoresPorMesPage } from '@/features/ajustes/pages/ColoresPorMes';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { ProtectedRoute } from '@/components/shared/ProtectedRoute';
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
       {
         path: 'vencimientos',
         element: <VencimientosPage />,
+      },
+      {
+        path: 'calendario',
+        element: <CalendarioPage />,
       },
       {
         path: 'ajustes/colores-mes',

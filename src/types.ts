@@ -1,4 +1,4 @@
-export type EstadoCliente = 'contratado' | 'contactado_buena_pinta' | 'en_negociacion' | 'descartado';
+export type EstadoCliente = 'llamado' | 'gmail_enviado' | 'reunido' | 'propuesta_activa' | 'vendido' | 'no_llegamos';
 
 export type TipoCarga = string;
 
@@ -80,5 +80,27 @@ export interface DataProvider {
 
   getConfig(): Promise<ConfigUsuario>;
   updateConfig(patch: Partial<ConfigUsuario>): Promise<ConfigUsuario>;
+}
+
+// ========== CALENDAR TYPES ==========
+
+export interface EventType {
+  id: string;
+  name: string;
+  color: string;
+  icon?: string;
+  createdAt: string;
+}
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  typeId: string;
+  date: string; // ISO date string (YYYY-MM-DD)
+  startTime: string; // "09:00"
+  endTime: string; // "10:00"
+  description?: string;
+  customColor?: string; // override del color del tipo
+  createdAt: string;
 }
 

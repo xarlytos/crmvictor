@@ -24,10 +24,12 @@ export const formatEmail = (email: string): string => {
  */
 export const enumToLabel = {
   estado: {
-    contratado: 'Contratado',
-    contactado_buena_pinta: 'Contactado - Buena Pinta',
-    en_negociacion: 'En Negociación',
-    descartado: 'Descartado',
+    llamado: 'Llamado',
+    gmail_enviado: 'Gmail enviado',
+    reunido: 'Reunido',
+    propuesta_activa: 'Propuesta activa',
+    vendido: 'Vendido',
+    no_llegamos: 'No llegamos',
   },
   tipoCarga: {
     general_fraccionada: 'General Fraccionada',

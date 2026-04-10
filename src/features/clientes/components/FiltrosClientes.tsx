@@ -22,7 +22,7 @@ import { enumToLabel } from '@/lib/formatters';
 import { ChipMes } from '@/components/shared/ChipMes';
 import type { ColumnVisibility } from './ColumnVisibilityMenu';
 
-const estados: EstadoCliente[] = ['contratado', 'contactado_buena_pinta', 'en_negociacion', 'descartado'];
+const estados: EstadoCliente[] = ['llamado', 'gmail_enviado', 'reunido', 'propuesta_activa', 'vendido', 'no_llegamos'];
 const transportes: Transporte[] = ['nacional', 'internacional', 'peninsular', 'espana_francia', 'espana_portugal', 'espana_francia_portugal'];
 const meses = Array.from({ length: 12 }, (_, i) => i + 1);
 

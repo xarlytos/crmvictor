@@ -13,6 +13,7 @@
     "server:prod": "tsx backend/index.ts",
     "seed": "tsx backend/seed.ts",
     "clean-db": "tsx backend/clean-db.ts",
+    "migrate:estados": "tsx backend/migrate-estados.ts",
     "setup": "npm install && npm run seed"
   },
   "dependencies": {

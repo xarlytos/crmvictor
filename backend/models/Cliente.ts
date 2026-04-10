@@ -38,7 +38,7 @@ const ClienteSchema = new Schema<ICliente>({
   notas: { type: String },
   estado: {
     type: String,
-    enum: ['contratado', 'contactado_buena_pinta', 'en_negociacion', 'descartado'],
+    enum: ['llamado', 'gmail_enviado', 'reunido', 'propuesta_activa', 'vendido', 'no_llegamos'],
   },
   tipoCarga: { type: String },
   transporte: {

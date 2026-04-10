@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
+  CalendarDays,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -13,6 +14,7 @@ const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/clientes', label: 'Clientes', icon: Users },
   { path: '/vencimientos', label: 'Vencimientos', icon: Calendar },
+  { path: '/calendario', label: 'Calendario', icon: CalendarDays },
   { path: '/ajustes/colores-mes', label: 'Ajustes', icon: Settings },
 ];
 
