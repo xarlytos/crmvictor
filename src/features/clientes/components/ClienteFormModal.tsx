@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { Cliente, Transporte } from '@/types';
+import type { Cliente, EstadoCliente, Transporte } from '@/types';
 import dayjs from 'dayjs';
 
 const clienteSchema = z.object({

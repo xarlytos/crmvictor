@@ -3,8 +3,6 @@ import { persist } from 'zustand/middleware';
 import type {
   SiniestroGrupo,
   Siniestro,
-  EstadoSiniestro,
-  ValoracionSiniestro,
   FiltrosSiniestros,
 } from '@/types';
 
