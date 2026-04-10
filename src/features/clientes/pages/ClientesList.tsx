@@ -296,12 +296,12 @@ export function ClientesList() {
       
       // Estado
       const estadoLabels: Record<string, string> = {
-        contratado: 'Contratado',
-        en_negociacion: 'En negociación',
-        pendiente: 'Pendiente',
-        baja: 'Baja',
-        contactado_buena_pinta: 'Contactado (buena pinta)',
-        descartado: 'Descartado',
+        llamado: 'Llamado',
+        gmail_enviado: 'Gmail enviado',
+        reunido: 'Reunido',
+        propuesta_activa: 'Propuesta activa',
+        vendido: 'Vendido',
+        no_llegamos: 'No llegamos',
       };
       const estadoLabel = cliente.estado ? estadoLabels[cliente.estado] || cliente.estado : 'Sin estado';
       doc.text(`Estado: ${estadoLabel}`, 20, y);
@@ -366,8 +366,8 @@ export function ClientesList() {
   const isSomeSelected = selectedIds.size > 0 && selectedIds.size < clientes.length;
 
   // KPIs
-  const contratados = clientesData?.items.filter((c) => c.estado === 'contratado').length || 0;
-  const tasaCierre = total > 0 ? ((contratados / total) * 100).toFixed(1) : '0';
+  const vendidos = clientesData?.items.filter((c) => c.estado === 'vendido').length || 0;
+  const tasaCierre = total > 0 ? ((vendidos / total) * 100).toFixed(1) : '0';
   const proximosVencimientos = clientesData?.items.filter((c) => {
     const dates = [
       c.poliza?.fechaFin,
@@ -383,7 +383,7 @@ export function ClientesList() {
       return dias >= 0 && dias <= 60;
     });
   }).length || 0;
-  const enNegociacion = clientesData?.items.filter((c) => c.estado === 'en_negociacion').length || 0;
+  const propuestasActivas = clientesData?.items.filter((c) => c.estado === 'propuesta_activa').length || 0;
 
   const totalPages = Math.ceil(sortedAndPaginated.total / pageSize);
 
@@ -414,8 +414,8 @@ export function ClientesList() {
             icon={<Users className="h-4 w-4 text-muted-foreground/60" />}
           />
           <KPI
-            title="Contratados"
-            value={contratados}
+            title="Vendidos"
+            value={vendidos}
             subtitle={`${tasaCierre}% tasa de cierre`}
             icon={<TrendingUp className="h-4 w-4 text-muted-foreground/60" />}
           />
@@ -426,8 +426,8 @@ export function ClientesList() {
             icon={<Calendar className="h-4 w-4 text-muted-foreground/60" />}
           />
           <KPI
-            title="En Negociación"
-            value={enNegociacion}
+            title="Propuestas Activas"
+            value={propuestasActivas}
             icon={<FileText className="h-4 w-4 text-muted-foreground/60" />}
           />
         </div>

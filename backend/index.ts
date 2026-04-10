@@ -9,6 +9,7 @@ import { authRouter } from './routes/auth';
 import { clientesRouter } from './routes/clientes';
 import { vencimientosRouter } from './routes/vencimientos';
 import { configRouter } from './routes/config';
+import siniestrosRouter from './routes/siniestros';
 import { iniciarCronJobs } from './services/cron-scheduler.service';
 
 const app = express();
@@ -54,6 +55,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/clientes', clientesRouter);
 app.use('/api/vencimientos', vencimientosRouter);
 app.use('/api/config', configRouter);
+app.use('/api/siniestros', siniestrosRouter);
 
 // Error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

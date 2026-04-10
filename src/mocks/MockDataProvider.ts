@@ -166,7 +166,7 @@ export class MockDataProvider implements DataProvider {
         contacto: 'JESUS',
         telefono: '609875288',
         correo: 'vtecolomar@gmail.com',
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: parseTipoCarga('NARANJA'),
         transporte: parseTransporte('INT'),
         poliza: {
@@ -185,7 +185,7 @@ export class MockDataProvider implements DataProvider {
         contacto: 'JUAN VICENTE',
         telefono: undefined,
         correo: 'Transterol@yahoo.es',
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: parseTipoCarga('FRIO'),
         transporte: parseTransporte('INT'),
         poliza: {
@@ -209,7 +209,7 @@ export class MockDataProvider implements DataProvider {
         contacto: 'EMILIA',
         telefono: '962387288',
         correo: 'Ontinyent@transporteselclariano.es',
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: undefined,
         transporte: parseTransporte('NAC'),
         poliza: {
@@ -232,7 +232,7 @@ export class MockDataProvider implements DataProvider {
         contacto: 'GEMA',
         telefono: '961590011',
         correo: 'Contabilidad@hursa.com',
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: undefined,
         transporte: undefined,
         poliza: {
@@ -257,7 +257,7 @@ export class MockDataProvider implements DataProvider {
         contacto: 'DANIEL',
         telefono: '606363299',
         correo: 'dmoret@logistica.net',
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: undefined,
         transporte: undefined,
         poliza: {
@@ -276,7 +276,7 @@ export class MockDataProvider implements DataProvider {
         contacto: 'CARMEN',
         telefono: '9628221497',
         correo: 'info@transvercher.com',
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: parseTipoCarga('CARGA FRACCIONADA'),
         transporte: undefined,
         poliza: {
@@ -299,7 +299,7 @@ export class MockDataProvider implements DataProvider {
         contacto: 'FRANCUASCO',
         telefono: '658856645',
         correo: 'contabilidad@trasnportestalens.com',
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: parseTipoCarga('NO ADR'),
         transporte: parseTransporte('NAC'),
         poliza: {
@@ -325,7 +325,7 @@ export class MockDataProvider implements DataProvider {
         contacto: 'HUGO',
         telefono: '650977675',
         correo: 'perislogistica@hotmail.es',
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: parseTipoCarga('FRIGO'),
         transporte: parseTransporte('INT'),
         poliza: {
@@ -347,7 +347,7 @@ export class MockDataProvider implements DataProvider {
         contacto: 'CHELLO',
         telefono: '626216533',
         correo: 'transcuquefrut@telefonica.es',
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: undefined,
         transporte: undefined,
         poliza: {
@@ -369,7 +369,7 @@ export class MockDataProvider implements DataProvider {
         contacto: 'M JOSE',
         telefono: '687749403',
         correo: 'admin@raleman.es',
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: undefined,
         transporte: undefined,
         poliza: {

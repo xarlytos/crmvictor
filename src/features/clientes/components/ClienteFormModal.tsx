@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { Cliente, EstadoCliente, Transporte } from '@/types';
+import type { Cliente, Transporte } from '@/types';
 import dayjs from 'dayjs';
 
 const clienteSchema = z.object({
@@ -31,7 +31,7 @@ const clienteSchema = z.object({
   cif: z.string().optional(),
   direccion: z.string().optional(),
   notas: z.string().optional(),
-  estado: z.enum(['contratado', 'contactado_buena_pinta', 'en_negociacion', 'descartado']),
+  estado: z.enum(['llamado', 'gmail_enviado', 'reunido', 'propuesta_activa', 'vendido', 'no_llegamos']).optional(),
   tipoCarga: z.string().min(1, 'Tipo de carga es requerido'),
   transporte: z.enum([
     'nacional',
@@ -78,11 +78,13 @@ interface ClienteFormModalProps {
   onSubmit: (data: Partial<Cliente>) => Promise<void>;
 }
 
-const estadoLabels: Record<EstadoCliente, string> = {
-  contratado: 'Contratado',
-  contactado_buena_pinta: 'Contactado - Buena Pinta',
-  en_negociacion: 'En Negociación',
-  descartado: 'Descartado',
+const estadoLabels: Record<string, string> = {
+  llamado: 'Llamado',
+  gmail_enviado: 'Gmail enviado',
+  reunido: 'Reunido',
+  propuesta_activa: 'Propuesta activa',
+  vendido: 'Vendido',
+  no_llegamos: 'No llegamos',
 };
 
 const transporteLabels: Record<Transporte, string> = {
@@ -141,7 +143,7 @@ export function ClienteFormModal({
         },
       }
       : {
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: '',
         transporte: 'nacional',
         poliza: {
@@ -185,7 +187,7 @@ export function ClienteFormModal({
       });
     } else if (open && !cliente) {
       reset({
-        estado: 'contactado_buena_pinta',
+        estado: undefined,
         tipoCarga: '',
         transporte: 'nacional',
         poliza: {

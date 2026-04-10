@@ -14,10 +14,12 @@ import { cn } from '@/lib/utils';
 import type { EstadoCliente, Cliente } from '@/types';
 
 const estadoLabels: Record<EstadoCliente, string> = {
-  contratado: 'Contratado',
-  contactado_buena_pinta: 'Contactado - Buena Pinta',
-  en_negociacion: 'En Negociación',
-  descartado: 'Descartado',
+  llamado: 'Llamado',
+  gmail_enviado: 'Gmail enviado',
+  reunido: 'Reunido',
+  propuesta_activa: 'Propuesta activa',
+  vendido: 'Vendido',
+  no_llegamos: 'No llegamos',
 };
 
 export function VencimientosPage() {

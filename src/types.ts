@@ -104,3 +104,51 @@ export interface CalendarEvent {
   createdAt: string;
 }
 
+// ========== SINIESTROS TYPES ==========
+
+export type EstadoSiniestro = 'abierto' | 'cerrado';
+export type CulpaSiniestro = 'tomador' | 'contrario';
+export type ValoracionSiniestro = 'positiva' | 'intermedia' | 'negativa';
+
+export interface Siniestro {
+  id: string;
+  nombreTomador: string;
+  numeroPoliza: string;
+  compania: string;
+  matricula: string;
+  fechaOcurrencia: string | null;
+  tipoSiniestro: string;
+  fechaApertura: string | null;
+  numSiniestroCompania: string;
+  numSiniestroElevia: string;
+  estado: EstadoSiniestro;
+  costeTotal: number | null;
+  culpa: CulpaSiniestro | null;
+  observaciones: string;
+  fechaCierre: string | null;
+  valoracion: ValoracionSiniestro | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SiniestroGrupo {
+  id: string;
+  clienteId: string;
+  empresa: {
+    nombre: string;
+    direccion?: string;
+    cp?: string;
+    ciudad?: string;
+  };
+  observacionesGenerales: string;
+  siniestros: Siniestro[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FiltrosSiniestros {
+  search?: string;
+  estado?: EstadoSiniestro;
+  valoracion?: ValoracionSiniestro;
+}
+

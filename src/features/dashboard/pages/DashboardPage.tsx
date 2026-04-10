@@ -146,8 +146,8 @@ export function DashboardPage() {
     return days >= 0 && days <= config.alertWindowDays;
   }).length;
 
-  const contratados = clientes.filter((c) => c.estado === 'contratado').length;
-  const tasaCierre = clientes.length > 0 ? ((contratados / clientes.length) * 100).toFixed(1) : '0';
+  const vendidos = clientes.filter((c) => c.estado === 'vendido').length;
+  const tasaCierre = clientes.length > 0 ? ((vendidos / clientes.length) * 100).toFixed(1) : '0';
 
   // Obtener TODOS los vencimientos individuales ordenados por fecha
   const proximosVencimientos = useMemo(() => {
@@ -211,7 +211,7 @@ export function DashboardPage() {
         <KPI
           title="Tasa de Cierre"
           value={`${tasaCierre}%`}
-          subtitle={`${contratados} contratados`}
+          subtitle={`${vendidos} vendidos`}
           icon={<TrendingUp className="h-4 w-4" />}
         />
       </div>
