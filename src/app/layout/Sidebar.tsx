@@ -5,6 +5,7 @@ import {
   Users,
   Calendar,
   CalendarDays,
+  FileWarning,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -15,6 +16,7 @@ const navItems = [
   { path: '/clientes', label: 'Clientes', icon: Users },
   { path: '/vencimientos', label: 'Vencimientos', icon: Calendar },
   { path: '/calendario', label: 'Calendario', icon: CalendarDays },
+  { path: '/siniestros', label: 'Siniestros', icon: FileWarning },
   { path: '/ajustes/colores-mes', label: 'Ajustes', icon: Settings },
 ];
 

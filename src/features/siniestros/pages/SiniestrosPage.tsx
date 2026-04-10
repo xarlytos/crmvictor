@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { useClientes } from '@/features/clientes/hooks/useClientes';
+import { useQuery } from '@tanstack/react-query';
+import { dataProvider } from '@/config/dataProvider';
 import { useSiniestrosStore } from '../store/siniestros.store';
 import { ClienteSelectorModal } from '../components/ClienteSelectorModal';
 import { SiniestrosTableModal } from '../components/SiniestrosTableModal';
@@ -35,7 +36,11 @@ import { useToast } from '@/hooks/use-toast';
 import type { SiniestroGrupo, Cliente } from '@/types';
 
 export function SiniestrosPage() {
-  const { data: clientes = [] } = useClientes();
+  const { data: clientesData } = useQuery({
+    queryKey: ['clientes', 'all'],
+    queryFn: () => dataProvider.listClientes(),
+  });
+  const clientes = clientesData?.items || [];
   const {
     grupos,
     filtros,
