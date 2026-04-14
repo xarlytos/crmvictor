@@ -25,19 +25,39 @@ export function generateSiniestroPDF(
     // Logo/Empresa
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
-    doc.text('GESA MEDIACIÓN, S.L.', 8, y);
+    doc.setTextColor(150, 190, 60);
+    doc.text('Víctor Borja Clemente', 8, y);
+
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text('Oficina de FVET', 8, y + 4.5);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
-    doc.text('C/ JOSE MANUEL PEDREÑO, N.º 1 - ED. MAISONNAVE - 3.º A  |  MURCIA - 968-938-893', 8, y + 4);
+    doc.setTextColor(0, 0, 0);
+    doc.text('GESA MEDIACIÓN CORREDURÍA DE SEGUROS Y REASEGUROS S.L', 8, y + 8.5);
+
+    doc.setDrawColor(150, 190, 60);
+    doc.setLineWidth(0.8);
+    doc.line(8, y + 10, pageWidth - 8, y + 10);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.text('Tlf: 645866085', 8, y + 14.5);
+    doc.text('Oficina FVET', 8, y + 18);
+    doc.text('C/ Hernán Cortés, 4 -2, 46004, Valencia', 8, y + 21.5);
+    doc.text('gesamediacion.es', 8, y + 25);
 
     // Fecha a la derecha
     doc.setFont('helvetica', 'bold');
-    doc.text(`Fecha: ${format(new Date(), 'dd/MM/yyyy')}`, pageWidth - 45, y);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Fecha: ${format(new Date(), 'dd/MM/yyyy')}`, pageWidth - 45, y + 4);
 
     // Línea separadora
-    y += 8;
+    y += 32;
     doc.setDrawColor(150, 150, 150);
+    doc.setLineWidth(0.1);
     doc.line(8, y, pageWidth - 8, y);
 
     // ===== DATOS DEL CLIENTE =====
@@ -155,7 +175,16 @@ export function generateSiniestroPDF(
 
     closeY += 12;
     doc.setFont('helvetica', 'bold');
-    doc.text('GESA MEDIACIÓN, S.L.', 8, closeY);
+    doc.setTextColor(150, 190, 60);
+    doc.text('Víctor Borja Clemente', 8, closeY);
+
+    closeY += 5;
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(8);
+    doc.setTextColor(80, 80, 80);
+    doc.text('Oficina de FVET', 8, closeY);
+
+    doc.setTextColor(0, 0, 0);
 
     // Guardar PDF
     const fileName = `Siniestros_${grupo.empresa.nombre.replace(/\s+/g, '_')}_${format(
