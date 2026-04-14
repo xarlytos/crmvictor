@@ -11,6 +11,7 @@ interface CalendarDayProps {
   isToday: boolean;
   onEventClick: (event: CalendarEvent) => void;
   onDayClick: (date: Date) => void;
+  onToggleComplete?: (event: CalendarEvent) => void;
 }
 
 export function CalendarDay({
@@ -21,6 +22,7 @@ export function CalendarDay({
   isToday,
   onEventClick,
   onDayClick,
+  onToggleComplete,
 }: CalendarDayProps) {
   const dateStr = formatDateToString(date);
   const dayEvents = events
@@ -34,6 +36,11 @@ export function CalendarDay({
   const handleEventClick = (e: React.MouseEvent, event: CalendarEvent) => {
     e.stopPropagation();
     onEventClick(event);
+  };
+
+  const handleToggleComplete = (e: React.MouseEvent, event: CalendarEvent) => {
+    e.stopPropagation();
+    onToggleComplete?.(event);
   };
 
   const getEventType = (typeId: string) =>
@@ -78,6 +85,7 @@ export function CalendarDay({
             event={event}
             eventType={getEventType(event.typeId)}
             onClick={(e) => handleEventClick(e, event)}
+            onToggleComplete={(e) => handleToggleComplete(e, event)}
           />
         ))}
       </div>

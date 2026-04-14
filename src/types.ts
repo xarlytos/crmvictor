@@ -125,6 +125,7 @@ export interface CalendarEvent {
   endTime: string; // "10:00"
   description?: string;
   customColor?: string | null; // override del color del tipo
+  completed?: boolean;
   createdAt: string;
 }
 

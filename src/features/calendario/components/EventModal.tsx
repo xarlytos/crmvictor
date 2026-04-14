@@ -19,7 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertCircle, Trash2, CalendarPlus, Clock, CalendarDays, Type, Palette, FileText } from 'lucide-react';
+import { AlertCircle, Trash2, CalendarPlus, Clock, CalendarDays, Type, Palette, FileText, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ export function EventModal({
   const [endTime, setEndTime] = useState('10:00');
   const [description, setDescription] = useState('');
   const [customColor, setCustomColor] = useState('');
+  const [completed, setCompleted] = useState(false);
   const [error, setError] = useState('');
 
   const isEditing = !!event;
@@ -62,6 +64,7 @@ export function EventModal({
         setEndTime(event.endTime);
         setDescription(event.description || '');
         setCustomColor(event.customColor || '');
+        setCompleted(event.completed || false);
       } else {
         setTitle('');
         setTypeId(undefined); // Sin tipo por defecto
@@ -70,6 +73,7 @@ export function EventModal({
         setEndTime('10:00');
         setDescription('');
         setCustomColor('');
+        setCompleted(false);
       }
       setError('');
     }
@@ -93,6 +97,7 @@ export function EventModal({
       endTime,
       description: description.trim() || undefined,
       customColor: customColor || null,
+      completed,
     };
 
     onSave(eventData);
@@ -110,9 +115,9 @@ export function EventModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header con gradiente */}
-        <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white">
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white shrink-0">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -125,7 +130,7 @@ export function EventModal({
           </DialogHeader>
         </div>
 
-        <div className="grid gap-5 p-6">
+        <div className="grid gap-5 p-6 overflow-y-auto flex-1 min-h-0">
           {/* Título */}
           <div className="grid gap-2">
             <Label htmlFor="title" className="flex items-center gap-2 text-sm font-semibold text-slate-700">
@@ -241,6 +246,40 @@ export function EventModal({
             />
           </div>
 
+          {/* Completado */}
+          {isEditing && (
+            <div className="grid gap-2">
+              <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <Check className="w-4 h-4 text-emerald-500" />
+                Estado
+              </Label>
+              <button
+                type="button"
+                onClick={() => setCompleted(!completed)}
+                className={cn(
+                  'flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 w-fit',
+                  completed
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                )}
+              >
+                <div
+                  className={cn(
+                    'w-5 h-5 rounded border flex items-center justify-center transition-colors',
+                    completed
+                      ? 'bg-emerald-500 border-emerald-500 text-white'
+                      : 'bg-white border-slate-300'
+                  )}
+                >
+                  {completed && <Check className="w-3.5 h-3.5" />}
+                </div>
+                <span className="text-sm font-medium">
+                  {completed ? 'Evento completado' : 'Evento pendiente'}
+                </span>
+              </button>
+            </div>
+          )}
+
           {/* Color personalizado (opcional) */}
           <div className="grid gap-3 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
             <Label htmlFor="customColor" className="flex items-center gap-2 text-sm font-semibold text-slate-700">
@@ -294,7 +333,7 @@ export function EventModal({
           )}
         </div>
 
-        <DialogFooter className="gap-2 p-6 border-t bg-slate-50/50">
+        <DialogFooter className="gap-2 p-6 border-t bg-slate-50/50 shrink-0">
           {isEditing && (
             <Button
               variant="destructive"

@@ -103,6 +103,27 @@ export function CalendarioPage() {
     }
   };
 
+  const handleToggleComplete = async (event: CalendarEvent) => {
+    try {
+      await updateEvento.mutateAsync({
+        id: event.id,
+        dto: { completed: !event.completed },
+      });
+      toast({
+        title: event.completed ? 'Evento reactivado' : 'Evento completado',
+        description: event.completed
+          ? 'El evento se ha marcado como pendiente'
+          : 'El evento se ha marcado como completado',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo actualizar el evento',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleAddTipo = async (tipo: Omit<typeof eventTypes[0], 'id' | 'createdAt'>) => {
     try {
       await createTipoEvento.mutateAsync(tipo);
@@ -228,6 +249,7 @@ export function CalendarioPage() {
             eventTypes={eventTypes}
             onEventClick={handleEventClick}
             onDayClick={handleDayClick}
+            onToggleComplete={handleToggleComplete}
           />
         )}
       </div>

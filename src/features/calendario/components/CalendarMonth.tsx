@@ -19,6 +19,7 @@ interface CalendarMonthProps {
   eventTypes: EventType[];
   onEventClick: (event: CalendarEvent) => void;
   onDayClick: (date: Date) => void;
+  onToggleComplete?: (event: CalendarEvent) => void;
 }
 
 const WEEK_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -29,6 +30,7 @@ export function CalendarMonth({
   eventTypes,
   onEventClick,
   onDayClick,
+  onToggleComplete,
 }: CalendarMonthProps) {
   const { days, monthStart } = useMemo(() => {
     const monthStart = startOfMonth(currentDate);
@@ -83,6 +85,7 @@ export function CalendarMonth({
                 isToday={isSameDay(day, today)}
                 onEventClick={onEventClick}
                 onDayClick={onDayClick}
+                onToggleComplete={onToggleComplete}
               />
             ))}
           </div>

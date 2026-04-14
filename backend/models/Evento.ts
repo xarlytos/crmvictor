@@ -18,6 +18,7 @@ export interface IEvento extends Document {
   endTime: string; // HH:mm
   description?: string;
   customColor?: string | null;
+  completed?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -61,6 +62,7 @@ const EventoSchema = new Schema<IEvento>(
     endTime: { type: String, required: true }, // HH:mm
     description: { type: String, default: '' },
     customColor: { type: String, default: null },
+    completed: { type: Boolean, default: false },
   },
   {
     timestamps: true,
