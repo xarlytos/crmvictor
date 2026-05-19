@@ -20,6 +20,7 @@ export interface ColumnVisibility {
   facturacion: boolean;
   fechaLlamada: boolean;
   numVehiculos: boolean;
+  ubicacion: boolean;
   acciones: boolean;
 }
 
@@ -39,6 +40,7 @@ const columnLabels: Record<keyof ColumnVisibility, string> = {
   facturacion: 'Facturación',
   fechaLlamada: 'Fecha de Llamada',
   numVehiculos: 'Número de Vehículos',
+  ubicacion: 'Ubicación',
   acciones: 'Acciones',
 };
 

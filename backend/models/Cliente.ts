@@ -51,6 +51,7 @@ const ClienteSchema = new Schema<ICliente>({
   facturacion: { type: String },
   fechaLlamada: { type: String }, // ISO date string
   estadoConversacion: { type: String },
+  ubicacion: { type: String },
 }, {
   timestamps: true,
   toJSON: {

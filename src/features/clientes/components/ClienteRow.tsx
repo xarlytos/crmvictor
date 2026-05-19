@@ -2,7 +2,7 @@ import { EstadoBadge } from '@/components/shared/EstadoBadge';
 import { VencimientoCell } from '@/components/shared/VencimientoCell';
 import { formatPhone, formatEmail, enumToLabel } from '@/lib/formatters';
 import { formatDate } from '@/lib/date';
-import { Phone, Mail } from 'lucide-react';
+import { Phone, Mail, MapPin } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableRow, DataTableCell } from '@/components/shared/DataTable';
@@ -25,6 +25,7 @@ interface ClienteRowProps {
     facturacion: boolean;
     fechaLlamada: boolean;
     numVehiculos: boolean;
+    ubicacion: boolean;
     acciones: boolean;
   };
 }
@@ -73,6 +74,7 @@ export function ClienteRow({
     facturacion: true,
     fechaLlamada: true,
     numVehiculos: true,
+    ubicacion: true,
     acciones: false,
   };
 
@@ -207,6 +209,20 @@ export function ClienteRow({
         {visibility.numVehiculos && (
           <DataTableCell className="w-[150px]">
             <span className="text-sm font-bold text-slate-700">{cliente.numVehiculos ?? '-'}</span>
+          </DataTableCell>
+        )}
+
+        {/* Ubicación */}
+        {visibility.ubicacion && (
+          <DataTableCell className="w-[160px]">
+            {cliente.ubicacion ? (
+              <span className="inline-flex items-center gap-1.5 bg-teal-50 text-teal-700 px-3 py-1.5 rounded-lg font-medium text-sm">
+                <MapPin className="h-3.5 w-3.5" />
+                {cliente.ubicacion}
+              </span>
+            ) : (
+              <span className="text-sm text-slate-400">-</span>
+            )}
           </DataTableCell>
         )}
       </DataTableRow>

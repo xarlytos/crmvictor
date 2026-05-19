@@ -51,6 +51,7 @@ export interface Cliente {
   facturacion?: string; // Ej: "7,3M", "3M", "700mil"
   fechaLlamada?: string; // ISO
   estadoConversacion?: string; // Ej: "email enviado, llamar de nuevo"
+  ubicacion?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,6 +68,7 @@ export interface FiltrosClientes {
   transportes?: Transporte[];
   mesVencimiento?: number;
   proximosDias?: number; // New
+  ubicacion?: string;
 }
 
 export interface DataProvider {

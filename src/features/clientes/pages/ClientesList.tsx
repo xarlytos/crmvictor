@@ -51,6 +51,7 @@ export function ClientesList() {
     facturacion: true,
     fechaLlamada: true,
     numVehiculos: true,
+    ubicacion: true,
     acciones: false,
   });
 
@@ -537,6 +538,11 @@ export function ClientesList() {
                   {columnVisibility.numVehiculos && (
                     <DataTableHeaderCell className="w-[150px]">
                       Número de Vehículos
+                    </DataTableHeaderCell>
+                  )}
+                  {columnVisibility.ubicacion && (
+                    <DataTableHeaderCell className="w-[160px]">
+                      Ubicación
                     </DataTableHeaderCell>
                   )}
                 </tr>

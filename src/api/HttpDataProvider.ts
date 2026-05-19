@@ -80,6 +80,7 @@ export class HttpDataProvider implements DataProvider {
     if (filters?.transportes) filters.transportes.forEach((t) => queryParams.append('transportes', t));
     if (filters?.mesVencimiento) queryParams.append('mesVencimiento', String(filters.mesVencimiento));
     if (filters?.proximosDias !== undefined) queryParams.append('proximosDias', String(filters.proximosDias));
+    if (filters?.ubicacion) queryParams.append('ubicacion', filters.ubicacion);
 
     const query = queryParams.toString();
     return this.request<{ items: Cliente[]; total: number }>(

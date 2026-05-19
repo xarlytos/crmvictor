@@ -47,6 +47,7 @@ const formatCliente = (doc: any): Cliente => ({
   facturacion: doc.facturacion,
   fechaLlamada: doc.fechaLlamada,
   estadoConversacion: doc.estadoConversacion,
+  ubicacion: doc.ubicacion,
   createdAt: doc.createdAt instanceof Date 
     ? doc.createdAt.toISOString() 
     : doc.createdAt,
@@ -64,6 +65,7 @@ export const listClientes = async (req: Request, res: Response): Promise<void> =
       transportes: parseQueryArray(req.query.transportes) as any,
       mesVencimiento: req.query.mesVencimiento ? Number(req.query.mesVencimiento) : undefined,
       proximosDias: req.query.proximosDias ? Number(req.query.proximosDias) : undefined,
+      ubicacion: req.query.ubicacion as string,
     };
 
     let query: any = {};
@@ -76,6 +78,11 @@ export const listClientes = async (req: Request, res: Response): Promise<void> =
         { telefono: { $regex: filters.search, $options: 'i' } },
         { correo: { $regex: filters.search, $options: 'i' } },
       ];
+    }
+
+    // Filtro por ubicación
+    if (filters.ubicacion) {
+      query.ubicacion = { $regex: filters.ubicacion, $options: 'i' };
     }
 
     // Filtro por estados

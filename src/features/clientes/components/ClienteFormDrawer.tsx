@@ -22,7 +22,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { DateInput } from '@/components/shared/DateInput';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
-import { Trash2, Plus, UserCircle, X } from 'lucide-react';
+import { Trash2, Plus, UserCircle, X, MapPin } from 'lucide-react';
 import type { Cliente, EstadoCliente, Transporte } from '@/types';
 
 const vencimientoPersonalizadoSchema = z.object({
@@ -50,6 +50,7 @@ const clienteSchema = z.object({
   ]).optional(),
   fechaLlamada: z.string().optional(),
   facturacion: z.string().optional(),
+  ubicacion: z.string().optional(),
   numVehiculos: z.preprocess(
     (val) => {
       if (val === '' || val === null || val === undefined) return undefined;
@@ -139,6 +140,7 @@ export function ClienteFormDrawer({
       transporte: undefined,
       fechaLlamada: '',
       facturacion: '',
+      ubicacion: '',
       numVehiculos: undefined,
       vencimientos: { 
         rc: '', 
@@ -175,6 +177,7 @@ export function ClienteFormDrawer({
         transporte: cliente.transporte,
         fechaLlamada: cliente.fechaLlamada ? cliente.fechaLlamada.split('T')[0] : '',
         facturacion: cliente.facturacion || '',
+        ubicacion: cliente.ubicacion || '',
         numVehiculos: cliente.numVehiculos,
         vencimientos: {
           rc: cliente.vencimientos?.rc ? cliente.vencimientos.rc.split('T')[0] : '',
@@ -198,6 +201,7 @@ export function ClienteFormDrawer({
         transporte: undefined,
         fechaLlamada: '',
         facturacion: '',
+        ubicacion: '',
         numVehiculos: undefined,
         vencimientos: { rc: '', mercancias: '', acc: '', flotas: '', pyme: '', personalizados: [] },
       });
@@ -230,6 +234,7 @@ export function ClienteFormDrawer({
       transporte: data.transporte || undefined,
       fechaLlamada: data.fechaLlamada && data.fechaLlamada.trim() !== '' ? new Date(data.fechaLlamada).toISOString() : undefined,
       facturacion: cleanString(data.facturacion),
+      ubicacion: cleanString(data.ubicacion),
       numVehiculos: data.numVehiculos,
 
       vencimientos: data.vencimientos ? {
@@ -341,6 +346,21 @@ export function ClienteFormDrawer({
                   placeholder="CIF / DNI"
                   className="h-11 bg-white border-slate-200 rounded-xl focus:border-violet-500 focus:ring-violet-500/20"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="ubicacion" className="text-sm font-semibold text-slate-700">
+                  Ubicación
+                </Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    id="ubicacion"
+                    {...register('ubicacion')}
+                    placeholder="Ej: Valencia, Madrid, Barcelona..."
+                    className="h-11 bg-white border-slate-200 rounded-xl focus:border-violet-500 focus:ring-violet-500/20 pl-9"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">

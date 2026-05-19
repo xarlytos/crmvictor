@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Search, X, SlidersHorizontal, ChevronDown, Columns2 } from 'lucide-react';
+import { Search, X, SlidersHorizontal, ChevronDown, Columns2, MapPin } from 'lucide-react';
 import { useClientesStore } from '../store/clientes.store';
 import { dataProvider } from '@/config/dataProvider';
 import { useQuery } from '@tanstack/react-query';
@@ -64,6 +64,7 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
     const tiposCargaParam = searchParams.get('tiposCarga')?.split(',').filter(Boolean) as TipoCarga[] | undefined;
     const transportesParam = searchParams.get('transportes')?.split(',').filter(Boolean) as Transporte[] | undefined;
     const mesParam = searchParams.get('mesVencimiento') ? Number(searchParams.get('mesVencimiento')) : undefined;
+    const ubicacionParam = searchParams.get('ubicacion') || undefined;
 
     setFiltros({
       search: search || undefined,
@@ -71,6 +72,7 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
       tiposCarga: tiposCargaParam,
       transportes: transportesParam,
       mesVencimiento: mesParam,
+      ubicacion: ubicacionParam,
     });
   }, [searchParams, setFiltros]);
 
@@ -81,11 +83,18 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
     if (newFiltros.tiposCarga?.length) params.set('tiposCarga', newFiltros.tiposCarga.join(','));
     if (newFiltros.transportes?.length) params.set('transportes', newFiltros.transportes.join(','));
     if (newFiltros.mesVencimiento) params.set('mesVencimiento', String(newFiltros.mesVencimiento));
+    if (newFiltros.ubicacion) params.set('ubicacion', newFiltros.ubicacion);
     setSearchParams(params, { replace: true });
   };
 
   const handleSearchChange = (value: string) => {
     const newFiltros = { ...filtros, search: value || undefined };
+    setFiltros(newFiltros);
+    updateURL(newFiltros);
+  };
+
+  const handleUbicacionChange = (value: string) => {
+    const newFiltros = { ...filtros, ubicacion: value || undefined };
     setFiltros(newFiltros);
     updateURL(newFiltros);
   };
@@ -138,7 +147,8 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
     filtros.estados?.length ||
     filtros.tiposCarga?.length ||
     filtros.transportes?.length ||
-    filtros.mesVencimiento
+    filtros.mesVencimiento ||
+    filtros.ubicacion
   );
 
   const estadosCount = filtros.estados?.length || 0;
@@ -158,6 +168,18 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
           placeholder="Buscar..."
           value={filtros.search || ''}
           onChange={(e) => handleSearchChange(e.target.value)}
+          className="pl-9 h-10 bg-white/50 border-slate-200 rounded-xl focus:bg-white transition-colors"
+        />
+      </div>
+
+      {/* Ubicación */}
+      <div className={isMobile ? "relative w-full" : "relative min-w-[160px] max-w-[260px]"}>
+        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Input
+          id="ubicacion"
+          placeholder="Ubicación..."
+          value={filtros.ubicacion || ''}
+          onChange={(e) => handleUbicacionChange(e.target.value)}
           className="pl-9 h-10 bg-white/50 border-slate-200 rounded-xl focus:bg-white transition-colors"
         />
       </div>
@@ -384,6 +406,12 @@ function FiltrosContent({ onClose, columnVisibility, onColumnsChange }: FiltrosC
             >
               Número de Vehículos
             </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={columnVisibility.ubicacion}
+              onCheckedChange={() => onColumnsChange({ ...columnVisibility, ubicacion: !columnVisibility.ubicacion })}
+            >
+              Ubicación
+            </DropdownMenuCheckboxItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )}
@@ -406,6 +434,7 @@ export function FiltrosClientes({ columnVisibility, onColumnsChange }: FiltrosCl
     filtros.tiposCarga?.length,
     filtros.transportes?.length,
     filtros.mesVencimiento,
+    filtros.ubicacion,
   ].filter(Boolean).length;
 
   return (
